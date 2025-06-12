@@ -52,4 +52,11 @@ HitRecord Ray::Gethit(const std::vector<Object*>& objects, const ld& t_min, cons
     return first_hit;
 }
 
+Point3 Ray::at(const ld& t) const {
+    if (origin == nullptr || direction == nullptr) {
+        throw std::runtime_error("Ray origin or direction is not initialized.");
+    }
+    return *origin + (*direction * t);
+}
+
 } // namespace Prism

@@ -43,6 +43,8 @@ class PRISM_EXPORT Ray {
      */
     Vector3* Direction() const;
 
+    Point3 at(const ld& t) const; 
+
     Point3* origin;
     Vector3* direction;
 };
