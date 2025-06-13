@@ -8,3 +8,4 @@
 #include "Prism/sphere.hpp"
 #include "Prism/objects.hpp"
 #include "Prism/material.hpp"
+#include "Prism/environment.hpp"
