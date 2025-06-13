@@ -8,7 +8,7 @@ add_library(Prism SHARED
     src/color.cpp
     src/material.cpp
     src/plane.cpp
-    src/environment.cpp
+    src/scene.cpp
 )
 
 include(GenerateExportHeader)
