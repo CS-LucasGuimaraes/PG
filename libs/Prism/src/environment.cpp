@@ -27,7 +27,7 @@ namespace Prism{
         }
     }
     unsigned char Ppm::convert_range(float f) {
-        return (unsigned char)std::floor(f*225);
+        return (unsigned char)std::floor(f*255);
     }
     
 }
