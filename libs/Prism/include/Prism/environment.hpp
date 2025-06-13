@@ -14,10 +14,10 @@ namespace Prism{
         private:
             std::ofstream file;
             unsigned char convert_range(float f);
-    }
+    };
     class PRISM_EXPORT Environment{
 
-    }
+    };
 }
 
 #endif // PRISM_ENVIRONMENT_HPP_
