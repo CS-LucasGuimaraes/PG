@@ -18,7 +18,7 @@ bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) cons
     float tolerance = 1e-6; // A small value to avoid floating-point precision issues
     
     // If the denominator is zero, the ray is parallel to the plane
-    if (std::abs(denominator) == tolerance) {
+    if (std::abs(denominator) <= tolerance) {
         return false; // No intersection
     }
 
