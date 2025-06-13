@@ -1,24 +1,42 @@
-#include "ObjReader/ObjReader.hpp"
 #include "Prism.hpp"
-#include <iostream>
+#include "Prism/plane.hpp"
+#include <memory>
 
 int main() {
-    Prism::Vector3 v1(1, 2, 3);
-    Prism::Vector3 v2(4, 5, 6);
+    // Configuração da Câmera
+    Prism::Point3 lookfrom(-2, 2, 2);
+    Prism::Point3 lookat(0, 0, -0.75);
+    Prism::Vector3 vup(0, 1, 0);
+    auto aspect_ratio = 16.0 / 9.0;
+    int image_width = 1920;
+    int image_height = static_cast<int>(image_width / aspect_ratio);
 
-    std::cout << "Vector 1: (" << v1.x << ", " << v1.y << ", " << v1.z << ")" << std::endl;
-    std::cout << "Vector 2: (" << v2.x << ", " << v2.y << ", " << v2.z << ")" << std::endl;
-    Prism::Vector3 v3 = v1 + v2;
-    std::cout << "Vector 3 (v1 + v2): (" << v3.x << ", " << v3.y << ", " << v3.z << ")"
-              << std::endl;
+    Prism::Camera cam(lookfrom, lookat, vup, 2.0, 2.0, 2.0 * aspect_ratio, image_height, image_width);
 
-    std::cout << "Hello, Sílvio!" << std::endl;
+    // Criação da Cena
+    Prism::Scene scene(std::move(cam));
 
-    v1.cross(v2);
+    // Criação dos Materiais
+    auto material_chao = std::make_shared<Prism::Material>(Prism::Color(0.8, 0.8, 0.8));
+    auto material_esfera_1 = std::make_shared<Prism::Material>(Prism::Color(1.0, 0.3, 0.3)); // Vermelho/Rosa
+    auto material_esfera_2 = std::make_shared<Prism::Material>(Prism::Color(0.3, 0.3, 1.0));   // Azul
 
-    objReader obj("data/inputs/cubo.obj");
+    // Adição dos Objetos à Cena
+    
+    scene.addObject(std::make_unique<Prism::Plane>(
+        Prism::Point3(0, -0.5, 0), Prism::Vector3(0, 1, 0), material_chao
+    ));
 
-    obj.print_faces();
+    scene.addObject(std::make_unique<Prism::Sphere>(
+        Prism::Point3(0, 0, -1), 0.5, material_esfera_1
+    ));
+
+    scene.addObject(std::make_unique<Prism::Sphere>(
+        Prism::Point3(-0.35, -0.2, -0.6), 0.3, material_esfera_2
+    ));
+
+    // 5. Renderização
+    scene.render();
 
     return 0;
 }
