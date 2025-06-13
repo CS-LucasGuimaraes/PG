@@ -6,18 +6,18 @@
 #include "Prism/objects.hpp"
 #include "Prism/ray.hpp"
 #include "prism_export.h"
+#include <filesystem>
 #include <memory>
 #include <ostream>
 #include <vector>
-#include <filesystem>    
 
 namespace Prism {
 
-PRISM_EXPORT int convert_color(double f) {
+PRISM_EXPORT inline int convert_color(double f) {
     return static_cast<int>(255.999 * f);
 }
 
-PRISM_EXPORT std::ostream& operator<<(std::ostream& os, const Color& color) {
+PRISM_EXPORT inline std::ostream& operator<<(std::ostream& os, const Color& color) {
     os << static_cast<int>(convert_color(color.r)) << " "
        << static_cast<int>(convert_color(color.g)) << " "
        << static_cast<int>(convert_color(color.b));
