@@ -7,7 +7,7 @@
 namespace Prism{
     Ppm::Ppm(std::string file_name, size_t lines, size_t cols){
         std::string path = "../data/outputs/"+file_name+".ppm";
-        file.open(path,ios::app);
+        file.open(path,std::ios::app);
         if(file.is_open()){
             //configure size of ppm
             file << "P3" << std::endl;
