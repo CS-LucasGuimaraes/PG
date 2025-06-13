@@ -10,14 +10,14 @@ namespace Prism {
 
 class PRISM_EXPORT Sphere : public Object {
   public:
-    Sphere(Point3 center, double radius, Material* material);
+    Sphere(Point3 center, double radius, std::shared_ptr<Material> material);
 
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
 
   private:
     Point3 center;
     double radius;
-    Material* material;
+    std::shared_ptr<Material> material;
 };
 
 } // namespace Prism

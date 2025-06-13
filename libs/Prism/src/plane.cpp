@@ -8,8 +8,8 @@
 
 namespace Prism {
 
-Plane::Plane(Point3 point_on_plane, Vector3 normal, Material* material)
-    : point_on_plane(point_on_plane), normal(normal), material(material) {}
+Plane::Plane(Point3 point_on_plane, Vector3 normal, std::shared_ptr<Material>material)
+    : point_on_plane(point_on_plane), normal(normal), material(std::move(material)) {}
 
 
 bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
@@ -32,8 +32,9 @@ bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) cons
     // Populate the hit record
     rec.t = t;
     rec.p = ray.at(t);
-    rec.normal = normal;
+    rec.set_face_normal(ray, this->normal);
     rec.material = material;
+    
 
     return true; // Intersection occurred
 }

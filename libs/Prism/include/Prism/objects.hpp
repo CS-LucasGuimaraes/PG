@@ -15,7 +15,7 @@ struct PRISM_EXPORT HitRecord {
     Point3 p;
     Vector3 normal;
     double t;
-    Material* material;
+    std::shared_ptr<Material> material;
     bool front_face;
 
     inline void set_face_normal(const Ray& ray, const Vector3& outward_normal) {

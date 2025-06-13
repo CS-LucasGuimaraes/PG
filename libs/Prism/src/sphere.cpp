@@ -5,8 +5,8 @@
 
 namespace Prism {
 
-Sphere::Sphere(Point3 center, double radius, Material* material)
-    : center(center), radius(radius), material(material) {
+Sphere::Sphere(Point3 center, double radius, std::shared_ptr<Material> material)
+    : center(center), radius(radius), material(std::move(material)) {
 }
 
 //(d⋅d)t2+(2d⋅oc)t+(oc⋅oc−r2)=0

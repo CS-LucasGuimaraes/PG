@@ -8,8 +8,8 @@ using namespace Prism;
 
 TEST(SphereTest, HitFromOutside) {
     Point3 center(0.0L, 0.0L, 0.0L);
-    auto material = std::make_unique<Material>(Color(1.0f, 0.0f, 0.0f));
-    Sphere sphere(center, 1.0L, material.get());
+    auto material = std::make_shared<Material>(Color(1.0f, 0.0f, 0.0f));
+    Sphere sphere(center, 1.0L, material);
 
     Ray ray(Point3(0.0L, 0.0L, -5.0L), Vector3(0.0L, 0.0L, 1.0L));
     HitRecord rec;
@@ -25,8 +25,8 @@ TEST(SphereTest, HitFromOutside) {
 
 TEST(SphereTest, Miss) {
     Point3 center(0.0L, 0.0L, 0.0L);
-    auto material = std::make_unique<Material>(Color(1.0f, 0.0f, 0.0f));
-    Sphere sphere(center, 1.0L, material.get());
+    auto material = std::make_shared<Material>(Color(1.0f, 0.0f, 0.0f));
+    Sphere sphere(center, 1.0L, material);
 
     Ray ray(Point3(0.0L, 2.0L, -5.0L), Vector3(0.0L, 0.0L, 1.0L));
     HitRecord rec;
@@ -36,8 +36,8 @@ TEST(SphereTest, Miss) {
 
 TEST(SphereTest, Tangent) {
     Point3 center(0.0L, 0.0L, 0.0L);
-    auto material = std::make_unique<Material>(Color(1.0f, 0.0f, 0.0f));
-    Sphere sphere(  center, 1.0L, material.get());
+    auto material = std::make_shared<Material>(Color(1.0f, 0.0f, 0.0f));
+    Sphere sphere(  center, 1.0L, material);
 
     Ray ray(Point3(0.0L, 1.0L, -5.0L), Vector3(0.0L, 0.0L, 1.0L));
     HitRecord rec;
@@ -49,8 +49,8 @@ TEST(SphereTest, Tangent) {
 
 TEST(SphereTest, RayStartsInside) {
     Point3 center(0.0L, 0.0L, 0.0L);
-    auto material = std::make_unique<Material>(Color(1.0f, 0.0f, 0.0f));
-    Sphere sphere(center, 1.0L, material.get());
+    auto material = std::make_shared<Material>(Color(1.0f, 0.0f, 0.0f));
+    Sphere sphere(center, 1.0L, material);
 
     Ray ray(center, Vector3(0.0L, 0.0L, 1.0L));
     HitRecord rec;
@@ -66,8 +66,8 @@ TEST(SphereTest, RayStartsInside) {
 
 TEST(SphereTest, HitBehindRay) {
     Point3 center(0.0L, 0.0L, 0.0L);
-    auto material = std::make_unique<Material>(Color(1.0f, 0.0f, 0.0f));
-    Sphere sphere(center, 1.0L, material.get());
+    auto material = std::make_shared<Material>(Color(1.0f, 0.0f, 0.0f));
+    Sphere sphere(center, 1.0L, material);
 
     Ray ray(Point3(0.0L, 0.0L, 5.0L), Vector3(0.0L, 0.0L, 1.0L));
     HitRecord rec;

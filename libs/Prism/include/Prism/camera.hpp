@@ -4,12 +4,11 @@
 #include "Prism/point.hpp"
 #include "Prism/ray.hpp"
 #include "Prism/vector.hpp"
+#include "Prism/matrix.hpp"
 #include "prism_export.h"
 #include <initializer_list>
 #include <iterator>
 namespace Prism {
-
-template <typename T> class Matrix;
 
 /**
  * @class Camera
@@ -31,10 +30,8 @@ class PRISM_EXPORT Camera {
      * @param image_width The width of the image in pixels.
      */
     Camera(const Point3& position, const Point3& target, const Vector3& upvec,
-           const double& distance, const double& viewport_height, const double& viewport_width,
+           double distance, double viewport_height, double viewport_width,
            int image_height, int image_width);
-
-    ~Camera();
 
     class CameraIterator {
       public:
@@ -44,14 +41,14 @@ class PRISM_EXPORT Camera {
         using pointer = Ray*;
         using reference = Ray&;
 
-        CameraIterator(Camera* cam, int y, int x) : camera(cam), current_y(y), current_x(x) {
+        CameraIterator(const Camera* cam, int y, int x) : camera(cam), current_y(y), current_x(x) {
         }
 
         Ray operator*() const {
-            Point3 pixel_center = *camera->pixel_00_loc + (*camera->pixel_delta_u * current_x) -
-                                  (*camera->pixel_delta_v * current_y);
+            Point3 pixel_center = camera->pixel_00_loc + (camera->pixel_delta_u * current_x) -
+                                  (camera->pixel_delta_v * current_y);
 
-            return Ray(*camera->pos, pixel_center);
+            return Ray(camera->pos, pixel_center);
         }
 
         CameraIterator& operator++() {
@@ -68,7 +65,7 @@ class PRISM_EXPORT Camera {
         }
 
       private:
-        Camera* camera;
+        const Camera* camera;
         int current_y;
         int current_x;
     };
@@ -80,11 +77,18 @@ class PRISM_EXPORT Camera {
         return CameraIterator(this, pixel_height, 0);
     }
 
-    Point3* pos;
-    Point3* aim;
-    Vector3* up;
+    CameraIterator begin() const {
+        return CameraIterator(this, 0, 0);
+    }
+    CameraIterator end() const {
+        return CameraIterator(this, pixel_height, 0);
+    }
 
-    Matrix<double>* coordinate_basis;
+    Point3 pos;
+    Point3 aim;
+    Vector3 up;
+
+    Matrix<double> coordinate_basis;
 
     double screen_distance;
     double screen_height;
@@ -94,9 +98,9 @@ class PRISM_EXPORT Camera {
     int pixel_width;
 
   private:
-    Point3* pixel_00_loc;
-    Vector3* pixel_delta_u;
-    Vector3* pixel_delta_v;
+    Point3 pixel_00_loc;
+    Vector3 pixel_delta_u;
+    Vector3 pixel_delta_v;
 };
 
 } // namespace Prism
