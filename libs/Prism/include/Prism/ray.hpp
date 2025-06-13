@@ -2,15 +2,13 @@
 #define PRISM_RAY_HPP_
 
 #include "prism_export.h"
+#include "Prism/point.hpp"
+#include "Prism/vector.hpp"
 #include <initializer_list>
 #include <vector>
+#include <memory>
 namespace Prism {
 
-using ld = long double;
-
-class Vector3;                      // Forward declaration of Vector3 class
-class Point3;                       // Forward declaration of Point3 class
-template <typename T> class Matrix; // Forward declaration of Matrix class
 class Object;                       // Forward declaration of Object class
 struct HitRecord;                   // Forward declaration of HitRecord struct
 
@@ -35,18 +33,23 @@ class PRISM_EXPORT Ray {
     /**
      * @brief Casts rays and verifies first intersection with object
      * @param objects vector of objects within the scene
+     * @param t_min minimum distance at which intersections are verified
      * @param t_max maximum distance at which intersections are verified
      */
-    HitRecord Gethit(const std ::vector<Object*>& objects, const ld& t_min, const ld& t_max);
+    HitRecord Gethit(const std ::vector<std::unique_ptr<Object>>& objects, const double& t_min,
+                     const double& t_max);
     /**
      * @brief gets the direction of ray. if not instantiated, returns null
      */
-    Vector3* Direction() const;
+    Vector3 direction() const;
+    
+    Point3 origin() const;
 
-    Point3 at(const ld& t) const; 
+    Point3 at(const double& t) const;
 
-    Point3* origin;
-    Vector3* direction;
+  private:
+    Point3 origin_;
+    Vector3 direction_;
 };
 
 } // namespace Prism

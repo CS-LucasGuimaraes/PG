@@ -4,3 +4,7 @@
 #include "Prism/utils.hpp"
 #include "Prism/camera.hpp"
 #include "Prism/matrix.hpp"
+#include "Prism/color.hpp"
+#include "Prism/sphere.hpp"
+#include "Prism/objects.hpp"
+#include "Prism/material.hpp"

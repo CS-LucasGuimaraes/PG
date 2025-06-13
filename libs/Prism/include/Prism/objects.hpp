@@ -8,20 +8,18 @@
 
 namespace Prism {
 
-using ld = long double;
-
 class Ray;      // Forward declaration of Ray class
 class Material; // Forward declaration of Material class
 
 struct PRISM_EXPORT HitRecord {
     Point3 p;
     Vector3 normal;
-    ld t;
+    double t;
     Material* material;
     bool front_face;
 
     inline void set_face_normal(const Ray& ray, const Vector3& outward_normal) {
-        front_face = (ray.Direction())->dot(outward_normal) < 0;
+        front_face = (ray.direction()).dot(outward_normal) < 0;
         normal = front_face ? outward_normal : outward_normal * -1;
     }
 };
@@ -38,7 +36,7 @@ class PRISM_EXPORT Object {
      * @param rec The hit record to be filled upon a collision.
      * @return True if a valid hit was found, false otherwise.
      */
-    virtual bool hit(const Ray& ray, ld t_min, ld t_max, HitRecord& rec) const = 0;
+    virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const = 0;
 };
 
 } // namespace Prism

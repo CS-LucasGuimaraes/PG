@@ -7,7 +7,6 @@
 #include <gtest/gtest.h>
 
 namespace Prism {
-using ld = long double;
 
 /**
  * @brief Asserts that two Point3 objects are almost equal within a given epsilon.
@@ -16,7 +15,7 @@ using ld = long double;
  * @param eps The epsilon value for comparison (default is 1e-9).
  * @note This function compares each corresponding component using ASSERT_NEAR.
  */
-inline void AssertPointAlmostEqual(const Point3& p1, const Point3& p2, ld eps = 1e-9) {
+inline void AssertPointAlmostEqual(const Point3& p1, const Point3& p2, double eps = 1e-9) {
     ASSERT_NEAR(p1.x, p2.x, eps);
     ASSERT_NEAR(p1.y, p2.y, eps);
     ASSERT_NEAR(p1.z, p2.z, eps);
@@ -29,7 +28,7 @@ inline void AssertPointAlmostEqual(const Point3& p1, const Point3& p2, ld eps = 
  * @param eps The epsilon value for comparison (default is 1e-9).
  * @note This function compares each corresponding component using ASSERT_NEAR.
  */
-inline void AssertVectorAlmostEqual(const Vector3& v1, const Vector3& v2, ld eps = 1e-9) {
+inline void AssertVectorAlmostEqual(const Vector3& v1, const Vector3& v2, double eps = 1e-9) {
     ASSERT_NEAR(v1.x, v2.x, eps);
     ASSERT_NEAR(v1.y, v2.y, eps);
     ASSERT_NEAR(v1.z, v2.z, eps);
@@ -48,7 +47,7 @@ inline void AssertVectorAlmostEqual(const Vector3& v1, const Vector3& v2, ld eps
  *       and then compares each corresponding element using ASSERT_NEAR.
  */
 template <typename T>
-void AssertMatrixAlmostEqual(const Matrix<T>& m1, const Matrix<T>& m2, ld eps = 1e-9) {
+void AssertMatrixAlmostEqual(const Matrix<T>& m1, const Matrix<T>& m2, double eps = 1e-9) {
     ASSERT_EQ(m1.getRows(), m2.getRows());
     ASSERT_EQ(m1.getCols(), m2.getCols());
     for (size_t i = 0; i < m1.getRows(); ++i) {

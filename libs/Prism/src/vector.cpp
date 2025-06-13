@@ -4,11 +4,9 @@
 #include <cmath>
 #include <stdexcept>
 
-using ld = long double;
-
 namespace Prism {
 
-Vector3::Vector3(ld x, ld y, ld z) : x(x), y(y), z(z) {
+Vector3::Vector3(double x, double y, double z) : x(x), y(y), z(z) {
 }
 
 Vector3::Vector3(const Vector3& v) : x(v.x), y(v.y), z(v.z) {
@@ -17,7 +15,7 @@ Vector3::Vector3(const Vector3& v) : x(v.x), y(v.y), z(v.z) {
 Vector3::Vector3(const Point3& v) : x(v.x), y(v.y), z(v.z) {
 }
 
-Vector3::Vector3(std::initializer_list<ld> coords) {
+Vector3::Vector3(std::initializer_list<double> coords) {
     if (coords.size() != 3) {
         throw std::invalid_argument("Initializer list must contain exactly three elements.");
     }
@@ -55,11 +53,11 @@ Vector3 Vector3::operator+=(const Vector3& v) {
     return *this;
 }
 
-Vector3 Vector3::operator+(const ld scalar) const {
+Vector3 Vector3::operator+(const double scalar) const {
     return Vector3(x + scalar, y + scalar, z + scalar);
 }
 
-Vector3 Vector3::operator+=(const ld scalar) {
+Vector3 Vector3::operator+=(const double scalar) {
     x += scalar;
     y += scalar;
     z += scalar;
@@ -77,36 +75,36 @@ Vector3 Vector3::operator-=(const Vector3& v) {
     return *this;
 }
 
-Vector3 Vector3::operator-(const ld scalar) const {
+Vector3 Vector3::operator-(const double scalar) const {
     return Vector3(x - scalar, y - scalar, z - scalar);
 }
 
-Vector3 Vector3::operator-=(const ld scalar) {
+Vector3 Vector3::operator-=(const double scalar) {
     x -= scalar;
     y -= scalar;
     z -= scalar;
     return *this;
 }
 
-Vector3 Vector3::operator*(ld scalar) const {
+Vector3 Vector3::operator*(double scalar) const {
     return Vector3(x * scalar, y * scalar, z * scalar);
 }
 
-Vector3 Vector3::operator*=(ld scalar) {
+Vector3 Vector3::operator*=(double scalar) {
     x *= scalar;
     y *= scalar;
     z *= scalar;
     return *this;
 }
 
-Vector3 Vector3::operator/(ld scalar) const {
+Vector3 Vector3::operator/(double scalar) const {
     if (scalar == 0) {
         throw std::invalid_argument("Division by zero");
     }
     return Vector3(x / scalar, y / scalar, z / scalar);
 }
 
-Vector3 Vector3::operator/=(ld scalar) {
+Vector3 Vector3::operator/=(double scalar) {
     if (scalar == 0) {
         throw std::invalid_argument("Division by zero");
     }
@@ -116,11 +114,11 @@ Vector3 Vector3::operator/=(ld scalar) {
     return *this;
 }
 
-ld Vector3::dot(const Vector3& v) const {
+double Vector3::dot(const Vector3& v) const {
     return x * v.x + y * v.y + z * v.z;
 }
 
-ld Vector3::operator*(const Vector3& v) const {
+double Vector3::operator*(const Vector3& v) const {
     return dot(v);
 }
 
@@ -132,12 +130,12 @@ Vector3 Vector3::operator^(const Vector3& v) const {
     return cross(v);
 }
 
-ld Vector3::magnitude() const {
+double Vector3::magnitude() const {
     return std::sqrt(dot(*this));
 }
 
 Vector3 Vector3::normalize() const {
-    ld mag = magnitude();
+    double mag = magnitude();
     if (mag == 0) {
         throw std::invalid_argument("Cannot normalize a zero Vector");
     }

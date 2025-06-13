@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 using Prism::Vector3;
-using ld = long double;
 
 TEST(Vector3Test, ConstructorsAndAssignment) {
     Vector3 v1(1.0, 2.0, 3.0);
@@ -65,7 +64,7 @@ TEST(Vector3Test, ScalarMultiplicationAndDivision) {
 TEST(Vector3Test, DotAndCrossProduct) {
     Vector3 v1(1, 2, 3), v2(4, -5, 6);
 
-    ld expected_dot = 1 * 4 + 2 * (-5) + 3 * 6;
+    double expected_dot = 1 * 4 + 2 * (-5) + 3 * 6;
     ASSERT_NEAR(v1.dot(v2), expected_dot, 1e-9);
     ASSERT_NEAR(v1 * v2, expected_dot, 1e-9);
 

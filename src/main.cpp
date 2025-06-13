@@ -14,6 +14,8 @@ int main() {
 
     std::cout << "Hello, Sílvio!" << std::endl;
 
+    v1.cross(v2);
+
     objReader obj("data/inputs/cubo.obj");
 
     obj.print_faces();

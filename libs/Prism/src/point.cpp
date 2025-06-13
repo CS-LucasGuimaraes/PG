@@ -4,7 +4,7 @@
 
 namespace Prism {
 
-Point3::Point3(ld x, ld y, ld z) : x(x), y(y), z(z) {
+Point3::Point3(double x, double y, double z) : x(x), y(y), z(z) {
 }
 
 Point3::Point3(const Point3& p) : x(p.x), y(p.y), z(p.z) {
@@ -13,7 +13,7 @@ Point3::Point3(const Point3& p) : x(p.x), y(p.y), z(p.z) {
 Point3::Point3(const Vector3& v) : x(v.x), y(v.y), z(v.z) {
 }
 
-Point3::Point3(std::initializer_list<ld> coords) {
+Point3::Point3(std::initializer_list<double> coords) {
     if (coords.size() != 3) {
         throw std::invalid_argument("Initializer list must contain exactly three elements.");
     }

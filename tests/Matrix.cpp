@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 using Prism::Matrix;
-using ld = long double;
 
 TEST(MatrixTest, Construction) {
     Matrix<double> m1(2, 3);
