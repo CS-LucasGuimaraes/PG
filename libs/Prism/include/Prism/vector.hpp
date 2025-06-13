@@ -11,8 +11,6 @@
 
 namespace Prism {
 
-using ld = long double;
-
 class Point3; // Forward declaration of Point3 class
 
 /**
@@ -30,7 +28,7 @@ class PRISM_EXPORT Vector3 {
      * @param y The y component (default is 0).
      * @param z The z component (default is 0).
      */
-    Vector3(ld x = 0, ld y = 0, ld z = 0);
+    Vector3(double x = 0, double y = 0, double z = 0);
 
     /**
      * @brief Copy constructor.
@@ -50,7 +48,7 @@ class PRISM_EXPORT Vector3 {
      * @throws std::invalid_argument if the initializer list does not contain exactly three
      * elements.
      */
-    Vector3(std::initializer_list<ld> coords);
+    Vector3(std::initializer_list<double> coords);
 
     /**
      * @brief Checks if two vectors are equal.
@@ -92,14 +90,14 @@ class PRISM_EXPORT Vector3 {
      * @param scalar The scalar value to add.
      * @return The resulting vector.
      */
-    Vector3 operator+(const ld scalar) const;
+    Vector3 operator+(const double scalar) const;
 
     /**
      * @brief Adds a scalar to each component of this vector.
      * @param scalar The scalar value to add.
      * @return Reference to this vector after addition.
      */
-    Vector3 operator+=(const ld scalar);
+    Vector3 operator+=(const double scalar);
 
     /**
      * @brief Subtracts another vector from this vector.
@@ -120,28 +118,28 @@ class PRISM_EXPORT Vector3 {
      * @param scalar The scalar value to subtract.
      * @return The resulting vector.
      */
-    Vector3 operator-(const ld scalar) const;
+    Vector3 operator-(const double scalar) const;
 
     /**
      * @brief Subtracts a scalar from each component of this vector.
      * @param scalar The scalar value to subtract.
      * @return Reference to this vector after subtraction.
      */
-    Vector3 operator-=(const ld scalar);
+    Vector3 operator-=(const double scalar);
 
     /**
      * @brief Multiplies each component of the vector by a scalar.
      * @param scalar The scalar value to multiply by.
      * @return The resulting vector.
      */
-    Vector3 operator*(ld scalar) const;
+    Vector3 operator*(double scalar) const;
 
     /**
      * @brief Multiplies each component of this vector by a scalar in place.
      * @param scalar The scalar value to multiply by.
      * @return Reference to this vector after multiplication.
      */
-    Vector3 operator*=(ld scalar);
+    Vector3 operator*=(double scalar);
 
     /**
      * @brief Divides each component of the vector by a scalar.
@@ -149,7 +147,7 @@ class PRISM_EXPORT Vector3 {
      * @return The resulting vector.
      * @throws std::invalid_argument if scalar is zero.
      */
-    Vector3 operator/(ld scalar) const;
+    Vector3 operator/(double scalar) const;
 
     /**
      * @brief Divides each component of this vector by a scalar in place.
@@ -157,21 +155,21 @@ class PRISM_EXPORT Vector3 {
      * @return Reference to this vector after division.
      * @throws std::invalid_argument if scalar is zero.
      */
-    Vector3 operator/=(ld scalar);
+    Vector3 operator/=(double scalar);
 
     /**
      * @brief Computes the dot product with another vector.
      * @param v The vector to compute the dot product with.
      * @return The dot product (scalar).
      */
-    ld dot(const Vector3& v) const;
+    double dot(const Vector3& v) const;
 
     /**
      * @brief Computes the dot product with another vector (operator overload).
      * @param v The vector to compute the dot product with.
      * @return The dot product (scalar).
      */
-    ld operator*(const Vector3& v) const;
+    double operator*(const Vector3& v) const;
 
     /**
      * @brief Computes the cross product with another vector.
@@ -191,7 +189,7 @@ class PRISM_EXPORT Vector3 {
      * @brief Computes the magnitude (length) of the vector.
      * @return The magnitude as a scalar.
      */
-    ld magnitude() const;
+    double magnitude() const;
 
     /**
      * @brief Returns the normalized (unit) vector.
@@ -200,9 +198,9 @@ class PRISM_EXPORT Vector3 {
      */
     Vector3 normalize() const;
 
-    ld x; ///< The x component of the vector.
-    ld y; ///< The y component of the vector.
-    ld z; ///< The z component of the vector.
+    double x; ///< The x component of the vector.
+    double y; ///< The y component of the vector.
+    double z; ///< The z component of the vector.
 };
 
 } // namespace Prism

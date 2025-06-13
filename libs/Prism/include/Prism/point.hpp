@@ -5,8 +5,6 @@
 #include <initializer_list>
 namespace Prism {
 
-using ld = long double;
-
 class Vector3; // Forward declaration of Vector3 class
 
 /**
@@ -23,7 +21,7 @@ class PRISM_EXPORT Point3 {
      * @param y The y coordinate (default is 0).
      * @param z The z coordinate (default is 0).
      */
-    Point3(ld x = 0, ld y = 0, ld z = 0);
+    Point3(double x = 0, double y = 0, double z = 0);
 
     /**
      * @brief Copy constructor.
@@ -41,7 +39,7 @@ class PRISM_EXPORT Point3 {
      * @brief Constructs a Point from an initializer list of coordinates.
      * @param coords An initializer list containing the x, y, and z coordinates.
      */
-    Point3(std::initializer_list<ld> coords);
+    Point3(std::initializer_list<double> coords);
 
     /**
      * @brief Asignment operator.
@@ -78,9 +76,9 @@ class PRISM_EXPORT Point3 {
      */
     Point3 operator+=(const Vector3& v);
 
-    ld x; ///< The x coordinate of the point.
-    ld y; ///< The y coordinate of the point.
-    ld z; ///< The z coordinate of the point.
+    double x; ///< The x coordinate of the point.
+    double y; ///< The y coordinate of the point.
+    double z; ///< The z coordinate of the point.
 };
 
 } // namespace Prism

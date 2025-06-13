@@ -4,13 +4,15 @@
 #include "Prism/vector.hpp"
 #include "TestHelpers.hpp"
 #include <gtest/gtest.h>
+#include <memory>
+#include <vector>
 
 using namespace Prism;
 using std::vector;
 
 class DummyObject : public Object {
   public:
-    bool hit(const Ray& ray, ld t_min, ld t_max, HitRecord& rec) const override {
+    bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override {
         rec.t = 2.0L;
         rec.p = Point3(1.0L, 1.0L, 1.0L);
         rec.normal = Vector3(0.0L, 1.0L, 0.0L);
@@ -25,11 +27,8 @@ TEST(RayTest, ConstructorWithDirection) {
     Vector3 dir(1.0L, 0.0L, 0.0L);
     Ray ray(origin, dir);
 
-    ASSERT_NE(ray.origin, nullptr);
-    ASSERT_NE(ray.direction, nullptr);
-
-    EXPECT_DOUBLE_EQ(ray.origin->x, 0.0L);
-    EXPECT_DOUBLE_EQ(ray.direction->x, 1.0L);
+    EXPECT_DOUBLE_EQ(ray.origin().x, 0.0L);
+    EXPECT_DOUBLE_EQ(ray.direction().x, 1.0L);
 }
 
 TEST(RayTest, ConstructorWithTarget) {
@@ -37,21 +36,9 @@ TEST(RayTest, ConstructorWithTarget) {
     Point3 target(0.0L, 0.0L, 2.0L);
     Ray ray(origin, target);
 
-    ASSERT_NE(ray.origin, nullptr);
-    ASSERT_NE(ray.direction, nullptr);
-
-    EXPECT_DOUBLE_EQ(ray.origin->x, 0.0L);
-    EXPECT_DOUBLE_EQ(ray.direction->z, 1.0L); // pointing towards +z
-}
-
-TEST(RayTest, DirectionReturnsCorrectPointer) {
-    Point3 origin(0.0L, 0.0L, 0.0L);
-    Vector3 dir(0.0L, 1.0L, 0.0L);
-    Ray ray(origin, dir);
-
-    Vector3* d = ray.Direction();
-    ASSERT_NE(d, nullptr);
-    EXPECT_DOUBLE_EQ(d->y, 1.0L);
+    EXPECT_DOUBLE_EQ(ray.origin().x, 0.0L);
+    EXPECT_DOUBLE_EQ(ray.origin().y, 0.0L);
+    EXPECT_DOUBLE_EQ(ray.direction().z, 1.0L); // pointing towards +z
 }
 
 TEST(RayTest, GethitFindsIntersection) {
@@ -59,11 +46,12 @@ TEST(RayTest, GethitFindsIntersection) {
     Vector3 dir(0.0L, 0.0L, 1.0L);
     Ray ray(origin, dir);
 
-    DummyObject obj;
-    vector<Object*> objects = {&obj};
+    auto obj = std::make_unique<DummyObject>();
+    vector<std::unique_ptr<Object>> objects;
+    objects.push_back(std::move(obj));
 
-    ld t_min = 0.001L;
-    ld t_max = 1000.0L;
+    double t_min = 0.001L;
+    double t_max = 1000.0L;
 
     HitRecord hit = ray.Gethit(objects, t_min, t_max);
 

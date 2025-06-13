@@ -7,19 +7,17 @@
 #include <cmath>
 #include <stdexcept>
 
-using ld = long double;
-
 namespace Prism {
 
 Camera::Camera(const Point3& position, const Point3& target, const Vector3& upvec,
-               const ld& distance, const ld& viewport_height, const ld& viewport_width,
+               const double& distance, const double& viewport_height, const double& viewport_width,
                int image_height, int image_width)
     : screen_distance(distance), screen_height(viewport_height), screen_width(viewport_width),
       pixel_height(image_height), pixel_width(image_width) {
     pos = new Point3(position);
     aim = new Point3(target);
     up = new Vector3(upvec);
-    coordinate_basis = new Matrix<ld>;
+    coordinate_basis = new Matrix<double>;
     *coordinate_basis = orthonormalBasisContaining(*pos - *aim);
 
     // Precalc pixel locations and deltas
@@ -32,7 +30,7 @@ Camera::Camera(const Point3& position, const Point3& target, const Vector3& upve
     Point3 top_left_corner =
         screen_center - (u * (screen_width / 2.0)) + (v * (screen_height / 2.0));
 
-    // O cálculo agora mistura 'ld' e 'int' corretamente
+    // O cálculo agora mistura 'double' e 'int' corretamente
     pixel_delta_u = new Vector3(u * (screen_width / pixel_width));
     pixel_delta_v = new Vector3(v * (screen_height / pixel_height));
 

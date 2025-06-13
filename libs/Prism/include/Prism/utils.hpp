@@ -29,18 +29,17 @@ Point3 PRISM_EXPORT centroid(const std::initializer_list<Point3>& points);
  * and the third is the cross product of the first two.
  * @throws std::invalid_argument if the input vector is zero.
  */
-Matrix<ld> PRISM_EXPORT orthonormalBasisContaining(const Vector3& vec);
+Matrix<double> PRISM_EXPORT orthonormalBasisContaining(const Vector3& vec);
 
 /**
  * @brief Computes the square of a value.
  * @param value The value to square.
  * @return The square of the value.
  */
-template <typename T>
-T sqr(const T& value) {
+template <typename T> T sqr(const T& value) {
     return value * value;
 }
 
-// namespace Prism
+} // namespace Prism
 
 #endif // PRISM_UTILS_HPP_

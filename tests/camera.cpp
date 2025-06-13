@@ -1,19 +1,18 @@
 #include "Prism/camera.hpp"
 #include "Prism/matrix.hpp"
 #include "Prism/point.hpp"
-#include "Prism/vector.hpp"
-#include "TestHelpers.hpp"
 #include "Prism/ray.hpp"
 #include "Prism/utils.hpp"
+#include "Prism/vector.hpp"
+#include "TestHelpers.hpp"
 #include <gtest/gtest.h>
 #include <vector>
 
 using Prism::Camera;
 using Prism::Matrix;
 using Prism::Point3;
-using Prism::Vector3;
 using Prism::Ray;
-using ld = long double;
+using Prism::Vector3;
 
 TEST(CameraTest, Instantiation) {
     // Arrange: create Point3 and Vector3 for constructor parameters
@@ -21,9 +20,9 @@ TEST(CameraTest, Instantiation) {
     Point3 target(4.0L, 5.0L, 6.0L);
     Vector3 upvec(0.0L, 1.0L, 0.0L);
 
-    ld distance = 10.0L;
-    ld height = 5.0L;
-    ld width = 8.0L;
+    double distance = 10.0L;
+    double height = 5.0L;
+    double width = 8.0L;
 
     // Act: instantiate the Camera
     Camera cam(position, target, upvec, distance, height, width, 10, 20);
@@ -57,16 +56,16 @@ TEST(CameraTest, CoordinateBasisOrthonormal) {
     Point3 target(4.0L, 5.0L, 6.0L);
     Vector3 upvec(0.0L, 1.0L, 0.0L);
 
-    ld distance = 10.0L;
-    ld height = 5.0L;
-    ld width = 8.0L;
+    double distance = 10.0L;
+    double height = 5.0L;
+    double width = 8.0L;
 
     // Act
     Camera cam(position, target, upvec, distance, height, width, 10, 20);
     ASSERT_NE(cam.coordinate_basis, nullptr);
 
     // Extract basis matrix and columns
-    const Matrix<ld>& basis = *cam.coordinate_basis;
+    const Matrix<double>& basis = *cam.coordinate_basis;
     auto getCol = [&](int c) { return Vector3{basis[0][c], basis[1][c], basis[2][c]}; };
 
     // Expected first basis vector: normalized (position - target)
@@ -95,16 +94,16 @@ TEST(CameraTest,
     Point3 target(4.0L, 5.0L, 6.0L);
     Vector3 upvec(0.0L, 1.0L, 0.0L);
 
-    ld distance = 10.0L;
-    ld height = 5.0L;
-    ld width = 8.0L;
+    double distance = 10.0L;
+    double height = 5.0L;
+    double width = 8.0L;
 
     // Act
     Camera cam(position, target, upvec, distance, height, width, 10, 20);
     ASSERT_NE(cam.coordinate_basis, nullptr);
 
     // Extract basis matrix and columns
-    const Matrix<ld>& basis = *cam.coordinate_basis;
+    const Matrix<double>& basis = *cam.coordinate_basis;
     auto getCol = [&](int c) { return Vector3{basis[0][c], basis[1][c], basis[2][c]}; };
 
     // Expected first basis vector: normalized (position - target)
@@ -124,7 +123,7 @@ TEST(CameraTest, IteratorGeneratesCorrectNumberOfRays) {
     int p_width = 20;
 
     Camera cam(position, target, upvec, 1.0L, 2.0L, 2.0L, p_height, p_width);
-    
+
     int count = 0;
     for (const auto& ray : cam) {
         (void)ray;
@@ -135,13 +134,13 @@ TEST(CameraTest, IteratorGeneratesCorrectNumberOfRays) {
 }
 
 TEST(CameraTest, IteratorGeneratesGeometricallyCorrectRays) {
-    const ld aspect_ratio = 16.0L / 9.0L;
+    const double aspect_ratio = 16.0L / 9.0L;
     const int image_width = 160;
     const int image_height = 90;
 
-    const ld viewport_height = 2.0L;
-    const ld viewport_width = viewport_height * aspect_ratio;
-    const ld distance_to_screen = 1.0L;
+    const double viewport_height = 2.0L;
+    const double viewport_width = viewport_height * aspect_ratio;
+    const double distance_to_screen = 1.0L;
 
     Prism::Point3 pos(0, 0, 0);
     Prism::Point3 target(0, 0, -1);
@@ -157,18 +156,17 @@ TEST(CameraTest, IteratorGeneratesGeometricallyCorrectRays) {
 
     ASSERT_EQ(generated_rays.size(), image_width * image_height);
 
-    Prism::Point3 expected_top_left(-viewport_width / 2.0L + (viewport_width / image_width) * 0.5L,
-                                    viewport_height / 2.0L - (viewport_height / image_height) * 0.5L,
-                                    -distance_to_screen);
+    Prism::Point3 expected_top_left(
+        -viewport_width / 2.0L + (viewport_width / image_width) * 0.5L,
+        viewport_height / 2.0L - (viewport_height / image_height) * 0.5L, -distance_to_screen);
 
     Prism::Point3 expected_bottom_right(
         viewport_width / 2.0L - (viewport_width / image_width) * 0.5L,
-        -viewport_height / 2.0L + (viewport_height / image_height) * 0.5L,
-        -distance_to_screen);
+        -viewport_height / 2.0L + (viewport_height / image_height) * 0.5L, -distance_to_screen);
 
     auto get_intersection_point = [&](const Prism::Ray& ray) {
-        ld t = (-distance_to_screen - ray.origin->z) / ray.direction->z;
-        return *ray.origin + (*ray.direction * t);
+        double t = (-distance_to_screen - ray.origin().z) / ray.direction().z;
+        return ray.origin() + (ray.direction() * t);
     };
 
     Prism::Ray& top_left_ray = generated_rays.front();
@@ -184,11 +182,11 @@ TEST(CameraTest, IteratorGeneratesGeometricallyCorrectRays) {
 TEST(CameraTest, IteratorGeneratesCorrectRayForAllPixels) {
     const int image_width = 80;
     const int image_height = 45;
-    const ld aspect_ratio = ld(image_width) / ld(image_height);
+    const double aspect_ratio = double(image_width) / double(image_height);
 
-    const ld viewport_height = 2.0L;
-    const ld viewport_width = viewport_height * aspect_ratio;
-    const ld distance_to_screen = 1.0L;
+    const double viewport_height = 2.0L;
+    const double viewport_width = viewport_height * aspect_ratio;
+    const double distance_to_screen = 1.0L;
 
     Prism::Point3 pos(0, 0, 1);
     Prism::Point3 target(0, 0, 0);
@@ -205,7 +203,7 @@ TEST(CameraTest, IteratorGeneratesCorrectRayForAllPixels) {
 
     ASSERT_EQ(generated_rays.size(), image_width * image_height);
 
-    Prism::Matrix<ld> basis = Prism::orthonormalBasisContaining(pos - target);
+    Prism::Matrix<double> basis = Prism::orthonormalBasisContaining(pos - target);
     Prism::Vector3 u_vec = {basis[0][1], basis[1][1], basis[2][1]};
     Prism::Vector3 v_vec = {basis[0][2], basis[1][2], basis[2][2]};
     Prism::Vector3 w_vec = {basis[0][0], basis[1][0], basis[2][0]};
@@ -220,8 +218,8 @@ TEST(CameraTest, IteratorGeneratesCorrectRayForAllPixels) {
         top_left_corner + (expected_delta_u * 0.5) - (expected_delta_v * 0.5);
 
     auto get_intersection_point = [&](const Prism::Ray& ray) {
-        ld t = (target - *ray.origin).dot(w_vec) / (ray.direction->dot(w_vec));
-        return *ray.origin + (*ray.direction * t);
+        double t = (target - ray.origin()).dot(w_vec) / (ray.direction().dot(w_vec));
+        return ray.origin() + (ray.direction() * t);
     };
 
     int ray_index = 0;
@@ -233,9 +231,9 @@ TEST(CameraTest, IteratorGeneratesCorrectRayForAllPixels) {
                 expected_pixel_00 + (expected_delta_u * x) - (expected_delta_v * y);
 
             Prism::Point3 actual_target = get_intersection_point(current_ray);
-            
+
             AssertPointAlmostEqual(actual_target, expected_target);
-            
+
             ray_index++;
         }
     }

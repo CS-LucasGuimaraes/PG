@@ -6,7 +6,6 @@
 
 using Prism::Point3;
 using Prism::Vector3;
-using ld = long double;
 
 TEST(Point3Test, ConstructorsAndAssignment) {
     Point3 p1(1.0, 2.0, 3.0);

@@ -1,15 +1,13 @@
 #ifndef PRISM_CAMERA_HPP_
 #define PRISM_CAMERA_HPP_
 
-#include "prism_export.h"
 #include "Prism/point.hpp"
 #include "Prism/ray.hpp"
 #include "Prism/vector.hpp"
+#include "prism_export.h"
 #include <initializer_list>
 #include <iterator>
 namespace Prism {
-
-using ld = long double;
 
 template <typename T> class Matrix;
 
@@ -32,9 +30,10 @@ class PRISM_EXPORT Camera {
      * @param image_height The height of the image in pixels.
      * @param image_width The width of the image in pixels.
      */
-     Camera(const Point3& position, const Point3& target, const Vector3& upvec, const ld& distance,
-           const ld& viewport_height, const ld& viewport_width, int image_height, int image_width);
-    
+    Camera(const Point3& position, const Point3& target, const Vector3& upvec,
+           const double& distance, const double& viewport_height, const double& viewport_width,
+           int image_height, int image_width);
+
     ~Camera();
 
     class CameraIterator {
@@ -50,7 +49,7 @@ class PRISM_EXPORT Camera {
 
         Ray operator*() const {
             Point3 pixel_center = *camera->pixel_00_loc + (*camera->pixel_delta_u * current_x) -
-                          (*camera->pixel_delta_v * current_y);
+                                  (*camera->pixel_delta_v * current_y);
 
             return Ray(*camera->pos, pixel_center);
         }
@@ -72,7 +71,6 @@ class PRISM_EXPORT Camera {
         Camera* camera;
         int current_y;
         int current_x;
-        
     };
 
     CameraIterator begin() {
@@ -86,11 +84,11 @@ class PRISM_EXPORT Camera {
     Point3* aim;
     Vector3* up;
 
-    Matrix<ld>* coordinate_basis;
+    Matrix<double>* coordinate_basis;
 
-    ld screen_distance;
-    ld screen_height;
-    ld screen_width;
+    double screen_distance;
+    double screen_height;
+    double screen_width;
 
     int pixel_height;
     int pixel_width;
@@ -99,7 +97,6 @@ class PRISM_EXPORT Camera {
     Point3* pixel_00_loc;
     Vector3* pixel_delta_u;
     Vector3* pixel_delta_v;
-
 };
 
 } // namespace Prism

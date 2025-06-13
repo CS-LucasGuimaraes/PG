@@ -10,7 +10,6 @@ using Prism ::Matrix;
 using Prism::orthonormalBasisContaining;
 using Prism::Point3;
 using Prism ::Vector3;
-using ld = long double;
 
 TEST(UtilsTest, CentroidOfMultiplePoints) {
     Point3 p1(0.0, 0.0, 0.0);
@@ -52,13 +51,13 @@ TEST(UtilsTest, CentroidThrowsOnEmptyList) {
 }
 
 // Helper function to extract a column vector from a 3x3 matrix
-Vector3 GetColumn(const Matrix<ld>& m, int col) {
+Vector3 GetColumn(const Matrix<double>& m, int col) {
     return Vector3{m[0][col], m[1][col], m[2][col]};
 }
 
 TEST(OrthonormalBasisTest, ProducesOrthonormalBasisContainingVector) {
     Vector3 input{1, 2, 3};
-    Matrix<ld> basis = orthonormalBasisContaining(input);
+    Matrix<double> basis = orthonormalBasisContaining(input);
 
     Vector3 v1 = GetColumn(basis, 0);
     Vector3 v2 = GetColumn(basis, 1);
