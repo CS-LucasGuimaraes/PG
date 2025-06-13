@@ -1,6 +1,9 @@
-#include "Prism/Plane.hpp"
-#include "Prism/Ray.hpp" 
+#include "Prism/plane.hpp"
+#include "Prism/ray.hpp" 
 #include "Prism/utils.hpp"
+#include "Prism/point.hpp"
+#include "Prism/vector.hpp"
+#include "Prism/material.hpp"
 #include <cmath>
 
 namespace Prism {
@@ -9,9 +12,9 @@ Plane::Plane(Point3 point_on_plane, Vector3 normal, Material* material)
     : point_on_plane(point_on_plane), normal(normal), material(material) {}
 
 
-bool Plane::hit(const Ray& ray, ld t_min, ld t_max, HitRecord& rec) const {
+bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
     // Calculate the denominator
-    ld denominator = normal.dot(ray.direction);
+    float denominator = normal.dot(ray.direction());
     
     // If the denominator is zero, the ray is parallel to the plane
     if (std::abs(denominator) == 0) {
@@ -19,7 +22,7 @@ bool Plane::hit(const Ray& ray, ld t_min, ld t_max, HitRecord& rec) const {
     }
 
     // Calculate the distance from the ray origin to the plane
-    ld t = (point_on_plane - ray.origin).dot(normal) / denominator;
+    float t = (point_on_plane - ray.origin()).dot(normal) / denominator;
 
     // Check if the intersection point is within the bounds
     if (t < t_min || t > t_max) {
@@ -28,7 +31,7 @@ bool Plane::hit(const Ray& ray, ld t_min, ld t_max, HitRecord& rec) const {
 
     // Populate the hit record
     rec.t = t;
-    rec.point = ray.at(t);
+    rec.p = ray.at(t);
     rec.normal = normal;
     rec.material = material;
 
