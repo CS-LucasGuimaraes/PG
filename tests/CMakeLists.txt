@@ -7,6 +7,7 @@ add_executable(runTests
     camera.cpp
     ray.cpp
     sphere.cpp
+    plane_test.cpp
 )
 
 target_link_libraries(runTests PRIVATE include gtest_main)
