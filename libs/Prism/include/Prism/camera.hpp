@@ -105,4 +105,4 @@ class PRISM_EXPORT Camera {
 
 } // namespace Prism
 
-#endif // PRISM_POINT_HPP_
+#endif // PRISM_CAMERA_HPP_
