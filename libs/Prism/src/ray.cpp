@@ -22,21 +22,6 @@ Ray::Ray(const Point3& origin_pt, const Point3& target_point) : origin_(origin_p
     }
 }
 
-HitRecord Ray::Gethit(const std::vector<std::unique_ptr<Object>>& objects, const double& t_min,
-    const double& t_max) {
-
-    HitRecord first_hit;
-    first_hit.t = t_max;
-    for (int i = 0; i < objects.size(); i++) {
-        HitRecord rec;
-        bool hit_happened = (objects[i]->hit(*this, t_min, t_max, rec));
-        
-        first_hit = (hit_happened and first_hit.t > rec.t) ? rec : first_hit;
-    }
-    
-    return first_hit;
-}
-
 Vector3 Ray::direction() const {
     return direction_;
 }

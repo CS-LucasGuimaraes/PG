@@ -23,6 +23,7 @@ class PRISM_EXPORT Ray {
      * @param origin Point in 3d space that originates the ray.
      * @param direction normalized vector representing the direction which the ray points towards.
      */
+    
     Ray(const Point3& origin, const Vector3& direction);
     /**
      * @brief Constucts a ray that goes from its origin torwards another given point
@@ -30,14 +31,7 @@ class PRISM_EXPORT Ray {
      * @param target Point which the ray targets
      */
     Ray(const Point3& origin, const Point3& target);
-    /**
-     * @brief Casts rays and verifies first intersection with object
-     * @param objects vector of objects within the scene
-     * @param t_min minimum distance at which intersections are verified
-     * @param t_max maximum distance at which intersections are verified
-     */
-    HitRecord Gethit(const std ::vector<std::unique_ptr<Object>>& objects, const double& t_min,
-                     const double& t_max);
+    
     /**
      * @brief gets the direction of ray. if not instantiated, returns null
      */
