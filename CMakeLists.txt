@@ -28,4 +28,5 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 install(DIRECTORY data DESTINATION bin)
