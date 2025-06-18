@@ -10,3 +10,4 @@
 #include "Prism/sphere.hpp"
 #include "Prism/utils.hpp"
 #include "Prism/vector.hpp"
+#include "Prism/triangle.hpp"
