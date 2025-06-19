@@ -13,25 +13,27 @@ Plane::Plane(Point3 point_on_plane, Vector3 normal, std::shared_ptr<Material>mat
 
 
 bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
-    double denominator = normal.dot(ray.direction());
+    Ray transformed_ray = ray.transform(inverseTransform);
+
+    double denominator = normal.dot(transformed_ray.direction());
     double tolerance = 1e-6;
     
     if (std::abs(denominator) <= tolerance) {
         return false;
     }
 
-    double t = (point_on_plane - ray.origin()).dot(normal) / denominator;
+    double t = (point_on_plane - transformed_ray.origin()).dot(normal) / denominator;
 
     if (t < t_min || t > t_max) {
         return false;
     }
 
     rec.t = t;
-    rec.p = ray.at(t);
-    rec.set_face_normal(ray, this->normal);
+    rec.p = transform * transformed_ray.at(t); // Ponto de volta para o espaço global
+    Vector3 outward_normal_world = (inverseTransposeTransform * this->normal).normalize();
+    rec.set_face_normal(ray, outward_normal_world); // Usa o raio original
     rec.material = material;
     
-
     return true;
 }
 

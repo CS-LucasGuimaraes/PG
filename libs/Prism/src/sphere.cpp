@@ -17,10 +17,12 @@ Sphere::Sphere(Point3 center, double radius, std::shared_ptr<Material> material)
 // t = (-2b' ± 2√(b'² - ac)) / 2a
 // t = -b' ± √(b'² - ac) / a
 bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
-    Vector3 oc = ray.origin() - center;
+    Ray transformed_ray = ray.transform(inverseTransform);
+
+    Vector3 oc = transformed_ray.origin() - center;
     
-    auto a = sqr(ray.direction().magnitude());
-    auto halfb = oc * ray.direction();
+    auto a = sqr(transformed_ray.direction().magnitude());
+    auto halfb = oc * transformed_ray.direction();
     auto c = oc.dot(oc) - sqr(radius);
 
     auto discriminant = sqr(halfb) - a * c;
@@ -38,9 +40,12 @@ bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) con
     }
 
     rec.t = root;
-    rec.p = ray.at(rec.t);
-    Vector3 outward_normal = (rec.p - center) / radius;
-    rec.set_face_normal(ray, outward_normal);
+    Point3 local_hit_point = transformed_ray.at(rec.t);
+    Vector3 outward_normal_local = (local_hit_point - center) / radius;
+
+    rec.p = transform * local_hit_point; // Ponto de volta para o espaço global
+    Vector3 outward_normal_world = (inverseTransposeTransform * outward_normal_local).normalize();
+    rec.set_face_normal(ray, outward_normal_world); // Usa o raio original (em espaço global)
     rec.material = material;
 
     return true;

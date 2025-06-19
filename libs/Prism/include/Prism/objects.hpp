@@ -39,6 +39,13 @@ class PRISM_EXPORT Object {
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const = 0;
 
+    void setTransform(const Matrix& new_transform) {
+        transform = new_transform;
+        inverseTransform = new_transform.inverse();
+        inverseTransposeTransform = inverseTransform.transpose();
+    }
+
+  protected:
     Matrix transform = Matrix::identity(4);
     Matrix inverseTransform = Matrix::identity(4);
     Matrix inverseTransposeTransform = Matrix::identity(4);

@@ -8,6 +8,7 @@ add_executable(runTests
     ray.cpp
     sphere.cpp
     plane_test.cpp
+    transformations.cpp
 )
 
 target_link_libraries(runTests PRIVATE include gtest_main)
