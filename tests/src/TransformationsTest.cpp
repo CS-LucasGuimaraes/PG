@@ -7,7 +7,7 @@
 using namespace Prism;
 
 // Testa a transformação de um raio
-TEST(Transformations, RayTransform) {
+TEST(TransformationsTest, RayTransform) {
     // Arrange
     Ray r(Point3(0, 0, 0), Vector3(0, 0, 1));
     // CORREÇÃO: Passando a dimensão (3D) e a lista de valores
@@ -22,7 +22,7 @@ TEST(Transformations, RayTransform) {
 }
 
 // Testa a colisão com uma esfera transladada
-TEST(Transformations, SphereHitWithTranslation) {
+TEST(TransformationsTest, SphereHitWithTranslation) {
     // Arrange
     auto s = std::make_shared<Sphere>(Point3(0, 0, 0), 1.0, nullptr);
     // CORREÇÃO: Passando a dimensão (3D) e a lista de valores
@@ -43,7 +43,7 @@ TEST(Transformations, SphereHitWithTranslation) {
 }
 
 // Testa a colisão com uma esfera com escala não uniforme
-TEST(Transformations, SphereHitWithNonUniformScale) {
+TEST(TransformationsTest, SphereHitWithNonUniformScale) {
     // Arrange
     auto s = std::make_shared<Sphere>(Point3(0, 0, 0), 1.0, nullptr);
     // Estica a esfera 2x no eixo Y
@@ -65,7 +65,7 @@ TEST(Transformations, SphereHitWithNonUniformScale) {
 
 
 // Testa a colisão com um plano rotacionado
-TEST(Transformations, PlaneHitWithRotation) {
+TEST(TransformationsTest, PlaneHitWithRotation) {
     // Arrange
     auto p = std::make_shared<Plane>(Point3(0, 0, 0), Vector3(0, 1, 0), nullptr);
     Matrix rotation = Matrix::rotation3d(M_PI / 2.0, Vector3(0, 0, 1));
@@ -85,7 +85,7 @@ TEST(Transformations, PlaneHitWithRotation) {
 }
 
 // Testa a colisão com um triângulo transladado
-TEST(Transformations, TriangleHitWithTranslation) {
+TEST(TransformationsTest, TriangleHitWithTranslation) {
     // Arrange
     auto tri = std::make_shared<Triangle>(
         Point3(0, 0, 0),
@@ -120,7 +120,7 @@ class TestableObject : public Object {
     const Matrix& getInverseTransposeTransform() const { return inverseTransposeTransform; }
 };
 
-TEST(Transformations, ObjectSetTransform) {
+TEST(TransformationsTest, ObjectSetTransform) {
     // Arrange
     TestableObject test_obj;
     Matrix t = Matrix::translation(3, {10, 20, 30});
