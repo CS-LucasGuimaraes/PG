@@ -17,7 +17,7 @@ int main() {
     Prism::Scene scene(std::move(cam));
 
     //Objreader
-    Prism :: ObjReader reader("./data/input/test.obj");
+    Prism :: ObjReader reader("./data/input/cubo.obj");
 
     std::vector<Prism::Triangle> trigs = reader.getTriangles();
 
