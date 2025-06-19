@@ -21,7 +21,7 @@ Point3 centroid(const std::initializer_list<Point3>& points) {
     return Point3(sumX / count, sumY / count, sumZ / count);
 }
 
-Matrix<double> orthonormalBasisContaining(const Vector3& v) {
+Matrix orthonormalBasisContaining(const Vector3& v) {
 
     // Step 1: Normalize v
     Vector3 v1 = v.normalize();
@@ -37,7 +37,7 @@ Matrix<double> orthonormalBasisContaining(const Vector3& v) {
     Vector3 v3 = v1.cross(orthogonal);
 
     // Step 5: Construct 3x3 matrix with v1, v2, v3 as columns
-    Matrix<double> basis(3, 3);
+    Matrix basis(3, 3);
     for (int i = 0; i < 3; ++i) {
         basis[i][0] = (i == 0 ? v1.x : (i == 1 ? v1.y : v1.z));
         basis[i][1] = (i == 0 ? orthogonal.x : (i == 1 ? orthogonal.y : orthogonal.z));

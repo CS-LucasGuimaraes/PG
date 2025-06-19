@@ -5,7 +5,7 @@
 using Prism::Matrix;
 
 TEST(MatrixTest, Construction) {
-    Matrix<double> m1(2, 3);
+    Matrix m1(2, 3);
     ASSERT_EQ(m1.getRows(), 2);
     ASSERT_EQ(m1.getCols(), 3);
 
@@ -15,27 +15,27 @@ TEST(MatrixTest, Construction) {
         }
     }
 
-    Matrix<int> m2 = {{1, 2, 3}, {4, 5, 6}};
+    Matrix m2 = {{1, 2, 3}, {4, 5, 6}};
     ASSERT_EQ(m2.getRows(), 2);
     ASSERT_EQ(m2.getCols(), 3);
     ASSERT_EQ(m2[1][1], 5);
 
-    Matrix<int> m3(m2);
+    Matrix m3(m2);
     ASSERT_TRUE(m3 == m2);
 
-    ASSERT_THROW(Matrix<int> m_err(0, 5), std::invalid_argument);
-    ASSERT_THROW(([]() { Matrix<int> m_err_list = {{1, 2}, {3}}; })(), std::invalid_argument);
+    ASSERT_THROW(Matrix m_err(0, 5), std::invalid_argument);
+    ASSERT_THROW(([]() { Matrix m_err_list = {{1, 2}, {3}}; })(), std::invalid_argument);
 }
 
 TEST(MatrixTest, AccessAndAssignment) {
-    Matrix<double> m1 = {{1.0, 2.0}, {3.0, 4.0}};
+    Matrix m1 = {{1.0, 2.0}, {3.0, 4.0}};
 
     ASSERT_DOUBLE_EQ(m1[0][1], 2.0);
 
     m1[0][1] = 42.0;
     ASSERT_DOUBLE_EQ(m1[0][1], 42.0);
 
-    Matrix<double> m2(1, 1);
+    Matrix m2(1, 1);
     m2 = m1;
     ASSERT_DOUBLE_EQ(m2[0][1], 42.0);
     ASSERT_TRUE(m1 == m2);
@@ -44,10 +44,10 @@ TEST(MatrixTest, AccessAndAssignment) {
 }
 
 TEST(MatrixTest, Equality) {
-    Matrix<int> m1 = {{1, 2}, {3, 4}};
-    Matrix<int> m2 = {{1, 2}, {3, 4}};
-    Matrix<int> m3 = {{9, 8}, {7, 6}};
-    Matrix<int> m4(3, 3); // Dimensões diferentes
+    Matrix m1 = {{1, 2}, {3, 4}};
+    Matrix m2 = {{1, 2}, {3, 4}};
+    Matrix m3 = {{9, 8}, {7, 6}};
+    Matrix m4(3, 3); // Dimensões diferentes
 
     ASSERT_TRUE(m1 == m2);
     ASSERT_FALSE(m1 == m3);
@@ -57,20 +57,20 @@ TEST(MatrixTest, Equality) {
 }
 
 TEST(MatrixTest, Multiplication) {
-    Matrix<double> m1 = {{1, 2, 3}, {4, 5, 6}};      // 2x3
-    Matrix<double> m2 = {{7, 8}, {9, 10}, {11, 12}}; // 3x2
+    Matrix m1 = {{1, 2, 3}, {4, 5, 6}};      // 2x3
+    Matrix m2 = {{7, 8}, {9, 10}, {11, 12}}; // 3x2
 
-    Matrix<double> result = m1 * m2;
-    Matrix<double> expected = {{58, 64}, {139, 154}};
+    Matrix result = m1 * m2;
+    Matrix expected = {{58, 64}, {139, 154}};
     ASSERT_TRUE(result == expected);
 
-    Matrix<double> m_err(5, 5);
+    Matrix m_err(5, 5);
     ASSERT_THROW(m1 * m_err, std::invalid_argument);
     ASSERT_THROW(m1 * m_err, std::invalid_argument);
 
-    Matrix<double> m_scalar = {{1, 2}, {3, 4}};
-    Matrix<double> result_scalar = m_scalar * 2.0;
-    Matrix<double> expected_scalar = {{2, 4}, {6, 8}};
+    Matrix m_scalar = {{1, 2}, {3, 4}};
+    Matrix result_scalar = m_scalar * 2.0;
+    Matrix expected_scalar = {{2, 4}, {6, 8}};
     ASSERT_TRUE(result_scalar == expected_scalar);
 
     m_scalar *= 2.0;
@@ -78,7 +78,7 @@ TEST(MatrixTest, Multiplication) {
 }
 
 TEST(MatrixTest, DefaultConstructorCreates3x3ZeroMatrix) {
-    Matrix<double> m;
+    Matrix m;
 
     ASSERT_EQ(m.getRows(), 3);
     ASSERT_EQ(m.getCols(), 3);
@@ -88,4 +88,16 @@ TEST(MatrixTest, DefaultConstructorCreates3x3ZeroMatrix) {
             ASSERT_DOUBLE_EQ(m[i][j], 0);
         }
     }
+}
+
+TEST(MatrixTest, Inverse) {
+    Matrix m = {{4, 7}, {2, 6}};
+    Matrix inv = m.inverse();
+    Matrix expected_inv = {{0.6, -0.7}, {-0.2, 0.4}};
+    
+    AssertMatrixAlmostEqual(inv, expected_inv);
+
+    // Test with a non-invertible matrix
+    Matrix singular = {{1, 2}, {2, 4}};
+    ASSERT_THROW(singular.inverse(), std::domain_error);
 }

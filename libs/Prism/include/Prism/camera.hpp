@@ -88,7 +88,7 @@ class PRISM_EXPORT Camera {
     Point3 aim;
     Vector3 up;
 
-    Matrix<double> coordinate_basis;
+    Matrix coordinate_basis;
 
     double screen_distance;
     double screen_height;
