@@ -17,7 +17,7 @@ Triangle::Triangle(Point3 point1, Point3 point2, Point3 point3,std::shared_ptr<M
  
 bool Triangle::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
 
-    constexpr double epsilon = std::numeric_limits<double>::epsilon();
+    const double epsilon = std::numeric_limits<double>::epsilon();
     const Vector3 ray_direction = ray.direction();
 
     // step 1: calculate the vectors that form the triangle
