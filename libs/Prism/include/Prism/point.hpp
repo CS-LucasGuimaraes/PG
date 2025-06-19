@@ -77,10 +77,6 @@ class PRISM_EXPORT Point3 {
      */
     Point3 operator+=(const Vector3& v);
 
-    Point3 operator*(const Matrix& m) const;
-
-    Point3 operator*=(const Matrix& m);
-
     double x; ///< The x coordinate of the point.
     double y; ///< The y coordinate of the point.
     double z; ///< The z coordinate of the point.

@@ -203,3 +203,78 @@ TEST(MatrixTest, Rotation3D) {
     ASSERT_DOUBLE_EQ(rotation[0][0], 1.0);
     ASSERT_DOUBLE_EQ(rotation[3][3], 1.0);
 }
+
+TEST(MatrixTest, MultiplyByPoint) {
+    Prism::Point3 p(1.0, 2.0, 3.0);
+
+    // Teste com identidade 3x3
+    Prism::Matrix id3 = Prism::Matrix::identity(3);
+    AssertPointAlmostEqual(id3 * p, p);
+
+    // Teste com escala 3x3
+    Prism::Matrix scale3 = Prism::Matrix::scaling(3, {2.0, 3.0, 4.0}); // Isso criará uma matriz 4x4, vamos criar uma 3x3 manualmente
+    Prism::Matrix manual_scale3 = {{2.0, 0.0, 0.0}, {0.0, 3.0, 0.0}, {0.0, 0.0, 4.0}};
+    Prism::Point3 expected_scaled_p(2.0, 6.0, 12.0);
+    AssertPointAlmostEqual(manual_scale3 * p, expected_scaled_p);
+    AssertPointAlmostEqual(scale3 * p, expected_scaled_p);
+
+    // Teste com identidade 4x4
+    Prism::Matrix id4 = Prism::Matrix::identity(4);
+    AssertPointAlmostEqual(id4 * p, p);
+
+    // Teste com translação 4x4
+    Prism::Matrix translation_matrix = Prism::Matrix::translation(3, {5.0, -2.0, 1.0});
+    Prism::Point3 expected_translated_p(6.0, 0.0, 4.0);
+    AssertPointAlmostEqual(translation_matrix * p, expected_translated_p);
+
+    // Teste com transformação combinada (escala e depois translação)
+    Prism::Matrix s = Prism::Matrix::scaling(3, {2.0, 2.0, 2.0});
+    Prism::Matrix t = Prism::Matrix::translation(3, {1.0, 1.0, 1.0});
+    Prism::Matrix combined = t * s; // Aplica escala, depois translação
+    Prism::Point3 expected_combined_p(3.0, 5.0, 7.0); // p*2 -> (2,4,6), +1 -> (3,5,7)
+    AssertPointAlmostEqual(combined * p, expected_combined_p);
+}
+
+// Testa a multiplicação de Matriz por Vetor
+TEST(MatrixTest, MultiplyByVector) {
+    Prism::Vector3 v(1.0, 2.0, 3.0);
+
+    // Teste com identidade 3x3
+    Prism::Matrix id3 = Prism::Matrix::identity(3);
+    AssertVectorAlmostEqual(id3 * v, v);
+
+    // Teste com escala 3x3
+    Prism::Matrix manual_scale3 = {{2.0, 0.0, 0.0}, {0.0, 3.0, 0.0}, {0.0, 0.0, 4.0}};
+    Prism::Vector3 expected_scaled_v(2.0, 6.0, 12.0);
+    AssertVectorAlmostEqual(manual_scale3 * v, expected_scaled_v);
+
+    // Teste com identidade 4x4
+    Prism::Matrix id4 = Prism::Matrix::identity(4);
+    AssertVectorAlmostEqual(id4 * v, v);
+
+    // Teste com translação 4x4 - O VETOR NÃO DEVE MUDAR!
+    Prism::Matrix translation_matrix = Prism::Matrix::translation(3, {5.0, -2.0, 1.0});
+    AssertVectorAlmostEqual(translation_matrix * v, v); // Essencial: translação não afeta vetores
+
+    // Teste com transformação combinada (escala e depois translação)
+    Prism::Matrix s = Prism::Matrix::scaling(3, {2.0, 2.0, 2.0});
+    Prism::Matrix t = Prism::Matrix::translation(3, {1.0, 1.0, 1.0});
+    Prism::Matrix combined = t * s;
+    Prism::Vector3 expected_combined_v(2.0, 4.0, 6.0); // Vetor é escalado, mas não transladado
+    AssertVectorAlmostEqual(combined * v, expected_combined_v);
+
+    // Teste com rotação
+    Prism::Matrix rot = Prism::Matrix::rotation3d(M_PI / 2.0, {0, 1, 0}); // Rotação de 90 graus em torno do eixo Y
+    Prism::Vector3 rotated_v = rot * Prism::Vector3(1, 0, 0);
+    AssertVectorAlmostEqual(rotated_v, Prism::Vector3(0, 0, -1), 1e-9);
+}
+
+// Testa o lançamento de exceções para dimensões inválidas
+TEST(MatrixTest, MultiplyThrowsOnInvalidDimensions) {
+    Prism::Matrix m5x5 = Prism::Matrix::identity(5);
+    Prism::Vector3 v(1, 2, 3);
+    Prism::Point3 p(1, 2, 3);
+
+    ASSERT_THROW(m5x5 * v, std::domain_error);
+    ASSERT_THROW(m5x5 * p, std::domain_error);
+}

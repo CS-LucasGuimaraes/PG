@@ -48,6 +48,8 @@ public:
     Matrix& operator=(const Matrix& m);
     Matrix operator*(const Matrix& m) const;
     Matrix operator*(const double& scalar) const;
+    Point3 operator*(const Point3& p) const;
+    Vector3 operator*(const Vector3& v) const;
     Matrix& operator*=(const Matrix& m);
     Matrix& operator*=(const double& scalar);
     MatrixRow operator[](size_t i);

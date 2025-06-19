@@ -172,10 +172,6 @@ class PRISM_EXPORT Vector3 {
      */
     double operator*(const Vector3& v) const;
 
-    Vector3 operator*(const Matrix& m) const;
-
-    Vector3 operator*=(const Matrix& m);
-
     /**
      * @brief Computes the cross product with another vector.
      * @param v The vector to compute the cross product with.

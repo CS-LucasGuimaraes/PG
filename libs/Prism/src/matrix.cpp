@@ -103,6 +103,46 @@ Matrix Matrix::operator*(const double& scalar) const {
     return result;
 }
 
+Point3 Matrix::operator*(const Point3& p) const {
+    if (rows_ == 3 && cols_ == 3) {
+        // Lógica para Matriz 3x3: aplica rotação/escala
+        double x = data_[0][0] * p.x + data_[0][1] * p.y + data_[0][2] * p.z;
+        double y = data_[1][0] * p.x + data_[1][1] * p.y + data_[1][2] * p.z;
+        double z = data_[2][0] * p.x + data_[2][1] * p.y + data_[2][2] * p.z;
+        return Point3(x, y, z);
+
+    } else if (rows_ == 4 && cols_ == 4) {
+        // Lógica para Matriz 4x4: aplica rotação/escala E translação
+        // Coordenada homogênea w=1 para pontos
+        double x = data_[0][0] * p.x + data_[0][1] * p.y + data_[0][2] * p.z + data_[0][3];
+        double y = data_[1][0] * p.x + data_[1][1] * p.y + data_[1][2] * p.z + data_[1][3];
+        double z = data_[2][0] * p.x + data_[2][1] * p.y + data_[2][2] * p.z + data_[2][3];
+        double w = data_[3][0] * p.x + data_[3][1] * p.y + data_[3][2] * p.z + data_[3][3];
+
+        if (w != 1.0 && w != 0.0) {
+            return Point3(x / w, y / w, z / w);
+        }
+        return Point3(x, y, z);
+
+    } else {
+        throw std::domain_error("Matrix must be 3x3 or 4x4 to multiply by a Point3.");
+    }
+}
+
+Vector3 Matrix::operator*(const Vector3& v) const {
+    if ((rows_ == 3 && cols_ == 3) || (rows_ == 4 && cols_ == 4)) {
+        // Lógica para Matriz 3x3: aplica rotação/escala
+        // Lógica para Matriz 4x4: aplica rotação/escala (ignora translação)
+        // Coordenada homogênea w=0 para vetores
+        double x = data_[0][0] * v.x + data_[0][1] * v.y + data_[0][2] * v.z;
+        double y = data_[1][0] * v.x + data_[1][1] * v.y + data_[1][2] * v.z;
+        double z = data_[2][0] * v.x + data_[2][1] * v.y + data_[2][2] * v.z;
+        return Vector3(x, y, z);
+    } else {
+        throw std::domain_error("Matrix must be 3x3 or 4x4 to multiply by a Vector3.");
+    }
+}
+
 Matrix& Matrix::operator*=(const Matrix& m) {
     *this = *this * m;
     return *this;
