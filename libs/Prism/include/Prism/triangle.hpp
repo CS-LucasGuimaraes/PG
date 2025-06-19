@@ -10,7 +10,7 @@ namespace Prism {
 
 class PRISM_EXPORT Triangle : public Object {
   public:
-    Triangle(Point3 point1 = Point3(), Point3 point2 = Point3(), Point3 point3 = Point3(), Vector3 normal1 = Vector3(), Vector3 normal2 = Vector3(), Vector3 normal3 = Vector3(), std ::shared_ptr<Material> material = std::make_shared<Prism::Material>());
+    Triangle(Point3 point1 = Point3(), Point3 point2 = Point3(), Point3 point3 = Point3(), std ::shared_ptr<Material> material = std::make_shared<Prism::Material>());
 
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
     std::shared_ptr<Material> material;
