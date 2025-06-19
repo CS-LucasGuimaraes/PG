@@ -43,7 +43,7 @@ TEST(CameraTest, CoordinateBasisOrthonormal) {
 
     Camera cam(position, target, upvec, distance, height, width, 10, 20);
 
-    const Matrix<double>& basis = cam.coordinate_basis;
+    const Matrix& basis = cam.coordinate_basis;
     auto getCol = [&](int c) { return Vector3(basis[0][c], basis[1][c], basis[2][c]); };
 
     Vector3 dir = (position - target).normalize();
@@ -68,7 +68,7 @@ TEST(CameraTest, BasisHasOpposite) {
 
     Camera cam(position, target, upvec, distance, height, width, 10, 20);
 
-    const Matrix<double>& basis = cam.coordinate_basis;
+    const Matrix& basis = cam.coordinate_basis;
     auto getCol = [&](int c) { return Vector3{basis[0][c], basis[1][c], basis[2][c]}; };
 
     Vector3 b1 = getCol(0);

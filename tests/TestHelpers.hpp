@@ -46,8 +46,7 @@ inline void AssertVectorAlmostEqual(const Vector3& v1, const Vector3& v2, double
  * @note This function checks that both matrices have the same number of rows and columns,
  *       and then compares each corresponding element using ASSERT_NEAR.
  */
-template <typename T>
-void AssertMatrixAlmostEqual(const Matrix<T>& m1, const Matrix<T>& m2, double eps = 1e-9) {
+inline void AssertMatrixAlmostEqual(const Matrix& m1, const Matrix& m2, double eps = 1e-9) {
     ASSERT_EQ(m1.getRows(), m2.getRows());
     ASSERT_EQ(m1.getCols(), m2.getCols());
     for (size_t i = 0; i < m1.getRows(); ++i) {

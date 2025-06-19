@@ -1,11 +1,13 @@
 #include "Prism/point.hpp"
 #include "Prism/utils.hpp"
 #include "Prism/vector.hpp"
+#include "Prism/matrix.hpp"
 #include "TestHelpers.hpp"
 #include <gtest/gtest.h>
 
 using Prism::Point3;
 using Prism::Vector3;
+using Prism::Matrix;
 
 TEST(Point3Test, ConstructorsAndAssignment) {
     Point3 p1(1.0, 2.0, 3.0);
@@ -44,4 +46,50 @@ TEST(Point3Test, Centroid) {
 
     // Test with an empty list
     ASSERT_THROW(Prism::centroid({}), std::invalid_argument);
+}
+
+TEST(Point3Test, AdditionWithVector) {
+    Point3 p1(1, 2, 3);
+    Vector3 v(4, 5, 6);
+    Point3 p2 = p1 + v;
+    AssertPointAlmostEqual(p2, Point3(5, 7, 9));
+
+    p1 += v;
+    AssertPointAlmostEqual(p1, Point3(5, 7, 9));
+}
+
+TEST(Point3Test, TransformationWithMatrix) {
+    Point3 p1(1, 2, 3);
+    Matrix m = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}; // Identity matrix
+    Point3 p2 = p1 * m;
+    AssertPointAlmostEqual(p2, p1);
+
+    m = {{2, 0, 0}, {0, 2, 0}, {0, 0, 2}}; // Scaling matrix
+    Point3 p3 = p1 * m;
+    AssertPointAlmostEqual(p3, Point3(2, 4, 6));
+
+    m = {{0, -1, 0}, {1, 0, 0}, {0, 0, 1}}; // 90-degree rotation matrix
+    Point3 p4 = p1 * m;
+    AssertPointAlmostEqual(p4, Point3(-2, 1, 3));
+
+    ASSERT_THROW(p1 * Matrix(2, 2), std::invalid_argument); // Invalid matrix size
+    ASSERT_THROW(p1 *= Matrix(2, 2), std::invalid_argument); // Invalid matrix size
+}
+
+TEST(Point3Test, TransformationWithHomogeneousCords) {
+    Point3 p1(1, 2, 3);
+    Matrix m = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}; // Identity matrix
+    Point3 p2 = p1 * m;
+    AssertPointAlmostEqual(p2, p1);
+
+    m = {{2, 0, 0, 0}, {0, 2, 0, 0}, {0, 0, 2, 0}, {0, 0, 0, 1}}; // Scaling matrix
+    Point3 p3 = p1 * m;
+    AssertPointAlmostEqual(p3, Point3(2, 4, 6));
+
+    m = {{0, -1, 0, 0}, {1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}; // Rotation matrix
+    Point3 p4 = p1 * m;
+    AssertPointAlmostEqual(p4, Point3(-2, 1, 3));
+
+    ASSERT_THROW(p1 * Matrix(2, 2), std::invalid_argument); // Invalid matrix size
+    ASSERT_THROW(p1 *= Matrix(2, 2), std::invalid_argument); // Invalid matrix size
 }

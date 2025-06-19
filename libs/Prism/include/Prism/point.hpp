@@ -6,6 +6,7 @@
 namespace Prism {
 
 class Vector3; // Forward declaration of Vector3 class
+class Matrix; // Forward declaration of Matrix class
 
 /**
  * @class Point3
@@ -75,6 +76,10 @@ class PRISM_EXPORT Point3 {
      * @return Reference to this point after addition.
      */
     Point3 operator+=(const Vector3& v);
+
+    Point3 operator*(const Matrix& m) const;
+
+    Point3 operator*=(const Matrix& m);
 
     double x; ///< The x coordinate of the point.
     double y; ///< The y coordinate of the point.

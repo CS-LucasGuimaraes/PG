@@ -1,16 +1,5 @@
-add_library(Prism SHARED 
-    src/vector.cpp
-    src/point.cpp
-    src/utils.cpp
-    src/camera.cpp
-    src/ray.cpp
-    src/sphere.cpp
-    src/color.cpp
-    src/material.cpp
-    src/plane.cpp
-    src/scene.cpp
-    src/triangle.cpp
-)
+file(GLOB_RECURSE PRISM_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+add_library(Prism SHARED ${PRISM_SOURCES})
 
 include(GenerateExportHeader)
 generate_export_header(Prism)

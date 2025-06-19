@@ -1,8 +1,10 @@
 #include "Prism/vector.hpp"
+#include "Prism/matrix.hpp"
 #include "TestHelpers.hpp"
 #include <gtest/gtest.h>
 
 using Prism::Vector3;
+using Prism::Matrix;
 
 TEST(Vector3Test, ConstructorsAndAssignment) {
     Vector3 v1(1.0, 2.0, 3.0);
@@ -83,4 +85,41 @@ TEST(Vector3Test, MagnitudeAndNormalize) {
 
     Vector3 zero(0, 0, 0);
     ASSERT_THROW(zero.normalize(), std::invalid_argument);
+}
+
+TEST(Vector3Test, TransformationWithMatrix) {
+    Matrix m = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}; // Identity matrix
+    Vector3 v(1, 2, 3);
+    Vector3 transformed = v * m;
+    AssertVectorAlmostEqual(transformed, v);
+
+    v *= m;
+    AssertVectorAlmostEqual(v, Vector3(1, 2, 3));
+
+    Matrix m2 = {{0, -1, 0}, {1, 0, 0}, {0, 0, 1}}; // 90-degree rotation around Z-axis
+    Vector3 rotated = v * m2;
+
+    AssertVectorAlmostEqual(rotated, Vector3(-2, 1, 3));
+    v *= m2;
+    AssertVectorAlmostEqual(v, Vector3(-2, 1, 3));
+
+    ASSERT_THROW(v * Matrix(2, 2), std::invalid_argument);
+    ASSERT_THROW(v *= Matrix(2, 2), std::invalid_argument);
+}
+
+TEST(Vector3Test, TransformationWithHomogeneousCords) {
+    Matrix m = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}; // Identity matrix
+    Vector3 v(1, 2, 3);
+    Vector3 transformed = v * m;
+    AssertVectorAlmostEqual(transformed, v);
+    v *= m;
+    AssertVectorAlmostEqual(v, Vector3(1, 2, 3));
+
+    Matrix m2 = {{0, -1, 0, 0}, {1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}; // 90-degree rotation around Z-axis
+    Vector3 rotated = v * m2;
+    AssertVectorAlmostEqual(rotated, Vector3(-2, 1, 3));
+    v *= m2;
+    AssertVectorAlmostEqual(v, Vector3(-2, 1, 3));
+    ASSERT_THROW(v * Matrix(2, 2), std::invalid_argument);
+    ASSERT_THROW(v *= Matrix(2, 2), std::invalid_argument);
 }

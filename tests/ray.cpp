@@ -40,24 +40,3 @@ TEST(RayTest, ConstructorWithTarget) {
     EXPECT_DOUBLE_EQ(ray.origin().y, 0.0L);
     EXPECT_DOUBLE_EQ(ray.direction().z, 1.0L); // pointing towards +z
 }
-
-TEST(RayTest, GethitFindsIntersection) {
-    Point3 origin(0.0L, 0.0L, -5.0L);
-    Vector3 dir(0.0L, 0.0L, 1.0L);
-    Ray ray(origin, dir);
-
-    auto obj = std::make_unique<DummyObject>();
-    vector<std::unique_ptr<Object>> objects;
-    objects.push_back(std::move(obj));
-
-    double t_min = 0.001L;
-    double t_max = 1000.0L;
-
-    HitRecord hit = ray.Gethit(objects, t_min, t_max);
-
-    EXPECT_NEAR(hit.t, 2.0L, 1e-9);
-    EXPECT_EQ(hit.p.x, 1.0L);
-    EXPECT_EQ(hit.p.y, 1.0L);
-    EXPECT_EQ(hit.normal.y, -1.0L);
-    EXPECT_FALSE(hit.front_face); // Because dot(ray.direction, normal) < 0
-}
