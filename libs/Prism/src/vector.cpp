@@ -99,26 +99,47 @@ Vector3 Vector3::operator*=(double scalar) {
 }
 
 Vector3 Vector3::operator*(const Matrix& m) const {
-    if (m.getRows() != 3 || m.getCols() != 3) {
-        throw std::invalid_argument("Matrix must be 3x3 for vector transformation.");
+    if (!((m.getRows() == 3 && m.getCols() == 3) || (m.getRows() == 4 && m.getCols() == 4))) {
+        throw std::invalid_argument("Matrix must be 3x3 or 4x4 for vector transformation.");
     }
-    return Vector3(
-        m[0][0] * x + m[0][1] * y + m[0][2] * z,
-        m[1][0] * x + m[1][1] * y + m[1][2] * z,
-        m[2][0] * x + m[2][1] * y + m[2][2] * z
-    );
+
+    if (m.getRows() == 3) {
+        return Vector3(
+            m[0][0] * x + m[0][1] * y + m[0][2] * z,
+            m[1][0] * x + m[1][1] * y + m[1][2] * z,
+            m[2][0] * x + m[2][1] * y + m[2][2] * z
+        );
+    } else { // 4x4 matrix
+        double w = m[3][0] * x + m[3][1] * y + m[3][2] * z + m[3][3];
+        return Vector3(
+            (m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3]) / w,
+            (m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3]) / w,
+            (m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3]) / w
+        );
+    }
 }
 
 Vector3 Vector3::operator*=(const Matrix& m) {
-    if (m.getRows() != 3 || m.getCols() != 3) {
-        throw std::invalid_argument("Matrix must be 3x3 for vector transformation.");
+    if (!((m.getRows() == 3 && m.getCols() == 3) || (m.getRows() == 4 && m.getCols() == 4))) {
+        throw std::invalid_argument("Matrix must be 3x3 or 4x4 for vector transformation.");
     }
-    double new_x = m[0][0] * x + m[0][1] * y + m[0][2] * z;
-    double new_y = m[1][0] * x + m[1][1] * y + m[1][2] * z;
-    double new_z = m[2][0] * x + m[2][1] * y + m[2][2] * z;
-    x = new_x;
-    y = new_y;
-    z = new_z;
+
+    double newx, newy, newz;
+
+    if (m.getRows() == 3) {
+        newx = m[0][0] * x + m[0][1] * y + m[0][2] * z;
+        newy = m[1][0] * x + m[1][1] * y + m[1][2] * z;
+        newz = m[2][0] * x + m[2][1] * y + m[2][2] * z;
+    }
+    else { // 4x4 matrix
+        double w = m[3][0] * x + m[3][1] * y + m[3][2] * z + m[3][3];
+        newx = (m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3]) / w;
+        newy = (m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3]) / w;
+        newz = (m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3]) / w;
+    }
+    x = newx;
+    y = newy;
+    z = newz;
     return *this;
 }
 
