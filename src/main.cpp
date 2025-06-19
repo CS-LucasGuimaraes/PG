@@ -16,6 +16,15 @@ int main() {
     // Criação da Cena
     Prism::Scene scene(std::move(cam));
 
+    //Objreader
+    Prism :: ObjReader reader("./data/input/test.obj");
+
+    std::vector<Prism::Triangle> trigs = reader.getTriangles();
+
+    for(int i = 0; i < trigs.size(); i++){
+        scene.addObject(std::make_unique<Prism :: Triangle>(trigs[i]));
+    }
+
     // Criação dos Materiais
     auto material_chao = std::make_shared<Prism::Material>(Prism::Color(0.8, 0.8, 0.8));
     auto material_esfera_1 = std::make_shared<Prism::Material>(Prism::Color(1.0, 0.3, 0.3)); // Vermelho/Rosa
@@ -34,7 +43,7 @@ int main() {
     scene.addObject(std::make_unique<Prism::Sphere>(
         Prism::Point3(-0.35, -0.2, -0.6), 0.3, material_esfera_2
     ));
-
+    
     // 5. Renderização
     scene.render();
 
