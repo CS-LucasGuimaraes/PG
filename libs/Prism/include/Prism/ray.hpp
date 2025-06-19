@@ -1,16 +1,16 @@
 #ifndef PRISM_RAY_HPP_
 #define PRISM_RAY_HPP_
 
-#include "prism_export.h"
 #include "Prism/point.hpp"
 #include "Prism/vector.hpp"
+#include "prism_export.h"
 #include <initializer_list>
-#include <vector>
 #include <memory>
+#include <vector>
 namespace Prism {
 
-class Object;                       // Forward declaration of Object class
-struct HitRecord;                   // Forward declaration of HitRecord struct
+class Object;     // Forward declaration of Object class
+struct HitRecord; // Forward declaration of HitRecord struct
 
 /**
  * @class Ray
@@ -42,7 +42,7 @@ class PRISM_EXPORT Ray {
      * @brief gets the direction of ray. if not instantiated, returns null
      */
     Vector3 direction() const;
-    
+
     Point3 origin() const;
 
     Point3 at(const double& t) const;

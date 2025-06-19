@@ -8,7 +8,7 @@ Classe de leitura de arquivos .mtl, que guarda cores e propriedades de materiais
 A saber que:
     - kd = Difuso (Cor do objeto)
     - ks = Specular (Reflexivo)
-    - ke = Emissivo 
+    - ke = Emissivo
     - ka = Ambiente
     - ns = Brilho
     - ni = Índice de refração
@@ -17,26 +17,26 @@ A saber que:
 A classe precisa ser instânciada passando o caminho do arquivo .mtl correspondente
 */
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <map>
-#include "Prism/vector.hpp"
 #include "Prism/material.hpp"
+#include "Prism/vector.hpp"
 #include "prism_export.h"
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 using namespace std;
 
-namespace Prism{
+namespace Prism {
 class colormap {
 
-public:
+  public:
     map<string, Material> mp;
 
-    //Construtor    
+    // Construtor
     colormap(){};
-    colormap(string input){
+    colormap(string input) {
 
         // construtor: lê arquivo cores.mtl e guarda valores RGB associados a cada nome
 
@@ -94,16 +94,16 @@ public:
         mtlFile.close();
     }
 
-    Vector3 getColor(string& s){
+    Vector3 getColor(string& s) {
         if (mp.find(s) != mp.end()) {
             return Vector3(mp[s].color.r, mp[s].color.g, mp[s].color.b);
         } else {
             cerr << "Error: cor " << s << " indefinida no arquivo .mtl\n";
-            return Vector3(0,0,0);
+            return Vector3(0, 0, 0);
         }
     }
 
-    Material getMaterial(string& s){
+    Material getMaterial(string& s) {
         if (mp.find(s) != mp.end()) {
             return mp[s];
         } else {
@@ -111,7 +111,6 @@ public:
             return Material();
         }
     }
-
 };
-}
+} // namespace Prism
 #endif

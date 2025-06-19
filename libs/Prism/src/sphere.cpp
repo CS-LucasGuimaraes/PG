@@ -18,7 +18,7 @@ Sphere::Sphere(Point3 center, double radius, std::shared_ptr<Material> material)
 // t = -b' ± √(b'² - ac) / a
 bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
     Vector3 oc = ray.origin() - center;
-    
+
     auto a = sqr(ray.direction().magnitude());
     auto halfb = oc * ray.direction();
     auto c = oc.dot(oc) - sqr(radius);

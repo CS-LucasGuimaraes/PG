@@ -1,10 +1,10 @@
 #ifndef PRISM_CAMERA_HPP_
 #define PRISM_CAMERA_HPP_
 
+#include "Prism/matrix.hpp"
 #include "Prism/point.hpp"
 #include "Prism/ray.hpp"
 #include "Prism/vector.hpp"
-#include "Prism/matrix.hpp"
 #include "prism_export.h"
 #include <initializer_list>
 #include <iterator>
@@ -29,9 +29,8 @@ class PRISM_EXPORT Camera {
      * @param image_height The height of the image in pixels.
      * @param image_width The width of the image in pixels.
      */
-    Camera(const Point3& position, const Point3& target, const Vector3& upvec,
-           double distance, double viewport_height, double viewport_width,
-           int image_height, int image_width);
+    Camera(const Point3& position, const Point3& target, const Vector3& upvec, double distance,
+           double viewport_height, double viewport_width, int image_height, int image_width);
 
     class CameraIterator {
       public:

@@ -1,22 +1,22 @@
 #include "Prism/plane.hpp"
-#include "Prism/ray.hpp" 
-#include "Prism/utils.hpp"
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
 #include "Prism/material.hpp"
+#include "Prism/point.hpp"
+#include "Prism/ray.hpp"
+#include "Prism/utils.hpp"
+#include "Prism/vector.hpp"
 #include <cmath>
 
 namespace Prism {
 
-Plane::Plane(Point3 point_on_plane, Vector3 normal, std::shared_ptr<Material>material)
-    : point_on_plane(point_on_plane), normal(normal), material(std::move(material)) {}
-
+Plane::Plane(Point3 point_on_plane, Vector3 normal, std::shared_ptr<Material> material)
+    : point_on_plane(point_on_plane), normal(normal), material(std::move(material)) {
+}
 
 bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
     // Calculate the denominator
     float denominator = normal.dot(ray.direction());
     float tolerance = 1e-6; // A small value to avoid floating-point precision issues
-    
+
     // If the denominator is zero, the ray is parallel to the plane
     if (std::abs(denominator) <= tolerance) {
         return false; // No intersection
@@ -35,7 +35,6 @@ bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) cons
     rec.p = ray.at(t);
     rec.set_face_normal(ray, this->normal);
     rec.material = material;
-    
 
     return true; // Intersection occurred
 }
