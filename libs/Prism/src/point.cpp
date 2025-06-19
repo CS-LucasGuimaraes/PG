@@ -1,5 +1,6 @@
 #include "Prism/point.hpp"
 #include "Prism/vector.hpp"
+#include "Prism/matrix.hpp"
 #include <stdexcept>
 
 namespace Prism {
@@ -48,6 +49,30 @@ Point3 Point3::operator+=(const Vector3& v) {
     x += v.x;
     y += v.y;
     z += v.z;
+    return *this;
+}
+
+Point3 Point3::operator*(const Matrix& m) const {
+    if (m.getRows() != 3 || m.getCols() != 3) {
+        throw std::invalid_argument("Matrix must be 3x3 for point transformation.");
+    }
+    return Point3(
+        m[0][0] * x + m[0][1] * y + m[0][2] * z,
+        m[1][0] * x + m[1][1] * y + m[1][2] * z,
+        m[2][0] * x + m[2][1] * y + m[2][2] * z
+    );
+}
+
+Point3 Point3::operator*=(const Matrix& m) {
+    if (m.getRows() != 3 || m.getCols() != 3) {
+        throw std::invalid_argument("Matrix must be 3x3 for point transformation.");
+    }
+    double new_x = m[0][0] * x + m[0][1] * y + m[0][2] * z;
+    double new_y = m[1][0] * x + m[1][1] * y + m[1][2] * z;
+    double new_z = m[2][0] * x + m[2][1] * y + m[2][2] * z;
+    x = new_x;
+    y = new_y;
+    z = new_z;
     return *this;
 }
 

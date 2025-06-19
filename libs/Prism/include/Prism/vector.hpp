@@ -12,6 +12,7 @@
 namespace Prism {
 
 class Point3; // Forward declaration of Point3 class
+class Matrix; // Forward declaration of Matrix class
 
 /**
  * @class Vector3
@@ -170,6 +171,10 @@ class PRISM_EXPORT Vector3 {
      * @return The dot product (scalar).
      */
     double operator*(const Vector3& v) const;
+
+    Vector3 operator*(const Matrix& m) const;
+
+    Vector3 operator*=(const Matrix& m);
 
     /**
      * @brief Computes the cross product with another vector.
