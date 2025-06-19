@@ -1,6 +1,7 @@
 #include "Prism/triangle.hpp"
 #include "Prism/ray.hpp"
 #include "Prism/utils.hpp"
+#include "Prism/material.hpp"
 #include <cmath>
 
 //r: O + tv
