@@ -1,6 +1,7 @@
 #ifndef PRISM_OBJECT_HPP_
 #define PRISM_OBJECT_HPP_
 
+#include "Prism/matrix.hpp"
 #include "Prism/point.hpp"
 #include "Prism/ray.hpp"
 #include "Prism/vector.hpp"
@@ -37,6 +38,10 @@ class PRISM_EXPORT Object {
      * @return True if a valid hit was found, false otherwise.
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const = 0;
+
+    Matrix transform = Matrix::identity(4);
+    Matrix inverseTransform = Matrix::identity(4);
+    Matrix inverseTransposeTransform = Matrix::identity(4);
 };
 
 } // namespace Prism

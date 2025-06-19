@@ -34,4 +34,8 @@ Point3 Ray::at(const double& t) const {
     return origin_ + (direction_ * t);
 }
 
+Ray Ray::transform(const Matrix& m) const {
+    return Ray(m * origin_, m * direction_);
+}
+
 } // namespace Prism

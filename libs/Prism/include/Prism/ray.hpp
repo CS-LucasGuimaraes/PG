@@ -36,6 +36,8 @@ class PRISM_EXPORT Ray {
      * @brief gets the direction of ray. if not instantiated, returns null
      */
     Vector3 direction() const;
+
+    Ray transform(const Matrix& m) const;
     
     Point3 origin() const;
 
