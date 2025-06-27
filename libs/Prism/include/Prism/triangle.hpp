@@ -19,13 +19,34 @@ template <typename Point> class PRISM_EXPORT Triangle : public Object {
     Triangle(Point point1, Point point2, Point point3, std ::shared_ptr<Material> material = std::make_shared<Prism::Material>()): 
     point1(point1),point2(point2),point3(point3),material(std::move(material)){};
 
+    Point3 getPoint1() const{
+        Point3 point;
+        if constexpr (std::is_same<Point, std::shared_ptr<Point3>>::value) point = *point1;
+        else point = point1;
+        return point;
+    };
+
+    Point3 getPoint2() const{
+        Point3 point;
+        if constexpr(std::is_same<Point, std::shared_ptr<Point3>>::value) point = *point2;
+        else point = point2;
+        return point;
+    };
+
+    Point3 getPoint3() const{
+        Point3 point;
+        if constexpr (std::is_same<Point, std::shared_ptr<Point3>>::value) point = *point3;
+        else point = point3;
+        return point;
+    };
+
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
+
     std::shared_ptr<Material> material;
+  private:
     Point point1;
     Point point2;
     Point point3;
-
-  private:
 };
  
 template <typename Point> bool Triangle<Point>::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
@@ -36,8 +57,8 @@ template <typename Point> bool Triangle<Point>::hit(const Ray& ray, double t_min
     const double epsilon = std::numeric_limits<double>::epsilon();
     const Vector3 ray_direction = transformed_ray.direction();
 
-    const Vector3 edge1 = point2 - point1;
-    const Vector3 edge2 = point3 - point1;
+    const Vector3 edge1 = this->getPoint2()- this->getPoint1();
+    const Vector3 edge2 = this->getPoint3() - this->getPoint1();
     
     const Vector3 h = ray_direction ^ edge2;
     const double a = edge1 * h;
@@ -46,7 +67,7 @@ template <typename Point> bool Triangle<Point>::hit(const Ray& ray, double t_min
         return false; // Raio paralelo ao triângulo.
 
     const double f = 1.0 / a;
-    const Vector3 s = transformed_ray.origin() - point1;
+    const Vector3 s = transformed_ray.origin() - this->getPoint1();
     const double u = f * (s * h);
 
     if (u < 0.0 || u > 1.0)
