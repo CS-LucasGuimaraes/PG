@@ -20,7 +20,7 @@ class ObjReader {
   private:
     std::ifstream file;
     std::vector<Point3> vertices;
-    std::vector<Triangle> triangles;  
+    std::vector<Triangle<Point3>> triangles;  
     Material curMaterial;
     colormap cmap;
 
@@ -78,7 +78,7 @@ class ObjReader {
     /**
      * @brief Returns all parsed triangles from the OBJ file
      */
-    std::vector<Triangle> getTriangles() const {
+    std::vector<Triangle<Point3>> getTriangles() const {
         return triangles;
     }
 

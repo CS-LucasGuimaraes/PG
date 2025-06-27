@@ -87,7 +87,7 @@ TEST(TransformationsTest, PlaneHitWithRotation) {
 // Testa a colisão com um triângulo transladado
 TEST(TransformationsTest, TriangleHitWithTranslation) {
     // Arrange
-    auto tri = std::make_shared<Triangle>(
+    auto tri = std::make_shared<Triangle<Point3>>(
         Point3(0, 0, 0),
         Point3(1, 0, 0),
         Point3(0, 1, 0),
