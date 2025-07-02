@@ -18,7 +18,7 @@ namespace Prism {
 
 class ObjReader {
   public:
-    Material curMaterial;
+    std::shared_ptr<Material> curMaterial;
     std::vector<std::array<double, 3>> vertices;
     std::vector<std::array<unsigned int, 3>> triangles;
     
@@ -45,7 +45,7 @@ class ObjReader {
             } else if (prefix == "usemtl") {
                 iss >> colorname;
                 auto mtlProps = cmap.getMaterial(colorname);
-                curMaterial = Material(
+                curMaterial = std::make_shared<Material>(
                     Color(mtlProps.color.r, mtlProps.color.g, mtlProps.color.b),
                     mtlProps.ka, mtlProps.ks, mtlProps.ke,
                     mtlProps.ns, mtlProps.ni, mtlProps.d
