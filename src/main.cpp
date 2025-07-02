@@ -5,7 +5,7 @@
 
 int main() {
     // Configuração da Câmera
-    Prism::Point3 lookfrom(-2, 2, 2);
+    Prism::Point3 lookfrom(-4, 4, 4);
     Prism::Point3 lookat(0, 0, -0.75);
     Prism::Vector3 vup(0, 1, 0);
     auto aspect_ratio = 16.0 / 9.0;
@@ -26,14 +26,8 @@ int main() {
     auto material_esfera_2 = std::make_shared<Prism::Material>(Prism::Color(0.3, 0.3, 1.0));   // Azul
 
     // Adição dos Objetos à Cena
-    std::vector<std::shared_ptr<Prism::Point3>> points;
-    for(auto& point: reader.vertices){
-        points.emplace_back(std::make_shared<Prism::Point3>(point[0],point[1],point[2]));
-    }
-
-    for(auto& triangle: reader.triangles){
-        scene.addObject(std::make_unique<Prism::Triangle<std::shared_ptr<Prism::Point3>>>(points[triangle[0]],points[triangle[1]],points[triangle[2]],material_esfera_1));
-    }
+   
+    scene.addObject(std::make_unique<Prism::Mesh>(reader));
 
     scene.addObject(std::make_unique<Prism::Plane>(
         Prism::Point3(0, -0.5, 0), Prism::Vector3(0, 1, 0), material_chao
