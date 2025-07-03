@@ -41,6 +41,7 @@ template <typename Point> class PRISM_EXPORT Triangle : public Object {
     };
 
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
+    virtual bool hit_in_mesh(const Ray& ray, double t_min, double t_max, HitRecord& rec, const Matrix& mesh_transform, const Matrix& mesh_inverse, const Matrix& mesh_inverseTranspose) const;
 
     std::shared_ptr<Material> material;
   private:
@@ -86,6 +87,52 @@ template <typename Point> bool Triangle<Point>::hit(const Ray& ray, double t_min
         rec.p = transform * transformed_ray.at(t);
         Vector3 local_normal = edge1 ^ edge2;
         Vector3 world_normal = (inverseTransposeTransform * local_normal).normalize();
+        rec.set_face_normal(ray, world_normal);
+        rec.material = material;
+        return true;
+    }
+
+    return false;
+}
+
+
+template <typename Point> bool Triangle<Point>::hit_in_mesh(const Ray& ray, double t_min, double t_max, HitRecord& rec, const Matrix& mesh_transform, const Matrix& mesh_inverse, const Matrix& mesh_inverseTranspose) const {
+    // Passo 1: Criar um raio transformado.
+    Ray transformed_ray = ray.transform(mesh_inverse);
+    
+    // Passo 2: Realizar o teste de colisão em espaço local (algoritmo Möller-Trumbore).
+    const double epsilon = std::numeric_limits<double>::epsilon();
+    const Vector3 ray_direction = transformed_ray.direction();
+
+    const Vector3 edge1 = this->getPoint2()- this->getPoint1();
+    const Vector3 edge2 = this->getPoint3() - this->getPoint1();
+    
+    const Vector3 h = ray_direction ^ edge2;
+    const double a = edge1 * h;
+
+    if (a > -epsilon && a < epsilon)
+        return false; // Raio paralelo ao triângulo.
+
+    const double f = 1.0 / a;
+    const Vector3 s = transformed_ray.origin() - this->getPoint1();
+    const double u = f * (s * h);
+
+    if (u < 0.0 || u > 1.0)
+        return false;
+
+    const Vector3 q = s ^ edge1;
+    const double v = f * (ray_direction * q);
+
+    if (v < 0.0 || u + v > 1.0)
+        return false;
+
+    const double t = f * (edge2 * q);
+
+    if (t > t_min && t < t_max) {
+        rec.t = t;
+        rec.p = mesh_transform * transformed_ray.at(t);
+        Vector3 local_normal = edge1 ^ edge2;
+        Vector3 world_normal = (mesh_inverseTranspose * local_normal).normalize();
         rec.set_face_normal(ray, world_normal);
         rec.material = material;
         return true;

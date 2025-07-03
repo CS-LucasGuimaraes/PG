@@ -22,10 +22,12 @@ Mesh::Mesh(ObjReader& reader):material(std::move(reader.curMaterial)){
 };
 
 bool Mesh::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
+    Ray transformed_ray = ray.transform(inverseTransform);
+
     bool hit_anything = false;
     rec.t = INFINITY;
     for (const auto& triangle : mesh) {
-        if (triangle.hit(ray, 0.001, rec.t, rec)) {
+        if (triangle.hit_in_mesh(ray, 0.001, rec.t, rec, transform, inverseTransform, inverseTransposeTransform)) {
             hit_anything = true;
         }
     }
