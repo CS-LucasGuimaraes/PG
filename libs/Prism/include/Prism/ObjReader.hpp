@@ -17,14 +17,12 @@
 namespace Prism {
 
 class ObjReader {
-  private:
-    std::ifstream file;
-    std::vector<Point3> vertices;
-    std::vector<Triangle> triangles;  
-    Material curMaterial;
-    colormap cmap;
-
   public:
+    Material curMaterial;
+    std::vector<std::array<double, 3>> vertices;
+    std::vector<std::array<unsigned int, 3>> triangles;
+    
+
     ObjReader(const std::string& filename) : cmap(cmap) {
         file.open(filename);
         if (!file.is_open()) {
@@ -55,9 +53,9 @@ class ObjReader {
             } else if (prefix == "v") {
                 double x, y, z;
                 iss >> x >> y >> z;
-                vertices.emplace_back(x, y, z);
+                vertices.push_back({x,y,z});
             } else if (prefix == "f") {
-                int vi[3], ni[3];
+                unsigned int vi[3], ni[3];
                 char slash;
                 int _; // for skipping texture indices
                 for (int i = 0; i < 3; ++i) {
@@ -65,51 +63,31 @@ class ObjReader {
                     --vi[i];
                     --ni[i];
                 }
-                triangles.emplace_back(
-                    vertices[vi[0]], vertices[vi[1]], vertices[vi[2]],
-                    std::make_shared<Material>(curMaterial)
-                );
+                triangles.push_back({vi[0], vi[1], vi[2]});
             }
         }
 
         file.close();
     }
 
-    /**
-     * @brief Returns all parsed triangles from the OBJ file
-     */
-    std::vector<Triangle> getTriangles() const {
-        return triangles;
-    }
+    private:
+        std::ifstream file;
+        colormap cmap;
 
-    /**
-     * @brief Returns all parsed vertices from the OBJ file
-     */
-    std::vector<Point3> getVertices() const {
-        return vertices;
-    }
-
-    /**
-     * @brief Returns the last used material
-     */
-    Material getCurrentMaterial() const {
-        return curMaterial;
-    }
-
-    /**
-     * @brief Prints each triangle’s vertices to the console
-     */
-    void print_faces() const {
-        int i = 0;
-        for (const auto& tri : triangles) {
-            std::clog << "Face " << (++i) << ": ";
-            std::cout << "(" << tri.point1.x << ", " << tri.point1.y << ", " << tri.point1.z << ") ";
-            std::cout << "(" << tri.point2.x << ", " << tri.point2.y << ", " << tri.point2.z << ") ";
-            std::cout << "(" << tri.point3.x << ", " << tri.point3.y << ", " << tri.point3.z << ") ";
-            std::cout << std::flush;
-            std::clog << std::endl;
-        }
-    }
+    // /**
+    //  * @brief Prints each triangle’s vertices to the console
+    //  */
+    // void print_faces() const {
+    //     int i = 0;
+    //     for (const auto& tri : triangles) {
+    //         std::clog << "Face " << (++i) << ": ";
+    //         std::cout << "(" << tri.getPoint1().x << ", " << tri.getPoint1().y << ", " << tri.getPoint1().z << ") ";
+    //         std::cout << "(" << tri.getPoint2().x << ", " << tri.getPoint2().y << ", " << tri.getPoint2().z << ") ";
+    //         std::cout << "(" << tri.getPoint3().x << ", " << tri.getPoint3().y << ", " << tri.getPoint3().z << ") ";
+    //         std::cout << std::flush;
+    //         std::clog << std::endl;
+    //     }
+    // }
 };
 
 } // namespace Prism
