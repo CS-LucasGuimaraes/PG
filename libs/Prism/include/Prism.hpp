@@ -13,3 +13,4 @@
 #include "Prism/triangle.hpp"
 #include "Prism/ObjReader.hpp"
 #include "Prism/Colormap.hpp"
+#include "Prism/mesh.hpp"

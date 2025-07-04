@@ -41,7 +41,7 @@ class PRISM_EXPORT Object {
 
     void setTransform(const Matrix& new_transform) {
         transform = new_transform;
-        inverseTransform = new_transform.inverse();
+        inverseTransform = transform.inverse();
         inverseTransposeTransform = inverseTransform.transpose();
     }
 
