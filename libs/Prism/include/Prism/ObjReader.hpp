@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <array>
 #include "Prism/vector.hpp"
 #include "Prism/point.hpp"
 #include "Prism/Colormap.hpp"
