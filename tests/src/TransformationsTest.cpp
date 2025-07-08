@@ -1,6 +1,6 @@
+#include <cmath>
 #include <gtest/gtest.h>
 #include <memory>
-#include <cmath>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -16,7 +16,7 @@ TEST(TransformationsTest, RayTransform) {
     // Arrange
     Ray r(Point3(0, 0, 0), Vector3(0, 0, 1));
     // CORREÇÃO: Passando a dimensão (3D) e a lista de valores
-    Matrix translation = Matrix::translation(3, {10, 5, -3});
+    Matrix translation = Matrix::translation(10, 5, -3);
 
     // Act
     Ray transformed_r = r.transform(translation);
@@ -31,7 +31,7 @@ TEST(TransformationsTest, SphereHitWithTranslation) {
     // Arrange
     auto s = std::make_shared<Sphere>(Point3(0, 0, 0), 1.0, nullptr);
     // CORREÇÃO: Passando a dimensão (3D) e a lista de valores
-    Matrix translation = Matrix::translation(3, {10, 0, 0});
+    Matrix translation = Matrix::translation(10, 0, 0);
     s->setTransform(translation);
 
     Ray ray_that_hits(Point3(10, 0, -5), Vector3(0, 0, 1));
@@ -52,7 +52,7 @@ TEST(TransformationsTest, SphereHitWithNonUniformScale) {
     // Arrange
     auto s = std::make_shared<Sphere>(Point3(0, 0, 0), 1.0, nullptr);
     // Estica a esfera 2x no eixo Y
-    Matrix scale = Matrix::scaling(3, {1, 2, 1});
+    Matrix scale = Matrix::scaling(1, 2, 1);
     s->setTransform(scale);
 
     // Atira um raio de cima para baixo, em direção ao topo da esfera esticada
@@ -61,19 +61,18 @@ TEST(TransformationsTest, SphereHitWithNonUniformScale) {
 
     // Act & Assert
     EXPECT_TRUE(s->hit(ray_that_hits, 0, 100, rec));
-    EXPECT_NEAR(rec.t, 1.5, 1e-6); 
-    
+    EXPECT_NEAR(rec.t, 1.5, 1e-6);
+
     // As asserções mais importantes (ponto e normal em espaço global) continuam as mesmas.
     AssertPointAlmostEqual(rec.p, Point3(0, 2, 0));
     AssertVectorAlmostEqual(rec.normal, Vector3(0, 1, 0));
 }
 
-
 // Testa a colisão com um plano rotacionado
 TEST(TransformationsTest, PlaneHitWithRotation) {
     // Arrange
     auto p = std::make_shared<Plane>(Point3(0, 0, 0), Vector3(0, 1, 0), nullptr);
-    Matrix rotation = Matrix::rotation3d(M_PI / 2.0, Vector3(0, 0, 1));
+    Matrix rotation = Matrix::rotation(M_PI / 2.0, Vector3(0, 0, 1));
     p->setTransform(rotation);
 
     Ray ray_that_hits(Point3(-5, 0, 0), Vector3(1, 0, 0));
@@ -92,13 +91,9 @@ TEST(TransformationsTest, PlaneHitWithRotation) {
 // Testa a colisão com um triângulo transladado
 TEST(TransformationsTest, TriangleHitWithTranslation) {
     // Arrange
-    auto tri = std::make_shared<Triangle>(
-        Point3(0, 0, 0),
-        Point3(1, 0, 0),
-        Point3(0, 1, 0),
-        nullptr
-    );
-    Matrix translation = Matrix::translation(3, {0, 0, 5});
+    auto tri =
+        std::make_shared<Triangle>(Point3(0, 0, 0), Point3(1, 0, 0), Point3(0, 1, 0), nullptr);
+    Matrix translation = Matrix::translation(0, 0, 5);
     tri->setTransform(translation);
 
     Ray ray_that_hits(Point3(0.25, 0.25, 0), Vector3(0, 0, 1));
@@ -117,18 +112,26 @@ TEST(TransformationsTest, TriangleHitWithTranslation) {
 class TestableObject : public Object {
   public:
     // Implementação mínima para a função virtual pura
-    bool hit(const Ray&, double, double, HitRecord&) const override { return false; }
+    bool hit(const Ray&, double, double, HitRecord&) const override {
+        return false;
+    }
 
     // Funções para acessar as matrizes protegidas da classe base
-    const Matrix& getTransform() const { return transform; }
-    const Matrix& getInverseTransform() const { return inverseTransform; }
-    const Matrix& getInverseTransposeTransform() const { return inverseTransposeTransform; }
+    const Matrix& getTransform() const {
+        return transform;
+    }
+    const Matrix& getInverseTransform() const {
+        return inverseTransform;
+    }
+    const Matrix& getInverseTransposeTransform() const {
+        return inverseTransposeTransform;
+    }
 };
 
 TEST(TransformationsTest, ObjectSetTransform) {
     // Arrange
     TestableObject test_obj;
-    Matrix t = Matrix::translation(3, {10, 20, 30});
+    Matrix t = Matrix::translation(10, 20, 30);
     Matrix inv_t = t.inverse();
     Matrix inv_t_transpose = inv_t.transpose();
 

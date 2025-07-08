@@ -37,15 +37,29 @@ class PRISM_EXPORT Ray {
      */
     Vector3 direction() const;
 
+    /**
+     * @brief Transforms the ray using a transformation matrix
+     * @param m The transformation matrix to apply to the ray
+     * @return A new Ray object that is transformed by the given matrix
+     */
     Ray transform(const Matrix& m) const;
     
+    /**
+     * @brief Gets the origin point of the ray
+     * @return The origin point of the ray
+     */
     Point3 origin() const;
 
+    /**
+     * @brief Gets the point at a specific distance along the ray
+     * @param t The distance along the ray from its origin
+     * @return The Point3 at the specified distance along the ray
+     */
     Point3 at(const double& t) const;
 
   private:
-    Point3 origin_;
-    Vector3 direction_;
+    Point3 origin_; ///< The origin point of the ray
+    Vector3 direction_; ///< The direction vector of the ray, normalized to unit length
 };
 
 } // namespace Prism

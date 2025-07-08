@@ -6,12 +6,19 @@
 #include "Prism/ray.hpp"
 #include "Prism/vector.hpp"
 #include "prism_export.h"
+#include <memory>
 
 namespace Prism {
 
 class Ray;      // Forward declaration of Ray class
 class Material; // Forward declaration of Material class
 
+/** 
+ * @class HitRecord
+ * @brief Represents the details of a ray-object intersection.
+ * This class stores the intersection point, normal at the intersection, distance along the ray,
+ * material properties, and whether the hit is on the front face of the object.
+ */
 struct PRISM_EXPORT HitRecord {
     Point3 p;
     Vector3 normal;
@@ -25,6 +32,12 @@ struct PRISM_EXPORT HitRecord {
     }
 };
 
+/**
+ * @class Object
+ * @brief Abstract base class for all objects in the scene.
+ * This class defines the interface for objects that can be hit by rays, providing a method to check for intersections.
+ * It also manages the transformation of the object in 3D space using a transformation matrix.
+ */
 class PRISM_EXPORT Object {
   public:
     virtual ~Object() = default;
@@ -39,16 +52,30 @@ class PRISM_EXPORT Object {
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const = 0;
 
+    /**
+     * @brief Gets the transformation matrix of the object.
+     * @param The transformation matrix.
+     * This matrix represents the object's position, orientation, and scale in the scene.
+     */
     void setTransform(const Matrix& new_transform) {
         transform = new_transform;
         inverseTransform = transform.inverse();
         inverseTransposeTransform = inverseTransform.transpose();
     }
 
+    /**
+     * @brief Gets the transformation matrix of the object.
+     * @return The transformation matrix.
+     * This matrix can be used to transform points or vectors in the object's local space to world space.
+     */
+    Matrix getTransform() const {
+        return transform;
+    }
+
   protected:
-    Matrix transform = Matrix::identity(4);
-    Matrix inverseTransform = Matrix::identity(4);
-    Matrix inverseTransposeTransform = Matrix::identity(4);
+    Matrix transform = Matrix::identity(4); ///< Transformation matrix for the object
+    Matrix inverseTransform = Matrix::identity(4); ///< Inverse of the transformation matrix
+    Matrix inverseTransposeTransform = Matrix::identity(4); ///< Inverse transpose of the transformation matrix
 };
 
 } // namespace Prism

@@ -15,13 +15,18 @@ namespace Prism {
 
 PRISM_EXPORT std::filesystem::path generate_filename();
 
+/**
+ * @class Scene
+ * @brief Represents a 3D scene containing objects and a camera for rendering.
+ * This class manages the collection of objects in the scene and provides functionality to render the scene from the camera's perspective.
+ */
 class PRISM_EXPORT Scene {
   public:
     /**
-     * @brief Constrói a cena, movendo uma câmera para dentro dela.
-     * @param camera A câmera que será usada para renderizar a cena.
+     * @brief Constructs a Scene with a specified camera.
+     * @param camera The Camera object that defines the viewpoint and projection parameters for rendering the scene.
      */
-    Scene(Camera camera);
+    explicit Scene(Camera camera);
 
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;
@@ -30,20 +35,23 @@ class PRISM_EXPORT Scene {
     Scene& operator=(Scene&&) = default;
 
     /**
-     * @brief Adiciona um objeto à cena.
-     * A posse do objeto é transferida para a cena.
-     * @param object Um unique_ptr para um objeto derivado de Object (e.g., Sphere).
+     * @brief Adds an object to the scene.
+     * @param object A unique pointer to an Object that will be added to the scene.
+     * This method takes ownership of the object and stores it in the scene's collection.
      */
     void addObject(std::unique_ptr<Object> object);
 
     /**
-     * @brief Renderiza a cena a partir da perspectiva da câmera e salva em um arquivo PPM.
+     * @brief Renders the scene from the camera's perspective.
+     * This method iterates over all objects in the scene, checks for ray-object intersections, and generates the final image.
+     * The rendered image is saved to a file with a timestamped filename.
+     * The rendering process involves casting rays from the camera through each pixel of the viewport and checking for hits with the objects.
      */
     void render() const;
 
   private:
-    std::vector<std::unique_ptr<Object>> objects_;
-    Camera camera_;
+    std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene
+    Camera camera_; ///< The camera used to view the scene
 };
 } // namespace Prism
 

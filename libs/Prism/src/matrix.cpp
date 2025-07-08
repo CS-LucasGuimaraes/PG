@@ -1,85 +1,85 @@
 #include "Prism/matrix.hpp"
-#include <stdexcept>
 #include <cmath>
+#include <numeric>
+#include <stdexcept>
 
 namespace Prism {
 
-// --- Implementações dos Construtores ---
-Matrix::Matrix() : rows_(3), cols_(3), data_(3, std::vector<double>(3, 0.0)) {};
+// --- Implementação do Proxy (não-const) ---
+MatrixRow::MatrixRow(Matrix& matrix, size_t row) : matrix_(matrix), row_(row) {
+}
 
-Matrix::Matrix(size_t rows, size_t cols) {
+double& MatrixRow::operator[](size_t col) {
+    // Adicionar checagem de limites (bounds checking) se desejar
+    return matrix_.data_[row_ * matrix_.cols_ + col];
+}
+
+// --- Implementação do Proxy (const) ---
+ConstMatrixRow::ConstMatrixRow(const Matrix& matrix, size_t row) : matrix_(matrix), row_(row) {
+}
+
+const double& ConstMatrixRow::operator[](size_t col) const {
+    // Adicionar checagem de limites (bounds checking) se desejar
+    return matrix_.data_[row_ * matrix_.cols_ + col];
+}
+
+// --- Implementação dos Construtores da Matrix ---
+
+Matrix::Matrix() : rows_(3), cols_(3), data_(3 * 3, 0.0) {
+    // Construtor padrão agora cria uma matriz identidade 3x3
+    (*this)[0][0] = 1.0;
+    (*this)[1][1] = 1.0;
+    (*this)[2][2] = 1.0;
+}
+
+Matrix::Matrix(size_t rows, size_t cols) : rows_(rows), cols_(cols) {
     if (rows == 0 || cols == 0) {
-        throw std::invalid_argument("Matrix dimensions must be greater than zero.");
-    }
-    rows_ = rows;
-    cols_ = cols;
-    data_.resize(rows_, std::vector<double>(cols_, 0.0));
-};
-
-Matrix::Matrix(std::initializer_list<std::initializer_list<double>> data) {
-    rows_ = data.size();
-    if (rows_ == 0) {
+        // Permite matrizes 0x0 para consistência, mas não lança erro.
+        // Opcional: throw std::invalid_argument("Matrix dimensions cannot be zero.");
+        rows_ = 0;
         cols_ = 0;
-        data_ = {};
-        return;
+    }
+    data_.assign(rows_ * cols_, 0.0); // Usa 'assign' para preencher com zeros
+}
+
+Matrix::Matrix(std::initializer_list<std::initializer_list<double>> list) {
+    rows_ = list.size();
+    if (rows_ > 0) {
+        cols_ = list.begin()->size();
+    } else {
+        cols_ = 0;
     }
 
-    cols_ = data.begin()->size();
-    data_.reserve(rows_);
-    for (const auto& row : data) {
-        if (row.size() != cols_) {
+    data_.reserve(rows_ * cols_);
+    for (const auto& row_list : list) {
+        if (row_list.size() != cols_) {
             throw std::invalid_argument("All rows in initializer list must have the same size.");
         }
-        data_.emplace_back(row);
+        // Insere os elementos da linha no final do vetor linear
+        data_.insert(data_.end(), row_list.begin(), row_list.end());
     }
 }
 
-Matrix::Matrix(const Matrix& m) : rows_(m.rows_), cols_(m.cols_), data_(m.data_) {};
+// --- Implementação dos Operadores ---
 
-// --- Implementações das Classes Aninhadas ---
-
-Matrix::MatrixRow::MatrixRow(std::vector<double>& row_vec) : m_row_vector(row_vec) {}
-
-double& Matrix::MatrixRow::operator[](int col) {
-    return m_row_vector.at(col);
+MatrixRow Matrix::operator[](size_t row) {
+    return MatrixRow(*this, row);
 }
 
-Matrix::ConstMatrixRow::ConstMatrixRow(const std::vector<double>& row_vec) : m_row_vector(row_vec) {}
-
-const double& Matrix::ConstMatrixRow::operator[](int col) const {
-    return m_row_vector.at(col);
+ConstMatrixRow Matrix::operator[](size_t row) const {
+    return ConstMatrixRow(*this, row);
 }
-
-// --- Implementações dos Getters ---
-
-size_t Matrix::getRows() const {
-    return rows_;
-}
-
-size_t Matrix::getCols() const {
-    return cols_;
-}
-
-// --- Implementações dos Operadores ---
 
 bool Matrix::operator==(const Matrix& m) const {
     if (rows_ != m.rows_ || cols_ != m.cols_) {
         return false;
     }
+    // std::vector já tem um operador== eficiente para dados contíguos.
     return data_ == m.data_;
 }
 
 bool Matrix::operator!=(const Matrix& m) const {
     return !(*this == m);
-}
-
-Matrix& Matrix::operator=(const Matrix& m) {
-    if (this != &m) {
-        rows_ = m.rows_;
-        cols_ = m.cols_;
-        data_ = m.data_;
-    }
-    return *this;
 }
 
 Matrix Matrix::operator*(const Matrix& m) const {
@@ -89,153 +89,154 @@ Matrix Matrix::operator*(const Matrix& m) const {
     Matrix result(rows_, m.cols_);
     for (size_t i = 0; i < rows_; ++i) {
         for (size_t j = 0; j < m.cols_; ++j) {
+            double sum = 0.0;
             for (size_t k = 0; k < cols_; ++k) {
-                result.data_[i][j] += data_[i][k] * m.data_[k][j];
+                sum += (*this)[i][k] * m[k][j];
             }
+            result[i][j] = sum;
         }
     }
     return result;
 }
 
-Matrix Matrix::operator*(const double& scalar) const {
+Point3 Matrix::operator*(const Point3& p) const {
+    if (!((rows_ == 3 && cols_ == 3) || (rows_ == 4 && cols_ == 4))) {
+        throw std::domain_error("Matrix must be 3x3 or 4x4 to multiply by a Point3.");
+    }
+
+    double x = (*this)[0][0] * p.x + (*this)[0][1] * p.y + (*this)[0][2] * p.z;
+    double y = (*this)[1][0] * p.x + (*this)[1][1] * p.y + (*this)[1][2] * p.z;
+    double z = (*this)[2][0] * p.x + (*this)[2][1] * p.y + (*this)[2][2] * p.z;
+    double w = 1.0;
+
+    if (rows_ == 4) { // Adiciona a parte da translação e perspectiva
+        x += (*this)[0][3];
+        y += (*this)[1][3];
+        z += (*this)[2][3];
+        w = (*this)[3][0] * p.x + (*this)[3][1] * p.y + (*this)[3][2] * p.z + (*this)[3][3];
+    }
+
+    if (w != 1.0 && w != 0.0) {
+        return Point3(x / w, y / w, z / w);
+    }
+    return Point3(x, y, z);
+}
+
+Vector3 Matrix::operator*(const Vector3& v) const {
+    if (!((rows_ == 3 && cols_ == 3) || (rows_ == 4 && cols_ == 4))) {
+        throw std::domain_error("Matrix must be 3x3 or 4x4 to multiply by a Vector3.");
+    }
+    // A multiplicação de vetores ignora a translação (quarta coluna/linha)
+    double x = (*this)[0][0] * v.x + (*this)[0][1] * v.y + (*this)[0][2] * v.z;
+    double y = (*this)[1][0] * v.x + (*this)[1][1] * v.y + (*this)[1][2] * v.z;
+    double z = (*this)[2][0] * v.x + (*this)[2][1] * v.y + (*this)[2][2] * v.z;
+    return Vector3(x, y, z);
+}
+
+Matrix Matrix::operator*(double scalar) const {
     Matrix result(*this);
     result *= scalar;
     return result;
 }
 
-Point3 Matrix::operator*(const Point3& p) const {
-    if (rows_ == 3 && cols_ == 3) {
-        // Lógica para Matriz 3x3: aplica rotação/escala
-        double x = data_[0][0] * p.x + data_[0][1] * p.y + data_[0][2] * p.z;
-        double y = data_[1][0] * p.x + data_[1][1] * p.y + data_[1][2] * p.z;
-        double z = data_[2][0] * p.x + data_[2][1] * p.y + data_[2][2] * p.z;
-        return Point3(x, y, z);
-
-    } else if (rows_ == 4 && cols_ == 4) {
-        // Lógica para Matriz 4x4: aplica rotação/escala E translação
-        // Coordenada homogênea w=1 para pontos
-        double x = data_[0][0] * p.x + data_[0][1] * p.y + data_[0][2] * p.z + data_[0][3];
-        double y = data_[1][0] * p.x + data_[1][1] * p.y + data_[1][2] * p.z + data_[1][3];
-        double z = data_[2][0] * p.x + data_[2][1] * p.y + data_[2][2] * p.z + data_[2][3];
-        double w = data_[3][0] * p.x + data_[3][1] * p.y + data_[3][2] * p.z + data_[3][3];
-
-        if (w != 1.0 && w != 0.0) {
-            return Point3(x / w, y / w, z / w);
-        }
-        return Point3(x, y, z);
-
-    } else {
-        throw std::domain_error("Matrix must be 3x3 or 4x4 to multiply by a Point3.");
-    }
-}
-
-Vector3 Matrix::operator*(const Vector3& v) const {
-    if ((rows_ == 3 && cols_ == 3) || (rows_ == 4 && cols_ == 4)) {
-        // Lógica para Matriz 3x3: aplica rotação/escala
-        // Lógica para Matriz 4x4: aplica rotação/escala (ignora translação)
-        // Coordenada homogênea w=0 para vetores
-        double x = data_[0][0] * v.x + data_[0][1] * v.y + data_[0][2] * v.z;
-        double y = data_[1][0] * v.x + data_[1][1] * v.y + data_[1][2] * v.z;
-        double z = data_[2][0] * v.x + data_[2][1] * v.y + data_[2][2] * v.z;
-        return Vector3(x, y, z);
-    } else {
-        throw std::domain_error("Matrix must be 3x3 or 4x4 to multiply by a Vector3.");
-    }
-}
 
 Matrix& Matrix::operator*=(const Matrix& m) {
     *this = *this * m;
     return *this;
 }
 
-Matrix& Matrix::operator*=(const double& scalar) {
-    for (auto& row : data_) {
-        for (auto& val : row) {
-            val *= scalar;
-        }
+Matrix& Matrix::operator*=(double scalar) {
+    for (double& val : data_) {
+        val *= scalar;
     }
     return *this;
 }
 
-Matrix::MatrixRow Matrix::operator[](size_t i) {
-    return MatrixRow(data_.at(i));
-}
-
-Matrix::ConstMatrixRow Matrix::operator[](size_t i) const {
-    return ConstMatrixRow(data_.at(i));
-}
-
-
-// --- Implementações das Operações Matemáticas ---
+// --- Operações Matemáticas ---
 
 double Matrix::determinant() const {
     if (rows_ != cols_) {
         throw std::domain_error("Matrix must be square to compute determinant.");
     }
-    if (rows_ == 0) return 1; // Determinant of 0x0 matrix is 1
-    if (rows_ == 1) return data_[0][0];
-    if (rows_ == 2) return data_[0][0] * data_[1][1] - data_[0][1] * data_[1][0];
+    size_t n = rows_;
+    if (n == 0)
+        return 1.0;
+    if (n == 1)
+        return (*this)[0][0];
+    if (n == 2)
+        return (*this)[0][0] * (*this)[1][1] - (*this)[0][1] * (*this)[1][0];
 
-    double det = 0;
-    for (size_t j = 0; j < cols_; ++j) {
-        Matrix submatrix(rows_ - 1, cols_ - 1);
-        for (size_t r = 1; r < rows_; ++r) {
+    // Para matrizes maiores, é mais eficiente usar a decomposição LU,
+    // mas a expansão por cofatores é mantida aqui para consistência com o original.
+    double det = 0.0;
+    for (size_t j = 0; j < n; ++j) {
+        Matrix submatrix(n - 1, n - 1);
+        for (size_t r = 1; r < n; ++r) {
             size_t sub_col = 0;
-            for (size_t c = 0; c < cols_; ++c) {
-                if (c != j) {
-                    submatrix.data_[r - 1][sub_col++] = data_[r][c];
-                }
+            for (size_t c = 0; c < n; ++c) {
+                if (c == j)
+                    continue;
+                submatrix[r - 1][sub_col++] = (*this)[r][c];
             }
         }
         double sign = (j % 2 == 0) ? 1.0 : -1.0;
-        det += sign * data_[0][j] * submatrix.determinant();
+        det += sign * (*this)[0][j] * submatrix.determinant();
     }
     return det;
 }
 
 Matrix Matrix::inverse() const {
     double det = determinant();
-    if (det == 0) {
+    if (std::abs(det) < 1e-9) { // Comparação segura para ponto flutuante
         throw std::domain_error("Matrix is singular and cannot be inverted.");
     }
 
     size_t n = rows_;
+    // Cria uma matriz aumentada [A|I]
     Matrix augmented(n, 2 * n);
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = 0; j < n; ++j) {
-            augmented.data_[i][j] = data_[i][j];
+            augmented[i][j] = (*this)[i][j];
         }
-        augmented.data_[i][i + n] = 1;
+        augmented[i][i + n] = 1.0;
     }
 
+    // Processo de eliminação de Gauss-Jordan
     for (size_t i = 0; i < n; i++) {
+        // Encontra o pivô
         size_t pivot = i;
         for (size_t j = i + 1; j < n; j++) {
-            if (std::abs(augmented.data_[j][i]) > std::abs(augmented.data_[pivot][i])) {
+            if (std::abs(augmented[j][i]) > std::abs(augmented[pivot][i])) {
                 pivot = j;
             }
         }
-        std::swap(augmented.data_[i], augmented.data_[pivot]);
-
-        double div = augmented.data_[i][i];
-        for (size_t j = i; j < 2 * n; j++) {
-            augmented.data_[i][j] /= div;
+        // Troca as linhas
+        for (size_t k = 0; k < 2 * n; ++k) {
+            std::swap(augmented[i][k], augmented[pivot][k]);
         }
 
+        // Normaliza a linha do pivô
+        double div = augmented[i][i];
+        for (size_t j = i; j < 2 * n; j++) {
+            augmented[i][j] /= div;
+        }
+
+        // Elimina outras entradas na coluna
         for (size_t j = 0; j < n; j++) {
             if (i != j) {
-                double mult = augmented.data_[j][i];
+                double mult = augmented[j][i];
                 for (size_t k = i; k < 2 * n; k++) {
-                    augmented.data_[j][k] -= mult * augmented.data_[i][k];
+                    augmented[j][k] -= mult * augmented[i][k];
                 }
             }
         }
     }
 
+    // Extrai a matriz inversa da parte direita da matriz aumentada
     Matrix result(n, n);
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = 0; j < n; ++j) {
-            result.data_[i][j] = augmented.data_[i][j + n];
+            result[i][j] = augmented[i][j + n];
         }
     }
     return result;
@@ -245,74 +246,56 @@ Matrix Matrix::transpose() const {
     Matrix transposed(cols_, rows_);
     for (size_t i = 0; i < rows_; ++i) {
         for (size_t j = 0; j < cols_; ++j) {
-            transposed.data_[j][i] = data_[i][j];
+            transposed[j][i] = (*this)[i][j];
         }
     }
     return transposed;
 }
 
-// --- Implementações das Funções Estáticas (Factories) ---
+// --- Funções Estáticas (Factories) ---
 
 Matrix Matrix::identity(size_t n) {
-    Matrix id(n, n);
+    Matrix id(n, n); // Já inicializa com zeros
     for (size_t i = 0; i < n; ++i) {
-        id.data_[i][i] = 1;
+        id[i][i] = 1.0;
     }
     return id;
 }
 
-Matrix Matrix::translation(int dimension, std::initializer_list<double> values) {
-    if (dimension <= 0 || values.size() != static_cast<size_t>(dimension)) {
-        throw std::invalid_argument("Invalid dimension or values for translation matrix.");
-    }
-
-    Matrix t = identity(dimension + 1);
-    auto val_it = values.begin();
-    for (size_t i = 0; i < static_cast<size_t>(dimension); ++i) {
-        t.data_[i][dimension] = *val_it++;
-    }
+Matrix Matrix::translation(double tx, double ty, double tz) {
+    Matrix t = identity(4);
+    t[0][3] = tx;
+    t[1][3] = ty;
+    t[2][3] = tz;
     return t;
 }
 
-Matrix Matrix::scaling(int dimension, std::initializer_list<double> values) {
-    if (dimension <= 0 || values.size() != static_cast<size_t>(dimension)) {
-        throw std::invalid_argument("Invalid dimension or values for scaling matrix.");
-    }
-    Matrix s = identity(dimension + 1);
-    auto val_it = values.begin();
-    for (size_t i = 0; i < static_cast<size_t>(dimension); ++i) {
-        s.data_[i][i] = *val_it++;
-    }
+Matrix Matrix::scaling(double sx, double sy, double sz) {
+    Matrix s = identity(4);
+    s[0][0] = sx;
+    s[1][1] = sy;
+    s[2][2] = sz;
     return s;
 }
 
-Matrix Matrix::rotation2d(double angle) {
-    Matrix r = identity(3);
-    double c = std::cos(angle);
-    double s = std::sin(angle);
-    r.data_[0][0] = c; r.data_[0][1] = -s;
-    r.data_[1][0] = s; r.data_[1][1] = c;
-    return r;
-}
-
-Matrix Matrix::rotation3d(double angle, const Vector3& axis) {
+Matrix Matrix::rotation(double angle, const Vector3& axis) {
     Vector3 a = axis.normalize();
     Matrix r = identity(4);
     double c = cos(angle);
     double s = sin(angle);
     double omc = 1.0 - c;
 
-    r.data_[0][0] = c + a.x * a.x * omc;
-    r.data_[0][1] = a.x * a.y * omc - a.z * s;
-    r.data_[0][2] = a.x * a.z * omc + a.y * s;
+    r[0][0] = c + a.x * a.x * omc;
+    r[0][1] = a.x * a.y * omc - a.z * s;
+    r[0][2] = a.x * a.z * omc + a.y * s;
 
-    r.data_[1][0] = a.y * a.x * omc + a.z * s;
-    r.data_[1][1] = c + a.y * a.y * omc;
-    r.data_[1][2] = a.y * a.z * omc - a.x * s;
+    r[1][0] = a.y * a.x * omc + a.z * s;
+    r[1][1] = c + a.y * a.y * omc;
+    r[1][2] = a.y * a.z * omc - a.x * s;
 
-    r.data_[2][0] = a.z * a.x * omc - a.y * s;
-    r.data_[2][1] = a.z * a.y * omc + a.x * s;
-    r.data_[2][2] = c + a.z * a.z * omc;
+    r[2][0] = a.z * a.x * omc - a.y * s;
+    r[2][1] = a.z * a.y * omc + a.x * s;
+    r[2][2] = c + a.z * a.z * omc;
 
     return r;
 }
