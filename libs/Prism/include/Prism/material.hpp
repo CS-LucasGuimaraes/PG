@@ -2,6 +2,7 @@
 #define PRISM_MATERIAL_HPP_
 
 #include "Prism/color.hpp"
+#include "Prism/vector.hpp"
 #include "prism_export.h"
 
 namespace Prism {
