@@ -29,7 +29,7 @@ bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) cons
     }
 
     rec.t = t;
-    rec.p = ray.at(t); // Ponto de volta para o espaço global
+    rec.p = transform * transformed_ray.at(t); // Ponto de volta para o espaço global
     Vector3 outward_normal_world = (inverseTransposeTransform * this->normal).normalize();
     rec.set_face_normal(ray, outward_normal_world); // Usa o raio original
     rec.material = material;

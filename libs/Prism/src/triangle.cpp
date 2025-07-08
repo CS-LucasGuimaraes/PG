@@ -53,7 +53,7 @@ bool Triangle::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) c
 
     if (t > t_min && t < t_max) {
         rec.t = t;
-        rec.p = ray.at(t);
+        rec.p = transform * transformed_ray.at(t);
 
         Vector3 local_normal = edge1 ^ edge2;
         Vector3 world_normal = (inverseTransposeTransform * local_normal).normalize();
