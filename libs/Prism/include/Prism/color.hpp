@@ -7,9 +7,10 @@ namespace Prism {
     class PRISM_EXPORT Color {
         public:
             Color();
-            Color(float red, float green, float blue);
+            Color(double red, double green, double blue);
+            Color(int red, int green, int blue);
             Color(const Color& other);
-            float r, g, b;
+            double r, g, b;
     };
 
 } // namespace Prism

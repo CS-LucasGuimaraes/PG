@@ -1,7 +1,7 @@
 #ifndef VECTORHEADER
 #define VECTORHEADER
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 /*
 Classe de vetores.

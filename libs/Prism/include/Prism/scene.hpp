@@ -13,17 +13,6 @@
 
 namespace Prism {
 
-PRISM_EXPORT inline int convert_color(double f) {
-    return static_cast<int>(255.999 * f);
-}
-
-PRISM_EXPORT inline std::ostream& operator<<(std::ostream& os, const Color& color) {
-    os << static_cast<int>(convert_color(color.r)) << " "
-       << static_cast<int>(convert_color(color.g)) << " "
-       << static_cast<int>(convert_color(color.b));
-    return os;
-}
-
 PRISM_EXPORT std::filesystem::path generate_filename();
 
 class PRISM_EXPORT Scene {
@@ -33,6 +22,12 @@ class PRISM_EXPORT Scene {
      * @param camera A câmera que será usada para renderizar a cena.
      */
     Scene(Camera camera);
+
+    Scene(const Scene&) = delete;
+    Scene& operator=(const Scene&) = delete;
+
+    Scene(Scene&&) = default;
+    Scene& operator=(Scene&&) = default;
 
     /**
      * @brief Adiciona um objeto à cena.

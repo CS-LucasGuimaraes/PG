@@ -22,7 +22,7 @@ public:
     Matrix(const Matrix& m);
 
     // --- Classes aninhadas para acesso ---
-    class MatrixRow {
+    class PRISM_EXPORT MatrixRow {
     private:
         std::vector<double>& m_row_vector;
     public:
@@ -30,7 +30,7 @@ public:
         double& operator[](int col);
     };
 
-    class ConstMatrixRow {
+    class PRISM_EXPORT ConstMatrixRow {
     private:
         const std::vector<double>& m_row_vector;
     public:

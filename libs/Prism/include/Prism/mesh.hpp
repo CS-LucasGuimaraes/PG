@@ -21,7 +21,7 @@ class PRISM_EXPORT Mesh : public Object {
 
   private:
     std::vector<std::shared_ptr<Point3>> points;
-    std::vector<Triangle<std::shared_ptr<Point3>>> mesh;
+    std::vector<MeshTriangle> mesh;
     std::shared_ptr<Material> material;
 };
 

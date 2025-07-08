@@ -1,5 +1,10 @@
 #include <gtest/gtest.h>
 #include <memory>
+#include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 #include "Prism.hpp"
 #include "TestHelpers.hpp" // Para comparações de ponto flutuante
@@ -87,7 +92,7 @@ TEST(TransformationsTest, PlaneHitWithRotation) {
 // Testa a colisão com um triângulo transladado
 TEST(TransformationsTest, TriangleHitWithTranslation) {
     // Arrange
-    auto tri = std::make_shared<Triangle<Point3>>(
+    auto tri = std::make_shared<Triangle>(
         Point3(0, 0, 0),
         Point3(1, 0, 0),
         Point3(0, 1, 0),
