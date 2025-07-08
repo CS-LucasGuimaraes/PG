@@ -1,6 +1,7 @@
 #include "Prism/scene.hpp"
 #include "Prism/color.hpp"
 #include "Prism/material.hpp"
+#include <sstream>
 #include <fstream>
 #include <iostream>
 #include <cmath>

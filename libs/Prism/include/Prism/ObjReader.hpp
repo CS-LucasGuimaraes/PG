@@ -24,7 +24,7 @@ class ObjReader {
     std::vector<std::array<unsigned int, 3>> triangles;
     
 
-    ObjReader(const std::string& filename) : cmap(cmap) {
+    ObjReader(const std::string& filename) {
         file.open(filename);
         if (!file.is_open()) {
             std::cerr << "Erro ao abrir o arquivo: " << filename << std::endl;
