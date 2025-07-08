@@ -1,17 +1,18 @@
 #ifndef PRISM_PLANE_HPP_
 #define PRISM_PLANE_HPP_
 
-#include "prism_export.h"
 #include "Prism/objects.hpp"
 #include "Prism/point.hpp"
 #include "Prism/vector.hpp"
+#include "prism_export.h"
 
 namespace Prism {
 
-/** 
+/**
  * @class Plane
  * @brief Represents a plane in 3D space defined by a point and a normal vector.
- * This class inherits from Object and implements the hit method to check for ray-plane intersections.
+ * This class inherits from Object and implements the hit method to check for ray-plane
+ * intersections.
  */
 class PRISM_EXPORT Plane : public Object {
   public:
@@ -29,14 +30,16 @@ class PRISM_EXPORT Plane : public Object {
      * @param t_min The minimum distance for a valid hit.
      * @param t_max The maximum distance for a valid hit.
      * @param rec The HitRecord to be filled upon a collision.
-     * @return True if the ray intersects the plane within the specified distance range, false otherwise.
+     * @return True if the ray intersects the plane within the specified distance range, false
+     * otherwise.
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
 
   private:
     Point3 point_on_plane; ///< A point on the plane
-    Vector3 normal; ///< The normal vector of the plane
-    std::shared_ptr<Material> material; ///< Material properties of the plane, defining how it interacts with light
+    Vector3 normal;        ///< The normal vector of the plane
+    std::shared_ptr<Material>
+        material; ///< Material properties of the plane, defining how it interacts with light
 };
 
 } // namespace Prism

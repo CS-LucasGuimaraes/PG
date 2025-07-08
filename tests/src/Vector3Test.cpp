@@ -1,10 +1,10 @@
-#include "Prism/vector.hpp"
 #include "Prism/matrix.hpp"
+#include "Prism/vector.hpp"
 #include "TestHelpers.hpp"
 #include <gtest/gtest.h>
 
-using Prism::Vector3;
 using Prism::Matrix;
+using Prism::Vector3;
 
 TEST(Vector3Test, ConstructorsAndAssignment) {
     Vector3 v1(1.0, 2.0, 3.0);

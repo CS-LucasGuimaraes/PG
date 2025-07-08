@@ -30,7 +30,8 @@ class PRISM_EXPORT MatrixRow {
      * @brief Constructs a MatrixRow for a specific row of a Matrix.
      * @param matrix The Matrix to access.
      * @param row The index of the row to access.
-     * This constructor initializes the MatrixRow with a reference to the specified matrix and the row index.
+     * This constructor initializes the MatrixRow with a reference to the specified matrix and the
+     * row index.
      * @throws std::out_of_range if the row index is out of bounds.
      */
     MatrixRow(Matrix& matrix, size_t row);
@@ -40,13 +41,14 @@ class PRISM_EXPORT MatrixRow {
      * @param col The index of the column to access.
      * @return A reference to the element at the specified row and column.
      * @throws std::out_of_range if the column index is out of bounds.
-     * This operator allows you to access elements in the specified row of the matrix using the syntax `matrix[row][col]`.
+     * This operator allows you to access elements in the specified row of the matrix using the
+     * syntax `matrix[row][col]`.
      */
     double& operator[](size_t col);
 
   private:
     Matrix& matrix_; ///< Reference to the matrix being accessed
-    size_t row_; ///< Index of the row being accessed
+    size_t row_;     ///< Index of the row being accessed
 };
 
 /**
@@ -64,7 +66,8 @@ class PRISM_EXPORT ConstMatrixRow {
      * @brief Constructs a ConstMatrixRow for a specific row of a Matrix.
      * @param matrix The Matrix to access.
      * @param row The index of the row to access.
-     * This constructor initializes the ConstMatrixRow with a reference to the specified matrix and the row index.
+     * This constructor initializes the ConstMatrixRow with a reference to the specified matrix and
+     * the row index.
      * @throws std::out_of_range if the row index is out of bounds.
      */
     ConstMatrixRow(const Matrix& matrix, size_t row);
@@ -74,13 +77,14 @@ class PRISM_EXPORT ConstMatrixRow {
      * @param col The index of the column to access.
      * @return A const reference to the element at the specified row and column.
      * @throws std::out_of_range if the column index is out of bounds.
-     * This operator allows you to access elements in the specified row of the matrix using the syntax `const_matrix[row][col]`.
+     * This operator allows you to access elements in the specified row of the matrix using the
+     * syntax `const_matrix[row][col]`.
      */
     const double& operator[](size_t col) const;
 
   private:
     const Matrix& matrix_; ///< Reference to the matrix being accessed
-    size_t row_; ///< Index of the row being accessed
+    size_t row_;           ///< Index of the row being accessed
 };
 
 /**
@@ -138,7 +142,7 @@ class PRISM_EXPORT Matrix {
      * @param row The index of the row to access.
      * @return A MatrixRow object that allows access to the specified row.
      * @throws std::out_of_range if the row index is out of bounds.
-     * 
+     *
      * This operator allows you to access a row of the matrix using the syntax `matrix[row]`.
      * It returns a MatrixRow object that can be used to access or modify elements in that row.
      */
@@ -149,7 +153,7 @@ class PRISM_EXPORT Matrix {
      * @param row The index of the row to access.
      * @return A ConstMatrixRow object that allows read-only access to the specified row.
      * @throws std::out_of_range if the row index is out of bounds.
-     * 
+     *
      * This operator allows you to access a row of the matrix in a const context using the syntax
      * `matrix[row]`. It returns a ConstMatrixRow object that can be used to read elements in that
      * row without allowing modifications.
@@ -159,16 +163,16 @@ class PRISM_EXPORT Matrix {
     /**
      * @brief Checks if two matrices are equal.
      * @param m The matrix to compare with.
-     * @return True if the matrices have the same dimensions and all corresponding elements are equal,
-     * false otherwise.
+     * @return True if the matrices have the same dimensions and all corresponding elements are
+     * equal, false otherwise.
      */
     bool operator==(const Matrix& m) const;
 
     /**
      * @brief Checks if two matrices are not equal.
      * @param m The matrix to compare with.
-     * @return True if the matrices differ in dimensions or any corresponding elements are not equal,
-     * false otherwise.
+     * @return True if the matrices differ in dimensions or any corresponding elements are not
+     * equal, false otherwise.
      */
     bool operator!=(const Matrix& m) const;
 
@@ -176,7 +180,8 @@ class PRISM_EXPORT Matrix {
      * @brief Multiplies this matrix by another matrix.
      * @param m The matrix to multiply with.
      * @return A new Matrix that is the result of the multiplication.
-     * @throws std::invalid_argument if the number of columns in this matrix does not match the number of rows in the other matrix.
+     * @throws std::invalid_argument if the number of columns in this matrix does not match the
+     * number of rows in the other matrix.
      */
     Matrix operator*(const Matrix& m) const;
 
@@ -192,9 +197,9 @@ class PRISM_EXPORT Matrix {
      * @param p The Point3 to multiply with.
      * @return A Point3 that is the result of the multiplication.
      * @throws std::domain_error if the matrix is not 3x3 or 4x4.
-     * 
-     * This operator allows you to multiply a matrix by a Point3, which is useful for applying transformations
-     * such as translation, rotation, or scaling to a point in 3D space.
+     *
+     * This operator allows you to multiply a matrix by a Point3, which is useful for applying
+     * transformations such as translation, rotation, or scaling to a point in 3D space.
      */
     Point3 operator*(const Point3& p) const;
 
@@ -203,8 +208,9 @@ class PRISM_EXPORT Matrix {
      * @param v The Vector3 to multiply with.
      * @return A Vector3 that is the result of the multiplication.
      * @throws std::domain_error if the matrix is not 3x3 or 4x4.
-     * 
-     * This operator allows you to multiply a matrix by a Vector3, which is useful for transforming vectors in 3D space.
+     *
+     * This operator allows you to multiply a matrix by a Vector3, which is useful for transforming
+     * vectors in 3D space.
      */
     Vector3 operator*(const Vector3& v) const;
 
@@ -212,8 +218,9 @@ class PRISM_EXPORT Matrix {
      * @brief Multiplies this matrix by another matrix in place.
      * @param m The matrix to multiply with.
      * @return Reference to this matrix after multiplication.
-     * 
-     * This operator allows you to perform matrix multiplication and update the current matrix with the result.
+     *
+     * This operator allows you to perform matrix multiplication and update the current matrix with
+     * the result.
      */
     Matrix& operator*=(const Matrix& m);
 
@@ -221,12 +228,12 @@ class PRISM_EXPORT Matrix {
      * @brief Multiplies this matrix by a scalar in place.
      * @param scalar The scalar value to multiply with.
      * @return Reference to this matrix after multiplication.
-     * 
-     * This operator allows you to scale all elements of the matrix by a scalar value, modifying the current matrix.
+     *
+     * This operator allows you to scale all elements of the matrix by a scalar value, modifying the
+     * current matrix.
      */
     Matrix& operator*=(double scalar);
 
-    
     /**
      * @brief Computes the determinant of the matrix.
      * @return The determinant of the matrix.
@@ -238,7 +245,7 @@ class PRISM_EXPORT Matrix {
      * @brief Computes the inverse of the matrix.
      * @return A new Matrix that is the inverse of this matrix.
      * @throws std::domain_error if the matrix is singular (determinant is zero).
-     * 
+     *
      * This method uses the Gauss-Jordan elimination method to compute the inverse of the matrix.
      * It is applicable only for square matrices (3x3 or 4x4).
      */
@@ -247,7 +254,8 @@ class PRISM_EXPORT Matrix {
     /**
      * @brief Computes the transpose of the matrix.
      * @return A new Matrix that is the transpose of this matrix.
-     * This method swaps the rows and columns of the matrix, effectively flipping it over its diagonal.
+     * This method swaps the rows and columns of the matrix, effectively flipping it over its
+     * diagonal.
      * @return A new Matrix that is the transpose of this matrix.
      */
     Matrix transpose() const;
@@ -256,7 +264,8 @@ class PRISM_EXPORT Matrix {
      * @brief Creates an identity matrix of size n x n.
      * @param n The size of the identity matrix (number of rows and columns).
      * @return A new Matrix that is the identity matrix of size n x n.
-     * An identity matrix has ones on the diagonal and zeros elsewhere, serving as the multiplicative identity in matrix operations.
+     * An identity matrix has ones on the diagonal and zeros elsewhere, serving as the
+     * multiplicative identity in matrix operations.
      */
     static Matrix identity(size_t n);
 
@@ -266,7 +275,8 @@ class PRISM_EXPORT Matrix {
      * @param ty The translation distance along the y-axis.
      * @param tz The translation distance along the z-axis.
      * @return A new Matrix that represents a translation transformation.
-     * This matrix can be used to translate points or vectors in 3D space by adding the translation distances to the respective coordinates.
+     * This matrix can be used to translate points or vectors in 3D space by adding the translation
+     * distances to the respective coordinates.
      */
     static Matrix translation(double tx, double ty, double tz);
 
@@ -276,7 +286,8 @@ class PRISM_EXPORT Matrix {
      * @param sy The scaling factor along the y-axis.
      * @param sz The scaling factor along the z-axis.
      * @return A new Matrix that represents a scaling transformation.
-     * This matrix can be used to scale points or vectors in 3D space by multiplying the respective coordinates by the scaling factors.
+     * This matrix can be used to scale points or vectors in 3D space by multiplying the respective
+     * coordinates by the scaling factors.
      */
     static Matrix scaling(double sx, double sy, double sz);
 
@@ -285,13 +296,14 @@ class PRISM_EXPORT Matrix {
      * @param angle The angle of rotation in radians.
      * @param axis The axis of rotation as a Vector3.
      * @return A new Matrix that represents a rotation transformation.
-     * This matrix can be used to rotate points or vectors in 3D space around the specified axis by the given angle.
+     * This matrix can be used to rotate points or vectors in 3D space around the specified axis by
+     * the given angle.
      */
     static Matrix rotation(double angle, const Vector3& axis);
 
   private:
-    size_t rows_; // Number of rows in the matrix
-    size_t cols_; // Number of columns in the matrix
+    size_t rows_;              // Number of rows in the matrix
+    size_t cols_;              // Number of columns in the matrix
     std::vector<double> data_; // Data storage for the matrix elements
 };
 

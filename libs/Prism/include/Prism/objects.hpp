@@ -13,7 +13,7 @@ namespace Prism {
 class Ray;      // Forward declaration of Ray class
 class Material; // Forward declaration of Material class
 
-/** 
+/**
  * @class HitRecord
  * @brief Represents the details of a ray-object intersection.
  * This class stores the intersection point, normal at the intersection, distance along the ray,
@@ -35,8 +35,9 @@ struct PRISM_EXPORT HitRecord {
 /**
  * @class Object
  * @brief Abstract base class for all objects in the scene.
- * This class defines the interface for objects that can be hit by rays, providing a method to check for intersections.
- * It also manages the transformation of the object in 3D space using a transformation matrix.
+ * This class defines the interface for objects that can be hit by rays, providing a method to check
+ * for intersections. It also manages the transformation of the object in 3D space using a
+ * transformation matrix.
  */
 class PRISM_EXPORT Object {
   public:
@@ -66,16 +67,18 @@ class PRISM_EXPORT Object {
     /**
      * @brief Gets the transformation matrix of the object.
      * @return The transformation matrix.
-     * This matrix can be used to transform points or vectors in the object's local space to world space.
+     * This matrix can be used to transform points or vectors in the object's local space to world
+     * space.
      */
     Matrix getTransform() const {
         return transform;
     }
 
   protected:
-    Matrix transform = Matrix::identity(4); ///< Transformation matrix for the object
+    Matrix transform = Matrix::identity(4);        ///< Transformation matrix for the object
     Matrix inverseTransform = Matrix::identity(4); ///< Inverse of the transformation matrix
-    Matrix inverseTransposeTransform = Matrix::identity(4); ///< Inverse transpose of the transformation matrix
+    Matrix inverseTransposeTransform =
+        Matrix::identity(4); ///< Inverse transpose of the transformation matrix
 };
 
 } // namespace Prism

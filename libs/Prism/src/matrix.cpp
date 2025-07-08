@@ -139,7 +139,6 @@ Matrix Matrix::operator*(double scalar) const {
     return result;
 }
 
-
 Matrix& Matrix::operator*=(const Matrix& m) {
     *this = *this * m;
     return *this;

@@ -20,7 +20,7 @@ bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) con
     Ray transformed_ray = ray.transform(inverseTransform);
 
     Vector3 oc = transformed_ray.origin() - center;
-    
+
     auto a = sqr(transformed_ray.direction().magnitude());
     auto halfb = oc * transformed_ray.direction();
     auto c = oc.dot(oc) - sqr(radius);

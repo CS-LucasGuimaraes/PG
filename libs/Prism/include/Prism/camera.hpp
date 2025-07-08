@@ -1,10 +1,10 @@
 #ifndef PRISM_CAMERA_HPP_
 #define PRISM_CAMERA_HPP_
 
+#include "Prism/matrix.hpp"
 #include "Prism/point.hpp"
 #include "Prism/ray.hpp"
 #include "Prism/vector.hpp"
-#include "Prism/matrix.hpp"
 #include "prism_export.h"
 #include <initializer_list>
 #include <iterator>
@@ -29,23 +29,24 @@ class PRISM_EXPORT Camera {
      * @param image_height The height of the image in pixels.
      * @param image_width The width of the image in pixels.
      */
-    Camera(const Point3& position, const Point3& target, const Vector3& upvec,
-           double distance, double viewport_height, double viewport_width,
-           int image_height, int image_width);
+    Camera(const Point3& position, const Point3& target, const Vector3& upvec, double distance,
+           double viewport_height, double viewport_width, int image_height, int image_width);
 
     /**
      * @brief Constructs a Camera with default parameters.
      * This constructor initializes the camera at the origin, looking down the negative z-axis,
      * with the up vector pointing in the positive y direction.
      */
-    Camera() : Camera(Point3(0, 0, 0), Point3(0, 0, -1), Vector3(0, 1, 0), 1.0, 1.0, 1.0, 480, 640) {}
-    
+    Camera()
+        : Camera(Point3(0, 0, 0), Point3(0, 0, -1), Vector3(0, 1, 0), 1.0, 1.0, 1.0, 480, 640) {
+    }
+
     /**
      * @class CameraIterator
      * @brief An iterator for traversing the pixels of the camera's view.
      *
-     * This iterator allows iteration over the rays that correspond to each pixel in the camera's view.
-     * It provides a way to access each pixel's ray in a forward manner.
+     * This iterator allows iteration over the rays that correspond to each pixel in the camera's
+     * view. It provides a way to access each pixel's ray in a forward manner.
      */
     class CameraIterator {
       public:
@@ -99,8 +100,8 @@ class PRISM_EXPORT Camera {
 
       private:
         const Camera* camera; ///< Pointer to the Camera object being iterated over
-        int current_y; ///< Current row (y-coordinate) of the pixel
-        int current_x; ///< Current column (x-coordinate) of the pixel
+        int current_y;        ///< Current row (y-coordinate) of the pixel
+        int current_x;        ///< Current column (x-coordinate) of the pixel
     };
 
     /**
@@ -126,19 +127,22 @@ class PRISM_EXPORT Camera {
     Point3 aim; ///< Point the camera is looking at (the target point)
     Vector3 up; ///< Up vector indicating the upward direction from the camera
 
-    Matrix coordinate_basis; ///< Coordinate basis matrix for the camera, defining its orientation in space
+    Matrix coordinate_basis; ///< Coordinate basis matrix for the camera, defining its orientation
+                             ///< in space
 
     double screen_distance; ///< Distance from the camera to the projection screen (view plane)
-    double screen_height; ///< Height of the projection screen (view plane)
-    double screen_width; ///< Width of the projection screen (view plane)
+    double screen_height;   ///< Height of the projection screen (view plane)
+    double screen_width;    ///< Width of the projection screen (view plane)
 
     int pixel_height; ///< Height of the image in pixels
-    int pixel_width; ///< Width of the image in pixels
+    int pixel_width;  ///< Width of the image in pixels
 
   private:
-    Point3 pixel_00_loc; ///< Location of the pixel at (0, 0) in the camera's view
-    Vector3 pixel_delta_u; ///< Vector representing the change in position along the u direction (horizontal)
-    Vector3 pixel_delta_v; ///< Vector representing the change in position along the v direction (vertical)
+    Point3 pixel_00_loc;   ///< Location of the pixel at (0, 0) in the camera's view
+    Vector3 pixel_delta_u; ///< Vector representing the change in position along the u direction
+                           ///< (horizontal)
+    Vector3 pixel_delta_v; ///< Vector representing the change in position along the v direction
+                           ///< (vertical)
 };
 
 } // namespace Prism

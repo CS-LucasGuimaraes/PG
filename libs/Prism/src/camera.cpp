@@ -9,19 +9,11 @@
 
 namespace Prism {
 
-Camera::Camera(const Point3& position, const Point3& target, const Vector3& upvec,
-               double distance, double viewport_height, double viewport_width,
-               int image_height, int image_width)
-    : pos(position),
-      aim(target),
-      up(upvec),
-      coordinate_basis(),
-      screen_distance(distance),
-      screen_height(viewport_height),
-      screen_width(viewport_width),
-      pixel_height(image_height),
-      pixel_width(image_width)
-{
+Camera::Camera(const Point3& position, const Point3& target, const Vector3& upvec, double distance,
+               double viewport_height, double viewport_width, int image_height, int image_width)
+    : pos(position), aim(target), up(upvec), coordinate_basis(), screen_distance(distance),
+      screen_height(viewport_height), screen_width(viewport_width), pixel_height(image_height),
+      pixel_width(image_width) {
     coordinate_basis = orthonormalBasisContaining(pos - aim);
 
     const auto& basis = coordinate_basis;

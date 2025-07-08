@@ -1,16 +1,16 @@
 #ifndef PRISM_RAY_HPP_
 #define PRISM_RAY_HPP_
 
-#include "prism_export.h"
 #include "Prism/point.hpp"
 #include "Prism/vector.hpp"
+#include "prism_export.h"
 #include <initializer_list>
-#include <vector>
 #include <memory>
+#include <vector>
 namespace Prism {
 
-class Object;                       // Forward declaration of Object class
-struct HitRecord;                   // Forward declaration of HitRecord struct
+class Object;     // Forward declaration of Object class
+struct HitRecord; // Forward declaration of HitRecord struct
 
 /**
  * @class Ray
@@ -23,7 +23,7 @@ class PRISM_EXPORT Ray {
      * @param origin Point in 3d space that originates the ray.
      * @param direction normalized vector representing the direction which the ray points towards.
      */
-    
+
     Ray(const Point3& origin, const Vector3& direction);
     /**
      * @brief Constucts a ray that goes from its origin torwards another given point
@@ -31,7 +31,7 @@ class PRISM_EXPORT Ray {
      * @param target Point which the ray targets
      */
     Ray(const Point3& origin, const Point3& target);
-    
+
     /**
      * @brief gets the direction of ray. if not instantiated, returns null
      */
@@ -43,7 +43,7 @@ class PRISM_EXPORT Ray {
      * @return A new Ray object that is transformed by the given matrix
      */
     Ray transform(const Matrix& m) const;
-    
+
     /**
      * @brief Gets the origin point of the ray
      * @return The origin point of the ray
@@ -58,7 +58,7 @@ class PRISM_EXPORT Ray {
     Point3 at(const double& t) const;
 
   private:
-    Point3 origin_; ///< The origin point of the ray
+    Point3 origin_;     ///< The origin point of the ray
     Vector3 direction_; ///< The direction vector of the ray, normalized to unit length
 };
 

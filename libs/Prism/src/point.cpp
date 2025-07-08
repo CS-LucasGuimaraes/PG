@@ -1,6 +1,6 @@
 #include "Prism/point.hpp"
-#include "Prism/vector.hpp"
 #include "Prism/matrix.hpp"
+#include "Prism/vector.hpp"
 #include <stdexcept>
 
 namespace Prism {

@@ -13,25 +13,17 @@ Mesh::Mesh(std::string path) {
         points.emplace_back(std::make_shared<Point3>(point[0], point[1], point[2]));
     }
     for (auto& triangle : reader.triangles) {
-        mesh.push_back({
-            points[triangle[0]],
-            points[triangle[1]],
-            points[triangle[2]]}
-        );
+        mesh.push_back({points[triangle[0]], points[triangle[1]], points[triangle[2]]});
     }
 };
 
-Mesh::Mesh(ObjReader& reader):material(std::move(reader.curMaterial)){
+Mesh::Mesh(ObjReader& reader) : material(std::move(reader.curMaterial)) {
 
-    for(auto& point: reader.vertices){
-        points.emplace_back(std::make_shared<Point3>(point[0],point[1],point[2]));
+    for (auto& point : reader.vertices) {
+        points.emplace_back(std::make_shared<Point3>(point[0], point[1], point[2]));
     }
-    for(auto& triangle: reader.triangles){
-        mesh.push_back({
-            points[triangle[0]],
-            points[triangle[1]],
-            points[triangle[2]]}
-        );
+    for (auto& triangle : reader.triangles) {
+        mesh.push_back({points[triangle[0]], points[triangle[1]], points[triangle[2]]});
     }
 };
 
@@ -54,4 +46,4 @@ bool Mesh::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const
     return false;
 };
 
-};
+}; // namespace Prism
