@@ -1,6 +1,7 @@
 #include "Prism/scene.hpp"
 #include "Prism/color.hpp"
 #include "Prism/material.hpp"
+#include "Prism/style.hpp"
 #include <chrono>
 #include <cmath>
 #include <filesystem>
@@ -51,8 +52,8 @@ std::filesystem::path generate_filename() {
         return ss.str();
     }
 
-    std::cerr << "Error: Could not get local time for filename generation.\n";
-    std::cerr << "Using fallback filename.\n";
+    Style::logError("Could not get local time for filename generation.");
+    Style::logWarning("Using fallback filename.");
     return "render_fallback.ppm";
 }
 
@@ -64,15 +65,21 @@ void Scene::render() const {
 
     std::ofstream image_file(full_path, std::ios::trunc);
     if (!image_file.is_open()) {
-        std::cerr << "Error: Could not open the file for writing.\n";
+        Style::logError("could not open the file for writing.");
         return;
     }
 
+    auto clean_path = std::filesystem::weakly_canonical(output_dir);
+    
+    Style::logInfo("Output directory: " + Prism::Style::CYAN + clean_path.string());
+    Style::logInfo("Starting render...\n");
+
     image_file << "P3\n" << camera_.pixel_width << " " << camera_.pixel_height << "\n255\n";
 
-    std::clog << "Starting render...\n";
-
+    int total_pixels = camera_.pixel_height * camera_.pixel_width;
     int pixels_done = 0;
+    const int progress_bar_width = 25;
+    int last_progress_percent = -1;
 
     for (Ray const& ray : camera_) {
         HitRecord closest_hit_rec;
@@ -98,16 +105,19 @@ void Scene::render() const {
 
         image_file << pixel_color << '\n';
 
-        if (++pixels_done % camera_.pixel_width == 0) {
-            double percent =
-                (static_cast<double>(pixels_done) / (camera_.pixel_height * camera_.pixel_width)) *
-                100.0;
-            std::clog << "\rProgress: " << static_cast<int>(percent) << "%" << std::flush;
+        pixels_done++;
+        int current_progress_percent = static_cast<int>((static_cast<double>(pixels_done) / total_pixels) * 100.0);
+
+        if (current_progress_percent > last_progress_percent) {
+            last_progress_percent = current_progress_percent;
+            Style::logStatusBar(static_cast<double>(current_progress_percent) / 100.0);
         }
     }
-
-    std::clog << "\nRendering complete.\nImage saved as " << filename << ".\n";
+        
     image_file.close();
+
+    Style::logDone("Rendering complete.");
+    Style::logDone("Image saved as: " + Prism::Style::CYAN + generate_filename().string());
 }
 
 } // namespace Prism

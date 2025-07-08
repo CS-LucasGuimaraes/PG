@@ -6,6 +6,7 @@
 #include "Prism/point.hpp"
 #include "Prism/triangle.hpp"
 #include "Prism/vector.hpp"
+#include "Prism/style.hpp"
 #include "prism_export.h"
 #include <array>
 #include <fstream>
@@ -26,7 +27,7 @@ class ObjReader {
     ObjReader(const std::string& filename) {
         file.open(filename);
         if (!file.is_open()) {
-            std::cerr << "Erro ao abrir o arquivo: " << filename << std::endl;
+            Style::logError("Erro ao abrir o arquivo: " + filename);
             return;
         }
 
