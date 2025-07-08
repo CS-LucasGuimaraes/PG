@@ -25,9 +25,9 @@ bool Mesh::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const
     bool hit_anything = false;
     rec.t = INFINITY;
     for (const auto& triangle : mesh) {
-        if (triangle.hit(ray, 0.001, rec.t, rec)) {
+        if (triangle.hit(transformed_ray, 0.001, rec.t, rec)) {
             hit_anything = true;
-            rec.p = transform * ray.at(rec.t);
+            rec.p = transform * transformed_ray.at(rec.t);
             Vector3 world_normal = (inverseTransposeTransform * rec.normal).normalize();
             rec.set_face_normal(ray, world_normal);
             rec.material = material;
