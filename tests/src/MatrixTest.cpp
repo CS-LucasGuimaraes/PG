@@ -1,8 +1,8 @@
 #include "Prism/matrix.hpp"
 #include "Prism/vector.hpp"
 #include "TestHelpers.hpp"
+#include <cmath>
 #include <gtest/gtest.h>
-#include <math.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -217,7 +217,8 @@ TEST(MatrixTest, MultiplyByPoint) {
     AssertPointAlmostEqual(id3 * p, p);
 
     // Teste com escala 3x3
-    Prism::Matrix scale3 = Prism::Matrix::scaling(3, {2.0, 3.0, 4.0}); // Isso criará uma matriz 4x4, vamos criar uma 3x3 manualmente
+    Prism::Matrix scale3 = Prism::Matrix::scaling(
+        3, {2.0, 3.0, 4.0}); // Isso criará uma matriz 4x4, vamos criar uma 3x3 manualmente
     Prism::Matrix manual_scale3 = {{2.0, 0.0, 0.0}, {0.0, 3.0, 0.0}, {0.0, 0.0, 4.0}};
     Prism::Point3 expected_scaled_p(2.0, 6.0, 12.0);
     AssertPointAlmostEqual(manual_scale3 * p, expected_scaled_p);
@@ -235,7 +236,7 @@ TEST(MatrixTest, MultiplyByPoint) {
     // Teste com transformação combinada (escala e depois translação)
     Prism::Matrix s = Prism::Matrix::scaling(3, {2.0, 2.0, 2.0});
     Prism::Matrix t = Prism::Matrix::translation(3, {1.0, 1.0, 1.0});
-    Prism::Matrix combined = t * s; // Aplica escala, depois translação
+    Prism::Matrix combined = t * s;                   // Aplica escala, depois translação
     Prism::Point3 expected_combined_p(3.0, 5.0, 7.0); // p*2 -> (2,4,6), +1 -> (3,5,7)
     AssertPointAlmostEqual(combined * p, expected_combined_p);
 }
@@ -269,7 +270,8 @@ TEST(MatrixTest, MultiplyByVector) {
     AssertVectorAlmostEqual(combined * v, expected_combined_v);
 
     // Teste com rotação
-    Prism::Matrix rot = Prism::Matrix::rotation3d(M_PI / 2.0, {0, 1, 0}); // Rotação de 90 graus em torno do eixo Y
+    Prism::Matrix rot =
+        Prism::Matrix::rotation3d(M_PI / 2.0, {0, 1, 0}); // Rotação de 90 graus em torno do eixo Y
     Prism::Vector3 rotated_v = rot * Prism::Vector3(1, 0, 0);
     AssertVectorAlmostEqual(rotated_v, Prism::Vector3(0, 0, -1), 1e-9);
 }
