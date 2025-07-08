@@ -17,6 +17,11 @@
 #include "Prism/mesh.hpp"
 #include "Prism/color.hpp"
 #include "Prism/style.hpp"
+#include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // Define M_PI if not already defined
+#endif
 
 namespace Prism {
 
