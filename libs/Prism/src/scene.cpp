@@ -1,6 +1,7 @@
 #include "Prism/scene.hpp"
 #include "Prism/color.hpp"
 #include "Prism/material.hpp"
+#include "Prism/style.hpp"
 #include <chrono>
 #include <cmath>
 #include <filesystem>
@@ -68,11 +69,17 @@ void Scene::render() const {
         return;
     }
 
+    auto clean_path = std::filesystem::weakly_canonical(output_dir);
+    
+    std::clog << Prism::Style::YELLOW << "[INFO] " << Prism::Style::RESET << "Output directory: " << Prism::Style::CYAN << clean_path.string() << Prism::Style::RESET << std::endl;
+    std::clog << Prism::Style::YELLOW << "[INFO] " << Prism::Style::RESET << "Starting render...\n" << Prism::Style::RESET << std::endl;
+
     image_file << "P3\n" << camera_.pixel_width << " " << camera_.pixel_height << "\n255\n";
 
-    std::clog << "Starting render...\n";
-
+    int total_pixels = camera_.pixel_height * camera_.pixel_width;
     int pixels_done = 0;
+    const int progress_bar_width = 25;
+    int last_progress_percent = -1;
 
     for (Ray const& ray : camera_) {
         HitRecord closest_hit_rec;
@@ -98,16 +105,26 @@ void Scene::render() const {
 
         image_file << pixel_color << '\n';
 
-        if (++pixels_done % camera_.pixel_width == 0) {
-            double percent =
-                (static_cast<double>(pixels_done) / (camera_.pixel_height * camera_.pixel_width)) *
-                100.0;
-            std::clog << "\rProgress: " << static_cast<int>(percent) << "%" << std::flush;
+        pixels_done++;
+        int current_progress_percent = static_cast<int>((static_cast<double>(pixels_done) / total_pixels) * 100.0);
+
+        if (current_progress_percent > last_progress_percent) {
+            last_progress_percent = current_progress_percent;
+            int bar_fill = static_cast<int>((current_progress_percent / 100.0) * progress_bar_width);
+
+            std::clog << Prism::Style::GREEN << "\rProgress: [" << Prism::Style::RESET;
+            for (int i = 0; i < progress_bar_width; ++i) {
+                if (i < bar_fill) std::clog << "=";
+                else std::clog << " ";
+            }
+            std::clog << Prism::Style::GREEN << "] " << current_progress_percent << "%" << Prism::Style::RESET << std::flush;
         }
     }
-
-    std::clog << "\nRendering complete.\nImage saved as " << filename << ".\n";
+        
     image_file.close();
+
+    std::clog << Prism::Style::GREEN << "\n\n[DONE] " << Prism::Style::RESET << "Rendering complete." << std::endl;
+    std::clog << Prism::Style::GREEN << "[DONE] " << Prism::Style::RESET << "Image saved as: " << Prism::Style::CYAN << generate_filename().string() << Prism::Style::RESET << '\n' << std::endl;
 }
 
 } // namespace Prism
