@@ -11,6 +11,17 @@
 
 namespace Prism {
 
+PRISM_EXPORT int convert_color(double f) {
+    return static_cast<int>(255.999 * f);
+}
+
+PRISM_EXPORT std::ostream& operator<<(std::ostream& os, const Color& color) {
+    os << static_cast<int>(convert_color(color.r)) << " "
+       << static_cast<int>(convert_color(color.g)) << " "
+       << static_cast<int>(convert_color(color.b));
+    return os;
+}
+
 Scene::Scene(Camera camera) : camera_(std::move(camera)) {}
 
 void Scene::addObject(std::unique_ptr<Object> object) {

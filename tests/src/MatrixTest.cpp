@@ -2,6 +2,11 @@
 #include "Prism/vector.hpp"
 #include "TestHelpers.hpp"
 #include <gtest/gtest.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 using Prism::Matrix;
 using Prism::Vector3;

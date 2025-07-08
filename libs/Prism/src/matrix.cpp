@@ -268,7 +268,7 @@ Matrix Matrix::translation(int dimension, std::initializer_list<double> values) 
 
     Matrix t = identity(dimension + 1);
     auto val_it = values.begin();
-    for (size_t i = 0; i < dimension; ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(dimension); ++i) {
         t.data_[i][dimension] = *val_it++;
     }
     return t;
@@ -280,7 +280,7 @@ Matrix Matrix::scaling(int dimension, std::initializer_list<double> values) {
     }
     Matrix s = identity(dimension + 1);
     auto val_it = values.begin();
-    for (size_t i = 0; i < dimension; ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(dimension); ++i) {
         s.data_[i][i] = *val_it++;
     }
     return s;

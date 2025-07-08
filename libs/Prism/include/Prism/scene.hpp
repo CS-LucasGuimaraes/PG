@@ -13,17 +13,6 @@
 
 namespace Prism {
 
-PRISM_EXPORT inline int convert_color(double f) {
-    return static_cast<int>(255.999 * f);
-}
-
-PRISM_EXPORT inline std::ostream& operator<<(std::ostream& os, const Color& color) {
-    os << static_cast<int>(convert_color(color.r)) << " "
-       << static_cast<int>(convert_color(color.g)) << " "
-       << static_cast<int>(convert_color(color.b));
-    return os;
-}
-
 PRISM_EXPORT std::filesystem::path generate_filename();
 
 class PRISM_EXPORT Scene {

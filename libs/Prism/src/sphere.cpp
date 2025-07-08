@@ -43,9 +43,9 @@ bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) con
     Point3 local_hit_point = transformed_ray.at(rec.t);
     Vector3 outward_normal_local = (local_hit_point - center) / radius;
 
-    rec.p = transform * local_hit_point; // Ponto de volta para o espaço global
+    rec.p = transform * local_hit_point;
     Vector3 outward_normal_world = (inverseTransposeTransform * outward_normal_local).normalize();
-    rec.set_face_normal(ray, outward_normal_world); // Usa o raio original (em espaço global)
+    rec.set_face_normal(ray, outward_normal_world);
     rec.material = material;
 
     return true;
