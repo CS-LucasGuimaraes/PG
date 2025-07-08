@@ -14,7 +14,7 @@ namespace Prism {
  * This namespace centralizes ANSI escape codes for styling text in the terminal,
  * ensuring a consistent look and feel for all engine logs.
  */
-namespace PRISM_EXPORT Style {
+namespace Style {
 
     // --- Basic Colors ---
     const std::string RESET      = "\033[0m";
