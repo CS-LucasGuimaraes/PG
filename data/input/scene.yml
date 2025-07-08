@@ -1,0 +1,93 @@
+# -----------------------------------------------------------------
+# Exemplo de Arquivo de Cena para o Renderizador Prism
+# Este arquivo demonstra o uso de múltiplos objetos, materiais
+# e transformações para criar uma cena complexa.
+# -----------------------------------------------------------------
+
+# Definições reutilizáveis da cena, como materiais.
+# Usamos âncoras (&) para definir um material e aliases (*) para reutilizá-lo.
+definitions:
+  materials:
+    # Material fosco para o chão
+    chao_cinza: &material_chao
+      color: [0.8, 0.8, 0.8]
+      ka: [0.1, 0.1, 0.1] # Pouca reflexão ambiente
+      ks: [0.1, 0.1, 0.1] # Pouco brilho especular
+      ns: 10
+
+    # Material de plástico vermelho, com brilho moderado
+    plastico_vermelho: &material_esfera_vermelha
+      color: [1.0, 0.2, 0.2]
+      ka: [0.2, 0.05, 0.05]
+      ks: [0.7, 0.7, 0.7] # Brilho especular forte
+      ns: 128 # Expoente de brilho alto para um highlight pequeno e intenso
+
+    # Material metálico/refletivo para o cubo
+    metal_azul: &material_cubo_metalico
+      color: [0.2, 0.3, 1.0]
+      ka: [0.1, 0.1, 0.2]
+      ks: [0.9, 0.9, 0.9] # Reflexão especular muito alta
+      ns: 256
+
+    # Material de vidro para o triângulo
+    vidro_transparente: &material_vidro
+      color: [0.9, 0.9, 1.0] # Cor levemente azulada
+      ka: [0.1, 0.1, 0.1]
+      ks: [0.8, 0.8, 0.8]
+      ns: 200
+      ni: 1.5  # Índice de refração (típico para vidro)
+      d: 0.1   # Opacidade (valor 'd' baixo significa mais transparente)
+
+# -----------------------------------------------------------------
+# Configurações da Câmera
+# -----------------------------------------------------------------
+camera:
+  image_width: 4800
+  image_height: 270
+  screen_distance: 1.5
+  viewport_width: 2.0
+  viewport_height: 1.125
+  lookfrom: [0, 2, 8]  # Posição da câmera
+  lookat: [0, 0, 0]    # Ponto para onde a câmera olha
+  vup: [0, 1, 0]         # Vetor "para cima"
+
+# -----------------------------------------------------------------
+# Lista de Objetos na Cena
+# -----------------------------------------------------------------
+objects:
+  - name: Chão
+    type: plane
+    point_on_plane: [0, -1, 0] # Ponto que define a altura do plano
+    normal: [0, 1, 0]         # Vetor normal aponta para cima
+    material: *material_chao  # Reutiliza o material do chão definido acima
+
+  - name: Esfera Vermelha Principal
+    type: sphere
+    center: [-1.5, 0, 0]
+    radius: 1.0
+    material: *material_esfera_vermelha # Reutiliza o material de plástico
+
+  - name: Malha de Cubo Metálico
+    type: mesh
+    path: "./data/input/cubo.obj" # Caminho para o arquivo .obj
+    material: *material_cubo_metalico # Reutiliza o material metálico
+    # Múltiplas transformações são aplicadas em ordem
+    transform:
+      - type: scaling
+        factors: [0.7, 0.7, 0.7] # Primeiro, diminui a escala do cubo
+      - type: rotation
+        angle: 45 # Em graus (o parser precisará converter para radianos)
+        axis: [0, 1, 0] # Rotaciona em torno do eixo Y
+      - type: translation
+        vector: [1.5, 0, -1] # Por último, move o cubo para sua posição final
+
+  - name: Triângulo de Vidro
+    type: triangle
+    # Vértices definidos diretamente no arquivo de cena
+    p1: [-3, -1, -5]
+    p2: [3, -1, -5]
+    p3: [0, 4, -5]
+    material: *material_vidro # Reutiliza o material de vidro
+    transform:
+      - type: translation
+        vector: [0, 0, 2] # Move o triângulo um pouco para frente

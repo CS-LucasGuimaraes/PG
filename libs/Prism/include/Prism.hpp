@@ -14,3 +14,5 @@
 #include "Prism/triangle.hpp"
 #include "Prism/utils.hpp"
 #include "Prism/vector.hpp"
+#include "Prism/scene_parser.hpp"
+#include "Prism/style.hpp"
