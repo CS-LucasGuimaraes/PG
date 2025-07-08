@@ -22,18 +22,20 @@ Mesh::Mesh(ObjReader& reader):material(std::move(reader.curMaterial)){
 bool Mesh::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
     Ray transformed_ray = ray.transform(inverseTransform);
 
-    bool hit_anything = false;
-    rec.t = INFINITY;
+    rec.t = t_max;
     for (const auto& triangle : mesh) {
-        if (triangle.hit(transformed_ray, 0.001, rec.t, rec)) {
-            hit_anything = true;
-            rec.p = transform * transformed_ray.at(rec.t);
-            Vector3 world_normal = (inverseTransposeTransform * rec.normal).normalize();
-            rec.set_face_normal(ray, world_normal);
-            rec.material = material;
-        }
+        triangle.hit(transformed_ray, 0.001, rec.t, rec);
     }
-    return hit_anything;
+
+    if (rec.t < t_max) {
+        rec.p = transform * transformed_ray.at(rec.t);
+        Vector3 world_normal = (inverseTransposeTransform * rec.normal).normalize();
+        rec.set_face_normal(ray, world_normal);
+        rec.material = material;
+        return true;
+    }
+
+    return false;
 };
 
 };
