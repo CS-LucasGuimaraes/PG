@@ -31,25 +31,25 @@ definitions:
 
     # Material de vidro para o triângulo
     vidro_transparente: &material_vidro
-      color: [0.9, 0.9, 1.0] # Cor levemente azulada
+      color: [0.9, 0.9, 1.0]  # Cor levemente azulada
       ka: [0.1, 0.1, 0.1]
       ks: [0.8, 0.8, 0.8]
       ns: 200
-      ni: 1.5  # Índice de refração (típico para vidro)
-      d: 0.1   # Opacidade (valor 'd' baixo significa mais transparente)
+      ni: 1.5   # Índice de refração (típico para vidro)
+      d: 0.1    # Opacidade (valor 'd' baixo significa mais transparente)
 
 # -----------------------------------------------------------------
 # Configurações da Câmera
 # -----------------------------------------------------------------
 camera:
-  image_width: 4800
-  image_height: 270
+  image_width: 960
+  image_height: 540
   screen_distance: 1.5
   viewport_width: 2.0
   viewport_height: 1.125
-  lookfrom: [0, 2, 8]  # Posição da câmera
-  lookat: [0, 0, 0]    # Ponto para onde a câmera olha
-  vup: [0, 1, 0]         # Vetor "para cima"
+  lookfrom: [0, 2, 8]   # Posição da câmera
+  lookat: [0, 0, 0]     # Ponto para onde a câmera olha
+  vup: [0, 1, 0]        # Vetor "para cima"
 
 # -----------------------------------------------------------------
 # Lista de Objetos na Cena
@@ -57,9 +57,9 @@ camera:
 objects:
   - name: Chão
     type: plane
-    point_on_plane: [0, -1, 0] # Ponto que define a altura do plano
-    normal: [0, 1, 0]         # Vetor normal aponta para cima
-    material: *material_chao  # Reutiliza o material do chão definido acima
+    point_on_plane: [0, -1, 0]  # Ponto que define a altura do plano
+    normal: [0, 1, 0]           # Vetor normal aponta para cima
+    material: *material_chao    # Reutiliza o material do chão definido acima
 
   - name: Esfera Vermelha Principal
     type: sphere
@@ -74,12 +74,12 @@ objects:
     # Múltiplas transformações são aplicadas em ordem
     transform:
       - type: scaling
-        factors: [0.7, 0.7, 0.7] # Primeiro, diminui a escala do cubo
+        factors: [0.7, 0.7, 0.7]  # Primeiro, diminui a escala do cubo
       - type: rotation
-        angle: 45 # Em graus (o parser precisará converter para radianos)
+        angle: 45 # Em graus (o parser converterá para radianos)
         axis: [0, 1, 0] # Rotaciona em torno do eixo Y
       - type: translation
-        vector: [1.5, 0, -1] # Por último, move o cubo para sua posição final
+        vector: [1.5, 0, -1]  # Por último, move o cubo para sua posição final
 
   - name: Triângulo de Vidro
     type: triangle

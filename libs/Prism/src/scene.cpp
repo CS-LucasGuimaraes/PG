@@ -52,8 +52,8 @@ std::filesystem::path generate_filename() {
         return ss.str();
     }
 
-    std::cerr << "Error: Could not get local time for filename generation.\n";
-    std::cerr << "Using fallback filename.\n";
+    Style::logError("Could not get local time for filename generation.");
+    Style::logWarning("Using fallback filename.");
     return "render_fallback.ppm";
 }
 
@@ -65,14 +65,14 @@ void Scene::render() const {
 
     std::ofstream image_file(full_path, std::ios::trunc);
     if (!image_file.is_open()) {
-        std::cerr << "Error: Could not open the file for writing.\n";
+        Style::logError("could not open the file for writing.");
         return;
     }
 
     auto clean_path = std::filesystem::weakly_canonical(output_dir);
     
-    std::clog << Prism::Style::YELLOW << "[INFO] " << Prism::Style::RESET << "Output directory: " << Prism::Style::CYAN << clean_path.string() << Prism::Style::RESET << std::endl;
-    std::clog << Prism::Style::YELLOW << "[INFO] " << Prism::Style::RESET << "Starting render...\n" << Prism::Style::RESET << std::endl;
+    Style::logInfo("Output directory: " + Prism::Style::CYAN + clean_path.string());
+    Style::logInfo("Starting render...\n");
 
     image_file << "P3\n" << camera_.pixel_width << " " << camera_.pixel_height << "\n255\n";
 
@@ -110,21 +110,14 @@ void Scene::render() const {
 
         if (current_progress_percent > last_progress_percent) {
             last_progress_percent = current_progress_percent;
-            int bar_fill = static_cast<int>((current_progress_percent / 100.0) * progress_bar_width);
-
-            std::clog << Prism::Style::GREEN << "\rProgress: [" << Prism::Style::RESET;
-            for (int i = 0; i < progress_bar_width; ++i) {
-                if (i < bar_fill) std::clog << "=";
-                else std::clog << " ";
-            }
-            std::clog << Prism::Style::GREEN << "] " << current_progress_percent << "%" << Prism::Style::RESET << std::flush;
+            Style::logStatusBar(static_cast<double>(current_progress_percent) / 100.0);
         }
     }
         
     image_file.close();
 
-    std::clog << Prism::Style::GREEN << "\n\n[DONE] " << Prism::Style::RESET << "Rendering complete." << std::endl;
-    std::clog << Prism::Style::GREEN << "[DONE] " << Prism::Style::RESET << "Image saved as: " << Prism::Style::CYAN << generate_filename().string() << Prism::Style::RESET << '\n' << std::endl;
+    Style::logDone("Rendering complete.");
+    Style::logDone("Image saved as: " + Prism::Style::CYAN + generate_filename().string());
 }
 
 } // namespace Prism

@@ -73,6 +73,9 @@ Matrix parseTransformations(const YAML::Node& node) {
         } else if (type == "scaling") {
             Vector3 v = parseVector(transform_node["factors"]);
             current_transform = Matrix::scaling(v.x, v.y, v.z);
+        } else {
+            Style::logWarning("Unknown transformation type: " + type + ". Skipping this transformation.");
+            continue; // Skip unknown transformation types
         }
         final_transform = final_transform * current_transform;
     }
@@ -91,7 +94,7 @@ Scene SceneParser::parse() {
         throw std::runtime_error("Error loading YAML file: " + std::string(e.what()));
     }
 
-    std::clog << Style::YELLOW << "[INFO] " << Style::RESET << "Parsing scene from file: " << Style::CYAN << filePath << Style::RESET << std::endl;
+    Style::logInfo("Parsing scene from file: " + Style::CYAN + filePath);
 
     // Parse the Camera
     if (!root["camera"]) {
@@ -169,6 +172,9 @@ Scene SceneParser::parse() {
                 auto mesh_ptr = static_cast<Mesh*>(object.get());
                 // (A material setter would be needed in the Mesh class here)
             }
+        } else {
+            Style::logWarning("Unknown object type: " + type + ". Skipping this object.");
+            continue;
         }
 
         if (object) {

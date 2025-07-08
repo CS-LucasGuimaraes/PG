@@ -26,6 +26,7 @@ A classe precisa ser instânciada passando o caminho do arquivo .mtl corresponde
 #include <sstream>
 #include <string>
 #include <vector>
+#include "Prism/style.hpp"
 using namespace std;
 
 namespace Prism {
@@ -43,7 +44,7 @@ class colormap {
         std::ifstream mtlFile(input);
 
         if (!mtlFile.is_open()) {
-            std::cerr << "erro abrindo arquivo cores.mtl\n";
+            Style::logError("erro abrindo arquivo cores.mtl");
         }
 
         string line, currentMaterial;
@@ -98,7 +99,7 @@ class colormap {
         if (mp.find(s) != mp.end()) {
             return Vector3(mp[s].color.r, mp[s].color.g, mp[s].color.b);
         } else {
-            cerr << "Error: cor " << s << " indefinida no arquivo .mtl\n";
+            Style::logError("Cor " + s + " indefinida no arquivo .mtl");
             return Vector3(0, 0, 0);
         }
     }
@@ -107,7 +108,7 @@ class colormap {
         if (mp.find(s) != mp.end()) {
             return mp[s];
         } else {
-            cerr << "Error: Cor " << s << " indefinida no arquivo .mtl\n";
+            Style::logError("Cor " + s + " indefinida no arquivo .mtl");
             return Material();
         }
     }
