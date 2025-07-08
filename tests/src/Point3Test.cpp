@@ -1,13 +1,13 @@
+#include "Prism/matrix.hpp"
 #include "Prism/point.hpp"
 #include "Prism/utils.hpp"
 #include "Prism/vector.hpp"
-#include "Prism/matrix.hpp"
 #include "TestHelpers.hpp"
 #include <gtest/gtest.h>
 
+using Prism::Matrix;
 using Prism::Point3;
 using Prism::Vector3;
-using Prism::Matrix;
 
 TEST(Point3Test, ConstructorsAndAssignment) {
     Point3 p1(1.0, 2.0, 3.0);

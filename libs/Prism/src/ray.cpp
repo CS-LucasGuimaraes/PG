@@ -10,13 +10,15 @@
 
 namespace Prism {
 
-Ray::Ray(const Point3& origin_pt, const Vector3& direction_vec) : origin_(origin_pt), direction_(direction_vec.normalize()) {
+Ray::Ray(const Point3& origin_pt, const Vector3& direction_vec)
+    : origin_(origin_pt), direction_(direction_vec.normalize()) {
     if (direction().magnitude() == 0) {
         throw std::invalid_argument("Direction vector cannot be zero length.");
     }
 }
 
-Ray::Ray(const Point3& origin_pt, const Point3& target_point) : origin_(origin_pt), direction_((target_point - origin_pt).normalize()) {
+Ray::Ray(const Point3& origin_pt, const Point3& target_point)
+    : origin_(origin_pt), direction_((target_point - origin_pt).normalize()) {
     if (direction().magnitude() == 0) {
         throw std::invalid_argument("Direction vector cannot be zero length.");
     }

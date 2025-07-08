@@ -6,7 +6,7 @@
 namespace Prism {
 
 class Vector3; // Forward declaration of Vector3 class
-class Matrix; // Forward declaration of Matrix class
+class Matrix;  // Forward declaration of Matrix class
 
 /**
  * @class Point3
