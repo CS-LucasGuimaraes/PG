@@ -10,7 +10,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 enable_testing()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-add_subdirectory(vendor)
 add_subdirectory(libs)
 add_subdirectory(src)
 
