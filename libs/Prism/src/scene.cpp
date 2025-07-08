@@ -17,14 +17,31 @@ void Scene::addObject(std::unique_ptr<Object> object) {
     objects_.push_back(std::move(object));
 }
 
+bool get_local_time(std::tm* tm_out, const std::time_t* time_in) {
+    #if defined(_WIN32) || defined(_MSC_VER)
+        // Usa a versão segura do Windows (MSVC)
+        return localtime_s(tm_out, time_in) == 0;
+    #else
+        // Usa a versão reentrante/segura do Linux e macOS (GCC/Clang)
+        return localtime_r(time_in, tm_out) != nullptr;
+    #endif
+}
+
 std::filesystem::path generate_filename() {
     auto now = std::chrono::system_clock::now();
     auto in_time_t = std::chrono::system_clock::to_time_t(now);
-    std::stringstream ss;
-    ss << "render_" << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d_%H-%M-%S") << ".ppm";
-    std::string filename = ss.str();
     
-    return filename;
+    std::tm time_info; 
+
+    if (get_local_time(&time_info, &in_time_t)) {
+        std::stringstream ss;
+        ss << "render_" << std::put_time(&time_info, "%Y-%m-%d_%H-%M-%S") << ".ppm";
+        return ss.str();
+    }
+
+    std::cerr << "Error: Could not get local time for filename generation.\n";
+    std::cerr << "Using fallback filename.\n";
+    return "render_fallback.ppm"; 
 }
 
 void Scene::render() const {
