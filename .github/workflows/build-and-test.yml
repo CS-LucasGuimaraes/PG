@@ -8,21 +8,16 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         preset: [debug, release]
-        include:
-          - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-          - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
-          - os: windows-latest
-            c_compiler: cl
-            cpp_compiler: cl
+
+        config:
+          - { os: ubuntu-latest, c_compiler: gcc, cpp_compiler: g++ }
+          - { os: ubuntu-latest, c_compiler: clang, cpp_compiler: clang++ }
+          - { os: windows-latest, c_compiler: cl, cpp_compiler: cl }
 
     steps:
     - name: Checkout repository
@@ -31,8 +26,8 @@ jobs:
     - name: Set compiler environment variables
       shell: bash
       run: |
-        echo "CC=${{ matrix.c_compiler }}" >> $GITHUB_ENV
-        echo "CXX=${{ matrix.cpp_compiler }}" >> $GITHUB_ENV
+        echo "CC=${{ matrix.config.c_compiler }}" >> $GITHUB_ENV
+        echo "CXX=${{ matrix.config.cpp_compiler }}" >> $GITHUB_ENV
 
     - name: Configure CMake using preset
       run: cmake --preset ${{ matrix.preset }}
