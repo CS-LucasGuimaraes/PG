@@ -55,36 +55,6 @@ The following presets are available:
 
 ---
 
-## Code Formatting
-
-This project uses `clang-format` to maintain a consistent code style across the entire codebase. A configuration file (`.clang-format`) is included in the project root to define the style rules.
-
-Before committing any changes, please format your code.
-
-### Installing clang-format
-
-You must have `clang-format` installed on your system. On Debian/Ubuntu-based systems, you can install it with:
-
-```sh
-sudo apt install clang-format
-```
-
-### Formatting the Entire Project
-
-To format all `.hpp` and `.cpp` files in the `src`, `libs`, and `tests` directories at once, run the following command from the **root directory of the project**:
-
-```sh
-find src demo tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
-```
-
-**What this command does:**
-
-* `find src libs tests ...`: Searches for files within the `src`, `libs`, and `tests` folders.
-* `-name "*.cpp" -o -name "*.hpp"`: Finds files that end in `.cpp` OR `.hpp`.
-* `| xargs clang-format -i`: For every file found, it runs the command `clang-format -i` to format it in-place.
-
----
-
 ## Running the Application
 
 The executable (`PG_Project`) will be located in the `bin` subdirectory of your build folder.
@@ -128,3 +98,66 @@ This project includes rules to create a clean, distributable package in a local 
     ```
 
     The `install/release` folder will then contain the `PG_Project` executable and the `libPrism.so` (or `Prism.dll`) library, ready to be run together.
+
+## Code Formatting
+
+This project uses `clang-format` to maintain a consistent code style across the entire codebase. A configuration file (`.clang-format`) is included in the project root to define the style rules.
+
+Before committing any changes, please format your code.
+
+### Installing clang-format
+
+You must have `clang-format` installed on your system. On Debian/Ubuntu-based systems, you can install it with:
+
+```sh
+sudo apt install clang-format
+```
+
+### Formatting the Entire Project
+
+To format all `.hpp` and `.cpp` files in the `src`, `libs`, and `tests` directories at once, run the following command from the **root directory of the project**:
+
+```sh
+find src demo tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
+```
+
+**What this command does:**
+
+* `find src libs tests ...`: Searches for files within the `src`, `libs`, and `tests` folders.
+* `-name "*.cpp" -o -name "*.hpp"`: Finds files that end in `.cpp` OR `.hpp`.
+* `| xargs clang-format -i`: For every file found, it runs the command `clang-format -i` to format it in-place.
+
+---
+
+## 🏛️ Project Architecture
+
+The project is organized into three main components: the core `Prism` library, a `prism_demo` application that uses the library, and a `runTests` executable for unit testing. The dependencies are managed by CMake and are visualized below.
+
+```mermaid
+graph TD;
+    subgraph "External Dependencies"
+        YAML_CPP["📚 yaml-cpp"];
+        GTEST["🧪 GoogleTest"];
+    end
+
+    subgraph "Prism Project"
+        DEMO["💻 prism_demo (Demo App)"];
+        PRISM_LIB["🎨 Prism (Library)"];
+        TESTS["⚙️ runTests (Unit Tests)"];
+    end
+
+    DEMO --> PRISM_LIB;
+    TESTS --> PRISM_LIB;
+    TESTS --> GTEST;
+    PRISM_LIB --> YAML_CPP;
+
+    style DEMO fill:#cce5ff,stroke:#333,stroke-width:2px;
+    style TESTS fill:#d5e8d4,stroke:#333,stroke-width:2px;
+    style PRISM_LIB fill:#ffcce5,stroke:#333,stroke-width:2px;
+    style YAML_CPP fill:#fff2cc,stroke:#333,stroke-width:2px;
+    style GTEST fill:#fff2cc,stroke:#333,stroke-width:2px;
+```
+
+For a more detailed breakdown of the internal library dependencies, please see the ARCHITECTURE.md file.
+
+---
