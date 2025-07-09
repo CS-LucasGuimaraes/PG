@@ -9,7 +9,8 @@
             "installDir": "${sourceDir}/install/debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "BUILD_TESTING": "ON"
+                "BUILD_TESTING": "ON",
+                "PRISM_BUILD_DEMO": "ON"
             }
         },
         {
@@ -20,7 +21,8 @@
             "installDir": "${sourceDir}/install/release",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "BUILD_TESTING": "OFF"
+                "BUILD_TESTING": "OFF",
+                "PRISM_BUILD_DEMO": "OFF"
             }
         }
     ],

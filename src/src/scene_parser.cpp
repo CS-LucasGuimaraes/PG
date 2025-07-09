@@ -170,8 +170,11 @@ Scene SceneParser::parse() {
                 parsePoint(obj_node["p3"]),
                 material);
         } else if (type == "mesh") {
-            std::string path = obj_node["path"].as<std::string>();
-            object = std::make_unique<Mesh>(path);
+            std::filesystem::path scene_dir = std::filesystem::path(filePath).parent_path();
+            std::string mesh_path_str = obj_node["path"].as<std::string>();
+            std::filesystem::path full_mesh_path = scene_dir / mesh_path_str;
+
+            object = std::make_unique<Mesh>(full_mesh_path);
             // Overrides the .obj material with the one from the .yml, if specified
             if(obj_node["material"]) {
                 auto mesh_ptr = static_cast<Mesh*>(object.get());

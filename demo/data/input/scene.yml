@@ -69,7 +69,7 @@ objects:
 
   - name: Malha de Cubo Metálico
     type: mesh
-    path: "./data/input/cubo.obj" # Caminho para o arquivo .obj
+    path: "./cubo.obj" # Caminho para o arquivo .obj
     material: *material_cubo_metalico # Reutiliza o material metálico
     # Múltiplas transformações são aplicadas em ordem
     transform:
