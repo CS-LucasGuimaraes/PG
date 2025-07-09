@@ -1,23 +1,23 @@
 #include "Prism/scene_parser.hpp"
-#include <yaml-cpp/yaml.h>
+#include "Prism/camera.hpp"
+#include "Prism/color.hpp"
+#include "Prism/material.hpp"
+#include "Prism/matrix.hpp"
+#include "Prism/mesh.hpp"
+#include "Prism/objects.hpp"
+#include "Prism/plane.hpp"
+#include "Prism/point.hpp"
+#include "Prism/scene.hpp"
+#include "Prism/sphere.hpp"
+#include "Prism/style.hpp"
+#include "Prism/triangle.hpp"
+#include "Prism/vector.hpp"
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <stdexcept>
-#include "Prism/scene.hpp"
-#include "Prism/camera.hpp"
-#include "Prism/material.hpp"
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
-#include "Prism/matrix.hpp"
-#include "Prism/objects.hpp"
-#include "Prism/sphere.hpp"
-#include "Prism/plane.hpp"
-#include "Prism/triangle.hpp"
-#include "Prism/mesh.hpp"
-#include "Prism/color.hpp"
-#include "Prism/style.hpp"
-#include <cmath>
+#include <yaml-cpp/yaml.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846 // Define M_PI if not already defined
@@ -46,21 +46,31 @@ Vector3 parseVector(const YAML::Node& node) {
 // Converts a YAML node with material properties to a Material
 std::shared_ptr<Material> parseMaterial(const YAML::Node& node) {
     auto mat = std::make_shared<Material>();
-    
-    if (node["color"]) {Vector3 v = parseVector(node["color"]); mat->color = Color(v.x, v.y, v.z);}
-    if (node["ka"]) mat->ka = parseVector(node["ka"]);
-    if (node["ks"]) mat->ks = parseVector(node["ks"]);
-    if (node["ke"]) mat->ke = parseVector(node["ke"]);
-    if (node["ns"]) mat->ns = node["ns"].as<double>();
-    if (node["ni"]) mat->ni = node["ni"].as<double>();
-    if (node["d"]) mat->d = node["d"].as<double>();
+
+    if (node["color"]) {
+        Vector3 v = parseVector(node["color"]);
+        mat->color = Color(v.x, v.y, v.z);
+    }
+    if (node["ka"])
+        mat->ka = parseVector(node["ka"]);
+    if (node["ks"])
+        mat->ks = parseVector(node["ks"]);
+    if (node["ke"])
+        mat->ke = parseVector(node["ke"]);
+    if (node["ns"])
+        mat->ns = node["ns"].as<double>();
+    if (node["ni"])
+        mat->ni = node["ni"].as<double>();
+    if (node["d"])
+        mat->d = node["d"].as<double>();
     return mat;
 }
 
 // Converts a YAML list of transformations into a single transformation matrix
 Matrix parseTransformations(const YAML::Node& node) {
     Matrix final_transform = Matrix::identity(4);
-    if (!node) return final_transform;
+    if (!node)
+        return final_transform;
 
     // Transformations are applied in the reverse order of the list (standard in computer graphics)
     for (int i = node.size() - 1; i >= 0; --i) {
@@ -79,7 +89,8 @@ Matrix parseTransformations(const YAML::Node& node) {
             Vector3 v = parseVector(transform_node["factors"]);
             current_transform = Matrix::scaling(v.x, v.y, v.z);
         } else {
-            Style::logWarning("Unknown transformation type: " + type + ". Skipping this transformation.");
+            Style::logWarning("Unknown transformation type: " + type +
+                              ". Skipping this transformation.");
             continue; // Skip unknown transformation types
         }
         final_transform = final_transform * current_transform;
@@ -89,7 +100,8 @@ Matrix parseTransformations(const YAML::Node& node) {
 
 // --- SceneParser Class Implementation ---
 
-SceneParser::SceneParser(const std::string& sceneFilePath) : filePath(sceneFilePath) {}
+SceneParser::SceneParser(const std::string& sceneFilePath) : filePath(sceneFilePath) {
+}
 
 Scene SceneParser::parse() {
     YAML::Node root;
@@ -106,16 +118,10 @@ Scene SceneParser::parse() {
         throw std::runtime_error("'camera' node not found in the scene file.");
     }
     const auto& cam_node = root["camera"];
-    Camera camera(
-        parsePoint(cam_node["lookfrom"]),
-        parsePoint(cam_node["lookat"]),
-        parseVector(cam_node["vup"]),
-        cam_node["screen_distance"].as<double>(),
-        cam_node["viewport_height"].as<double>(),
-        cam_node["viewport_width"].as<double>(),
-        cam_node["image_height"].as<int>(),
-        cam_node["image_width"].as<int>()
-    );
+    Camera camera(parsePoint(cam_node["lookfrom"]), parsePoint(cam_node["lookat"]),
+                  parseVector(cam_node["vup"]), cam_node["screen_distance"].as<double>(),
+                  cam_node["viewport_height"].as<double>(), cam_node["viewport_width"].as<double>(),
+                  cam_node["image_height"].as<int>(), cam_node["image_width"].as<int>());
 
     Scene scene(std::move(camera));
 
@@ -135,7 +141,7 @@ Scene SceneParser::parse() {
 
     for (const auto& obj_node : root["objects"]) {
         std::string type = obj_node["type"].as<std::string>();
-        
+
         // Find the material (whether defined inline or by reference)
         std::shared_ptr<Material> material;
         if (obj_node["material"].IsMap()) {
@@ -154,21 +160,15 @@ Scene SceneParser::parse() {
         std::unique_ptr<Object> object;
 
         if (type == "sphere") {
-            object = std::make_unique<Sphere>(
-                parsePoint(obj_node["center"]),
-                obj_node["radius"].as<double>(),
-                material);
+            object = std::make_unique<Sphere>(parsePoint(obj_node["center"]),
+                                              obj_node["radius"].as<double>(), material);
         } else if (type == "plane") {
-            object = std::make_unique<Plane>(
-                parsePoint(obj_node["point_on_plane"]),
-                parseVector(obj_node["normal"]),
-                material);
+            object = std::make_unique<Plane>(parsePoint(obj_node["point_on_plane"]),
+                                             parseVector(obj_node["normal"]), material);
         } else if (type == "triangle") {
-             object = std::make_unique<Triangle>(
-                parsePoint(obj_node["p1"]),
-                parsePoint(obj_node["p2"]),
-                parsePoint(obj_node["p3"]),
-                material);
+            object =
+                std::make_unique<Triangle>(parsePoint(obj_node["p1"]), parsePoint(obj_node["p2"]),
+                                           parsePoint(obj_node["p3"]), material);
         } else if (type == "mesh") {
             std::filesystem::path scene_dir = std::filesystem::path(filePath).parent_path();
             std::string mesh_path_str = obj_node["path"].as<std::string>();
@@ -176,7 +176,7 @@ Scene SceneParser::parse() {
 
             object = std::make_unique<Mesh>(full_mesh_path);
             // Overrides the .obj material with the one from the .yml, if specified
-            if(obj_node["material"]) {
+            if (obj_node["material"]) {
                 auto mesh_ptr = static_cast<Mesh*>(object.get());
                 // (A material setter would be needed in the Mesh class here)
             }

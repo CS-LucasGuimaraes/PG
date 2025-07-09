@@ -2,10 +2,10 @@
 # Prism Library | Root CMakeLists.txt
 #
 # This is the main project file that orchestrates the entire build.
-# It sets global settings and includes the sub-projects (library, app, tests).
+# It sets global settings and includes the sub-projects.
 # ===================================================================
 cmake_minimum_required(VERSION 3.22)
-project(Prism VERSION 1.0.0 LANGUAGES CXX)
+project(Prism VERSION 0.1.0 LANGUAGES CXX)
 
 # Set the policy for FetchContent to use modern, safer behavior.
 cmake_policy(SET CMP0135 NEW)

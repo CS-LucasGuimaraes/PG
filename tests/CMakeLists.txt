@@ -1,9 +1,9 @@
 # ===================================================================
 # Prism Unit Tests
 #
-# This CMakeLists.txt file sets up the unit tests for the Prism library.
-# It defines the test runner executable, links it against the Prism library,
-# and registers the tests with CTest.
+# This CMakeLists.txt file sets up the unit tests for the Prism 
+# library. It defines the test runner executable, links it against
+# the Prism library and registers the tests with CTest.
 # ===================================================================
 
 # Collect all test source files.

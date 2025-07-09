@@ -4,9 +4,9 @@
 #include "Prism/Colormap.hpp"
 #include "Prism/material.hpp"
 #include "Prism/point.hpp"
+#include "Prism/style.hpp"
 #include "Prism/triangle.hpp"
 #include "Prism/vector.hpp"
-#include "Prism/style.hpp"
 #include "prism_export.h"
 #include <array>
 #include <fstream>

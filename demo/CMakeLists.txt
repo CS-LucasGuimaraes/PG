@@ -1,8 +1,9 @@
 # ===================================================================
 # Prism Demo Application
 #
-# This CMakeLists.txt file defines the demo application that uses the Prism library.
-# It sets up the executable target, links against the Prism library, and handles installation.
+# This CMakeLists.txt file defines the demo application that uses the
+# Prism library. It sets up the executable target, links against the 
+# Prism library, and handles installation.
 # ===================================================================
 
 add_executable(prism_demo src/main.cpp)

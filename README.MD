@@ -5,7 +5,7 @@
 To build and run this project, you will need:
 
 * **Git**
-* **CMake** (version 3.15 or higher recommended)
+* **CMake** (version 3.22 or higher recommended)
 * A **C++17 compliant compiler** (e.g., GCC, Clang, MSVC)
 
 ## Building the Project
@@ -74,7 +74,7 @@ sudo apt install clang-format
 To format all `.hpp` and `.cpp` files in the `src`, `libs`, and `tests` directories at once, run the following command from the **root directory of the project**:
 
 ```sh
-find src libs tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
+find src demo tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
 ```
 
 **What this command does:**

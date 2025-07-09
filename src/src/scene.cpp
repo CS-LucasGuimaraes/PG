@@ -70,7 +70,7 @@ void Scene::render() const {
     }
 
     auto clean_path = std::filesystem::weakly_canonical(output_dir);
-    
+
     Style::logInfo("Output directory: " + Prism::Style::CYAN + clean_path.string());
     Style::logInfo("Starting render...\n");
 
@@ -106,14 +106,15 @@ void Scene::render() const {
         image_file << pixel_color << '\n';
 
         pixels_done++;
-        int current_progress_percent = static_cast<int>((static_cast<double>(pixels_done) / total_pixels) * 100.0);
+        int current_progress_percent =
+            static_cast<int>((static_cast<double>(pixels_done) / total_pixels) * 100.0);
 
         if (current_progress_percent > last_progress_percent) {
             last_progress_percent = current_progress_percent;
             Style::logStatusBar(static_cast<double>(current_progress_percent) / 100.0);
         }
     }
-        
+
     image_file.close();
 
     Style::logDone("Rendering complete.");

@@ -18,6 +18,7 @@ A classe precisa ser instânciada passando o caminho do arquivo .mtl corresponde
 */
 
 #include "Prism/material.hpp"
+#include "Prism/style.hpp"
 #include "Prism/vector.hpp"
 #include "prism_export.h"
 #include <fstream>
@@ -26,7 +27,6 @@ A classe precisa ser instânciada passando o caminho do arquivo .mtl corresponde
 #include <sstream>
 #include <string>
 #include <vector>
-#include "Prism/style.hpp"
 using namespace std;
 
 namespace Prism {
