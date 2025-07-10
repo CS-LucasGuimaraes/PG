@@ -1,14 +1,13 @@
 #include "Prism/objects/mesh.hpp"
 
 #include "Prism/core/matrix.hpp"
-
 #include <cmath>
 
 namespace Prism {
 // TODO: Implementar BVH aqui
 
-Mesh::Mesh(std::string path) {
-    ObjReader reader(path);
+Mesh::Mesh(std::filesystem::path& path) {
+    ObjReader reader(path.string());
     material = std::move(reader.curMaterial);
 
     for (auto& point : reader.vertices) {

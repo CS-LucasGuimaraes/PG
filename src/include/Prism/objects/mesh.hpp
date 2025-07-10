@@ -13,6 +13,7 @@
 #include <array>
 #include <memory>
 #include <vector>
+#include <filesystem>
 
 namespace Prism {
 
@@ -32,7 +33,7 @@ class PRISM_EXPORT Mesh : public Object {
      * This constructor initializes the Mesh by reading points and triangles from the specified OBJ
      * file.
      */
-    explicit Mesh(std::string path);
+    explicit Mesh(std::filesystem::path& path);
 
     /**
      * @brief Constructs a Mesh object from an ObjReader.
