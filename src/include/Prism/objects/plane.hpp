@@ -3,10 +3,10 @@
 
 #include "prism_export.h"
 
-#include "Prism/objects/objects.hpp"
+#include "Prism/core/material.hpp"
 #include "Prism/core/point.hpp"
 #include "Prism/core/ray.hpp"
-#include "Prism/core/material.hpp"
+#include "Prism/objects/objects.hpp"
 
 namespace Prism {
 

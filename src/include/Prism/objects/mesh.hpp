@@ -6,9 +6,9 @@
 #include "Prism/core/material.hpp"
 #include "Prism/core/point.hpp"
 #include "Prism/core/ray.hpp"
+#include "Prism/objects/ObjReader.hpp"
 #include "Prism/objects/objects.hpp"
 #include "Prism/objects/triangle.hpp"
-#include "Prism/objects/ObjReader.hpp"
 
 #include <array>
 #include <memory>

@@ -39,7 +39,7 @@ class colormap {
     map<string, Material> mp;
 
     // Construtor
-    colormap() {};
+    colormap(){};
     colormap(string input) {
 
         // construtor: lê arquivo cores.mtl e guarda valores RGB associados a cada nome
