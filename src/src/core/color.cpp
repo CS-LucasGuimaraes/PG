@@ -1,4 +1,4 @@
-#include "Prism/color.hpp"
+#include "Prism/core/color.hpp"
 
 namespace Prism {
 

@@ -1,11 +1,11 @@
 #ifndef PRISM_SCENE_HPP_
 #define PRISM_SCENE_HPP_
 
-#include "Prism/camera.hpp"
-#include "Prism/color.hpp"
-#include "Prism/objects.hpp"
-#include "Prism/ray.hpp"
 #include "prism_export.h"
+
+#include "Prism/objects/objects.hpp"
+#include "Prism/scene/camera.hpp"
+
 #include <filesystem>
 #include <memory>
 #include <ostream>

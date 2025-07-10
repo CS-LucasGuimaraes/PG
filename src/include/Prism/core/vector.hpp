@@ -2,17 +2,12 @@
 #define PRISM_VECTOR_HPP_
 
 #include "prism_export.h"
-#include <initializer_list>
 
-/**
- * @file vector.hpp
- * @brief Defines the Vector class for 3D vector operations in the Prism namespace.
- */
+#include <initializer_list>
 
 namespace Prism {
 
 class Point3; // Forward declaration of Point3 class
-class Matrix; // Forward declaration of Matrix class
 
 /**
  * @class Vector3

@@ -1,17 +1,19 @@
-#include "Prism/scene_parser.hpp"
-#include "Prism/camera.hpp"
-#include "Prism/color.hpp"
-#include "Prism/material.hpp"
-#include "Prism/matrix.hpp"
-#include "Prism/mesh.hpp"
-#include "Prism/objects.hpp"
-#include "Prism/plane.hpp"
-#include "Prism/point.hpp"
-#include "Prism/scene.hpp"
-#include "Prism/sphere.hpp"
-#include "Prism/style.hpp"
-#include "Prism/triangle.hpp"
-#include "Prism/vector.hpp"
+#ifdef PRISM_BUILD_SCENE
+
+#include "Prism/scene/scene_parser.hpp"
+
+#include "Prism/core/color.hpp"
+#include "Prism/core/material.hpp"
+#include "Prism/core/matrix.hpp"
+#include "Prism/core/point.hpp"
+#include "Prism/core/style.hpp"
+#include "Prism/core/vector.hpp"
+#include "Prism/objects/mesh.hpp"
+#include "Prism/objects/plane.hpp"
+#include "Prism/objects/sphere.hpp"
+#include "Prism/objects/triangle.hpp"
+#include "Prism/scene/camera.hpp"
+
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -195,3 +197,5 @@ Scene SceneParser::parse() {
 }
 
 } // namespace Prism
+
+#endif // PRISM_BUILD_SCENE

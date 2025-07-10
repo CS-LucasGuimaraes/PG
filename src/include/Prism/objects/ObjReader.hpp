@@ -1,13 +1,10 @@
 #ifndef PRISM_OBJREADER_HPP_
 #define PRISM_OBJREADER_HPP_
 
-#include "Prism/Colormap.hpp"
-#include "Prism/material.hpp"
-#include "Prism/point.hpp"
-#include "Prism/style.hpp"
-#include "Prism/triangle.hpp"
-#include "Prism/vector.hpp"
 #include "prism_export.h"
+
+#include "Prism/objects/Colormap.hpp"
+
 #include <array>
 #include <fstream>
 #include <iostream>

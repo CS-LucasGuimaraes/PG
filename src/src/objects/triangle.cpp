@@ -1,7 +1,7 @@
-#include "Prism/triangle.hpp"
-#include "Prism/matrix.hpp"
-#include "Prism/point.hpp"
-#include "Prism/ray.hpp"
+#include "Prism/objects/triangle.hpp"
+
+#include "Prism/core/matrix.hpp"
+
 #include <cmath>
 
 namespace Prism {

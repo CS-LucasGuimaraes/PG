@@ -1,4 +1,5 @@
-#include "Prism/style.hpp"
+#include "Prism/core/style.hpp"
+
 #include <iostream>
 
 namespace Prism {

@@ -3,14 +3,14 @@
 
 #include "prism_export.h"
 
+#include "Prism/core/point.hpp"
+#include "Prism/core/vector.hpp"
+
 #include <cmath>
 #include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 #include <vector>
-
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
 
 namespace Prism {
 

@@ -1,4 +1,5 @@
-#include "Prism/matrix.hpp"
+#include "Prism/core/matrix.hpp"
+
 #include <cmath>
 #include <numeric>
 #include <stdexcept>

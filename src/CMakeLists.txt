@@ -16,6 +16,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(yaml-cpp)
 
+set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Disable building yaml-cpp contrib tools" FORCE)
+set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Disable building yaml-cpp parse tools" FORCE)
+set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable building yaml-cpp tests" FORCE)
+set(YAML_CPP_FORMAT_SOURCE OFF CACHE BOOL "Disable yaml-cpp source formatting" FORCE)
+
+
 # --- Build Options ---
 
 # Option to build the core math and data structures (mandatory)
@@ -23,7 +29,6 @@ option(PRISM_BUILD_CORE "Build the Core module (math, etc.)" ON)
 
 # Optional modules
 option(PRISM_BUILD_OBJECTS "Build the Objects module (Sphere, Plane, Mesh, etc.)" ON)
-option(PRISM_BUILD_IO "Build the I/O module (SceneParser, ObjReader)" ON)
 option(PRISM_BUILD_SCENE "Build the Scene module (Scene, Camera)" ON)
 
 # The CORE module is essential for all other parts of the library.
@@ -47,11 +52,6 @@ endif()
 if(PRISM_BUILD_OBJECTS)
     file(GLOB GEOMETRY_SOURCES CONFIGURE_DEPENDS "src/objects/*.cpp")
     list(APPEND PRISM_SOURCES ${GEOMETRY_SOURCES})
-endif()
-
-if(PRISM_BUILD_IO)
-    file(GLOB IO_SOURCES CONFIGURE_DEPENDS "src/io/*.cpp")
-    list(APPEND PRISM_SOURCES ${IO_SOURCES})
 endif()
 
 if(PRISM_BUILD_SCENE)
@@ -84,10 +84,39 @@ target_include_directories(Prism
     $<INSTALL_INTERFACE:include>
 )
 
+# 
+set_target_properties(Prism PROPERTIES
+    # Define the library's version.
+    VERSION "${PROJECT_VERSION}"
+    # Define the SOVERSION, which is used for shared libraries.
+    # This should match the major version of the library.
+    SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+    # Identify debug and release builds.
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
+)
+
+# Define the RPATH settings for the library.
+set_target_properties(Prism PROPERTIES
+    INSTALL_RPATH "$ORIGIN/."
+)
+
 # Link the library against its dependencies.
 # The yaml-cpp dependency is only needed if the IO module is built.
-if(PRISM_BUILD_IO)
-    target_link_libraries(Prism PUBLIC yaml-cpp)
+if(PRISM_BUILD_OBJECTS)
+    target_link_libraries(Prism PRIVATE yaml-cpp::yaml-cpp)
+endif()
+# Set Submodule flags for the library.
+# This ensures that the library is built with the correct visibility settings.
+if (PRISM_BUILD_CORE)
+    target_compile_definitions(Prism PUBLIC PRISM_BUILD_CORE)
+endif()
+
+if (PRISM_BUILD_OBJECTS)
+    target_compile_definitions(Prism PUBLIC PRISM_BUILD_OBJECTS)
+endif()
+
+if (PRISM_BUILD_SCENE)
+    target_compile_definitions(Prism PUBLIC PRISM_BUILD_SCENE)
 endif()
 
 
@@ -104,7 +133,6 @@ install(TARGETS Prism
 install(DIRECTORY
     include/Prism/core
     include/Prism/objects
-    include/Prism/io
     include/Prism/scene
     DESTINATION include/Prism
 )
@@ -114,3 +142,19 @@ install(FILES
     include/Prism.hpp
     DESTINATION include
 )
+
+# Install yaml-cpp headers and library if the OBJECTS module is built.
+if(PRISM_BUILD_OBJECTS)
+
+    install(DIRECTORY ${yaml-cpp_SOURCE_DIR}/include/yaml-cpp
+        DESTINATION include
+    )
+
+    if(YAML_BUILD_SHARED_LIBS)
+        install(TARGETS yaml-cpp
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib
+        )
+    endif()
+endif()

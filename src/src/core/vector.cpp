@@ -1,6 +1,6 @@
-#include "Prism/vector.hpp"
-#include "Prism/matrix.hpp"
-#include "Prism/point.hpp"
+#include "Prism/core/vector.hpp"
+
+#include "Prism/core/point.hpp"
 
 #include <cmath>
 #include <stdexcept>

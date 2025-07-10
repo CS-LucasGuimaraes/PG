@@ -1,12 +1,15 @@
 #ifndef PRISM_MESH_HPP_
 #define PRISM_MESH_HPP_
 
-#include "Prism/ObjReader.hpp"
-#include "Prism/material.hpp"
-#include "Prism/objects.hpp"
-#include "Prism/point.hpp"
-#include "Prism/triangle.hpp"
 #include "prism_export.h"
+
+#include "Prism/core/material.hpp"
+#include "Prism/core/point.hpp"
+#include "Prism/core/ray.hpp"
+#include "Prism/objects/objects.hpp"
+#include "Prism/objects/triangle.hpp"
+#include "Prism/objects/ObjReader.hpp"
+
 #include <array>
 #include <memory>
 #include <vector>

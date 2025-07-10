@@ -1,9 +1,7 @@
-#include "Prism/camera.hpp"
-#include "Prism/matrix.hpp"
-#include "Prism/point.hpp"
-#include "Prism/ray.hpp"
-#include "Prism/utils.hpp"
-#include "Prism/vector.hpp"
+#include "Prism/scene/camera.hpp"
+
+#include "Prism/core/utils.hpp"
+
 #include <cmath>
 #include <stdexcept>
 

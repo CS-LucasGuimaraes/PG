@@ -1,16 +1,17 @@
 #ifndef PRISM_RAY_HPP_
 #define PRISM_RAY_HPP_
 
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
 #include "prism_export.h"
+
+#include "Prism/core/point.hpp"
+#include "Prism/core/vector.hpp"
+#include "Prism/core/matrix.hpp"
+
 #include <initializer_list>
 #include <memory>
 #include <vector>
-namespace Prism {
 
-class Object;     // Forward declaration of Object class
-struct HitRecord; // Forward declaration of HitRecord struct
+namespace Prism {
 
 /**
  * @class Ray

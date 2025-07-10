@@ -1,11 +1,13 @@
 #ifndef PRISM_CAMERA_HPP_
 #define PRISM_CAMERA_HPP_
 
-#include "Prism/matrix.hpp"
-#include "Prism/point.hpp"
-#include "Prism/ray.hpp"
-#include "Prism/vector.hpp"
 #include "prism_export.h"
+
+#include "Prism/core/matrix.hpp"
+#include "Prism/core/point.hpp"
+#include "Prism/core/ray.hpp"
+#include "Prism/core/vector.hpp"
+
 #include <initializer_list>
 #include <iterator>
 namespace Prism {

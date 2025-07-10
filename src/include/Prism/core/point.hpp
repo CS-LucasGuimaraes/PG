@@ -2,11 +2,12 @@
 #define PRISM_POINT_HPP_
 
 #include "prism_export.h"
+
 #include <initializer_list>
+
 namespace Prism {
 
 class Vector3; // Forward declaration of Vector3 class
-class Matrix;  // Forward declaration of Matrix class
 
 /**
  * @class Point3

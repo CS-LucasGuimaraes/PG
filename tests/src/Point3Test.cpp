@@ -1,8 +1,7 @@
-#include "Prism/matrix.hpp"
-#include "Prism/point.hpp"
-#include "Prism/utils.hpp"
-#include "Prism/vector.hpp"
+#include "Prism.hpp"
+
 #include "TestHelpers.hpp"
+
 #include <gtest/gtest.h>
 
 using Prism::Matrix;

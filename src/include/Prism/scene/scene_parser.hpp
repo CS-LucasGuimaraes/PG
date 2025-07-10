@@ -1,8 +1,12 @@
+#ifdef PRISM_BUILD_SCENE
+
 #ifndef PRISM_SCENEPARSER_HPP_
 #define PRISM_SCENEPARSER_HPP_
 
-#include "Prism/scene.hpp"
 #include "prism_export.h"
+
+#include "Prism/scene/scene.hpp"
+
 #include <string>
 
 namespace Prism {
@@ -35,3 +39,4 @@ class PRISM_EXPORT SceneParser {
 } // namespace Prism
 
 #endif // PRISM_SCENEPARSER_HPP_
+#endif // PRISM_BUILD_SCENE

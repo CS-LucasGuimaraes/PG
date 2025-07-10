@@ -18,6 +18,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # --- Build Options ---
 # Add an option to control whether the demo application is built.
 # Defaults to ON for typical development, but can be turned off.
+set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
 option(PRISM_BUILD_DEMO "Build the Prism demo application" ON)
 
 # Set a common output directory for all executables.
@@ -36,7 +37,10 @@ if(BUILD_TESTING)
         googletest
         URL https://github.com/google/googletest/archive/v1.14.0.zip
     )
+    set(INSTALL_GTEST OFF CACHE BOOL "Disable GTest installation" FORCE)
+    set(BUILD_GTEST_INSTALL OFF CACHE BOOL "Disable GTest installation" FORCE)
     FetchContent_MakeAvailable(googletest)
+
 
     add_subdirectory(tests)
 endif()

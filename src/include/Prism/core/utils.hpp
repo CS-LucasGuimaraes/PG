@@ -1,10 +1,12 @@
 #ifndef PRISM_UTILS_HPP_
 #define PRISM_UTILS_HPP_
 
-#include "Prism/matrix.hpp"
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
 #include "prism_export.h"
+
+#include "Prism/core/matrix.hpp"
+#include "Prism/core/point.hpp"
+#include "Prism/core/vector.hpp"
+
 #include <initializer_list>
 
 namespace Prism {

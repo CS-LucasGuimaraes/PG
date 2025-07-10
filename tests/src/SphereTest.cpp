@@ -1,7 +1,10 @@
 #include "Prism.hpp"
+
 #include "TestHelpers.hpp"
-#include <cmath>
+
 #include <gtest/gtest.h>
+
+#include <cmath>
 #include <memory>
 
 using namespace Prism;

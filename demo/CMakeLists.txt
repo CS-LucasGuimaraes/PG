@@ -10,12 +10,16 @@ add_executable(prism_demo src/main.cpp)
 
 target_link_libraries(prism_demo PRIVATE Prism)
 
+set_target_properties(prism_demo PROPERTIES
+    INSTALL_RPATH "$ORIGIN/../lib"
+)
+
 # --- Installation ---
 install(TARGETS prism_demo DESTINATION bin)
 
 # This command is now much cleaner. It copies the 'data' directory
 # from this subdirectory into the install directory.
-install(DIRECTORY data/ DESTINATION .)
+install(DIRECTORY data/ DESTINATION ./bin/data)
 
 # --- Development/Debugging Support ---
 

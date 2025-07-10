@@ -2,6 +2,7 @@
 #define PRISM_STYLE_HPP_
 
 #include "prism_export.h"
+
 #include <iostream>
 #include <string>
 

@@ -1,6 +1,8 @@
-#include "Prism/sphere.hpp"
-#include "Prism/ray.hpp"
-#include "Prism/utils.hpp"
+#include "Prism/objects/sphere.hpp"
+
+#include "Prism/core/matrix.hpp"
+#include "Prism/core/utils.hpp"
+
 #include <cmath>
 
 namespace Prism {

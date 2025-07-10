@@ -17,16 +17,19 @@ A saber que:
 A classe precisa ser instânciada passando o caminho do arquivo .mtl correspondente
 */
 
-#include "Prism/material.hpp"
-#include "Prism/style.hpp"
-#include "Prism/vector.hpp"
 #include "prism_export.h"
+
+#include "Prism/core/material.hpp"
+#include "Prism/core/style.hpp"
+#include "Prism/core/vector.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
+
 using namespace std;
 
 namespace Prism {
@@ -36,7 +39,7 @@ class colormap {
     map<string, Material> mp;
 
     // Construtor
-    colormap(){};
+    colormap() {};
     colormap(string input) {
 
         // construtor: lê arquivo cores.mtl e guarda valores RGB associados a cada nome

@@ -1,10 +1,13 @@
 #ifndef PRISM_TRIANGLE_HPP_
 #define PRISM_TRIANGLE_HPP_
 
-#include "Prism/material.hpp"
-#include "Prism/objects.hpp"
-#include "Prism/point.hpp"
 #include "prism_export.h"
+
+#include "Prism/core/material.hpp"
+#include "Prism/core/point.hpp"
+#include "Prism/core/ray.hpp"
+#include "Prism/objects/objects.hpp"
+
 #include <initializer_list>
 #include <memory>
 

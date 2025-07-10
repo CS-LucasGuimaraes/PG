@@ -1,9 +1,7 @@
-#include "Prism/plane.hpp"
-#include "Prism/material.hpp"
-#include "Prism/point.hpp"
-#include "Prism/ray.hpp"
-#include "Prism/utils.hpp"
-#include "Prism/vector.hpp"
+#include "Prism/objects/plane.hpp"
+
+#include "Prism/core/matrix.hpp"
+
 #include <cmath>
 
 namespace Prism {

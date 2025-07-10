@@ -1,10 +1,12 @@
 #ifndef PRISM_PLANE_HPP_
 #define PRISM_PLANE_HPP_
 
-#include "Prism/objects.hpp"
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
 #include "prism_export.h"
+
+#include "Prism/objects/objects.hpp"
+#include "Prism/core/point.hpp"
+#include "Prism/core/ray.hpp"
+#include "Prism/core/material.hpp"
 
 namespace Prism {
 

@@ -1,4 +1,5 @@
-#include "Prism/utils.hpp"
+#include "Prism/core/utils.hpp"
+
 #include <cstddef>
 #include <stdexcept>
 

@@ -1,5 +1,7 @@
-#include "Prism/mesh.hpp"
-#include "Prism/matrix.hpp"
+#include "Prism/objects/mesh.hpp"
+
+#include "Prism/core/matrix.hpp"
+
 #include <cmath>
 
 namespace Prism {

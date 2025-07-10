@@ -1,9 +1,8 @@
 #ifndef TESTS_TESTHELPERS_HPP
 #define TESTS_TESTHELPERS_HPP
 
-#include "Prism/matrix.hpp"
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
+#include "Prism.hpp"
+
 #include <gtest/gtest.h>
 
 namespace Prism {

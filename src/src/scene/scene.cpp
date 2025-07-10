@@ -1,7 +1,9 @@
-#include "Prism/scene.hpp"
-#include "Prism/color.hpp"
-#include "Prism/material.hpp"
-#include "Prism/style.hpp"
+#include "Prism/scene/scene.hpp"
+
+#include "Prism/core/color.hpp"
+#include "Prism/core/material.hpp"
+#include "Prism/core/style.hpp"
+
 #include <chrono>
 #include <cmath>
 #include <filesystem>
