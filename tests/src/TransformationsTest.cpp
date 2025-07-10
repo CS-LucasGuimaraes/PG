@@ -1,13 +1,15 @@
-#include <cmath>
+#include "Prism.hpp"
+
+#include "TestHelpers.hpp"
+
 #include <gtest/gtest.h>
+
+#include <cmath>
 #include <memory>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-
-#include "Prism.hpp"
-#include "TestHelpers.hpp" // Para comparações de ponto flutuante
 
 using namespace Prism;
 

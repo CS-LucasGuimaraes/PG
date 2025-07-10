@@ -1,8 +1,9 @@
-#include "Prism/utils.hpp"
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
+#include "Prism.hpp"
+
 #include "TestHelpers.hpp"
+
 #include <gtest/gtest.h>
+
 #include <vector>
 
 using Prism::centroid;

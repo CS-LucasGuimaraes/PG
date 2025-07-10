@@ -1,9 +1,9 @@
-#include "Prism/ray.hpp"
-#include "Prism/objects.hpp"
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
+#include "Prism.hpp"
+
 #include "TestHelpers.hpp"
+
 #include <gtest/gtest.h>
+
 #include <memory>
 #include <vector>
 

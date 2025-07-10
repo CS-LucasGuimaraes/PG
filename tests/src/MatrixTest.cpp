@@ -1,9 +1,10 @@
-#include "Prism/matrix.hpp"
-#include "Prism/point.hpp"
-#include "Prism/vector.hpp"
+#include "Prism.hpp"
+
 #include "TestHelpers.hpp"
-#include <cmath>
+
 #include <gtest/gtest.h>
+
+#include <cmath>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
