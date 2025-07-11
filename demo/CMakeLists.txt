@@ -8,6 +8,9 @@
 
 add_executable(prism_demo src/main.cpp)
 
+# Policy to ensure proper handling of paths.
+cmake_policy(SET CMP0177 NEW)
+
 target_link_libraries(prism_demo PRIVATE Prism)
 
 set_target_properties(prism_demo PROPERTIES
