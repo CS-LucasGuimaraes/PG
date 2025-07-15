@@ -67,8 +67,10 @@ bool Triangle::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) c
 }
 
 MeshTriangle::MeshTriangle(std::shared_ptr<Point3> p1, std::shared_ptr<Point3> p2,
-                           std::shared_ptr<Point3> p3)
-    : point1(std::move(p1)), point2(std::move(p2)), point3(std::move(p3)) {
+                           std::shared_ptr<Point3> p3, std::shared_ptr<Vector3> n1,
+                           std::shared_ptr<Vector3> n2, std::shared_ptr<Vector3> n3)
+    : point1(std::move(p1)), point2(std::move(p2)), point3(std::move(p3)), 
+      normal1(std::move(n1)), normal2(std::move(n2)), normal3(std::move(n3)) {
 }
 
 MeshTriangle::MeshTriangle(Point3 p1, Point3 p2, Point3 p3)
@@ -124,8 +126,10 @@ bool MeshTriangle::hit(const Ray& ray, double t_min, double t_max, HitRecord& re
     const double t = f * (edge2 * q);
 
     if (t > t_min && t < t_max) {
+
+        const double w = 1.0 - u - v;;
         rec.t = t;
-        rec.normal = edge1 ^ edge2;
+        rec.normal = ((*normal1 * w) + (*normal2 * u) + (*normal3 * v)).normalize();
         return true;
     }
     return false;

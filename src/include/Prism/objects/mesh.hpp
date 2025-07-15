@@ -60,6 +60,7 @@ class PRISM_EXPORT Mesh : public Object {
 
   private:
     std::vector<std::shared_ptr<Point3>> points; ///< Points that define the vertices of the mesh
+    std::vector<std::shared_ptr<Vector3>> normals; ///< Normals for each vertex in the mesh
     std::vector<MeshTriangle>
         mesh; ///< Triangles that make up the mesh, each defined by three points
     std::shared_ptr<Material>

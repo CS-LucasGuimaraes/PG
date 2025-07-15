@@ -92,10 +92,14 @@ class PRISM_EXPORT MeshTriangle {
      * @param p1 The first point of the triangle.
      * @param p2 The second point of the triangle.
      * @param p3 The third point of the triangle.
+     * @param n1 The normal vector at the first point.
+     * @param n2 The normal vector at the second point.
+     * @param n3 The normal vector at the third point.
      * This constructor initializes the MeshTriangle with the specified points.
      */
     MeshTriangle(std::shared_ptr<Point3> p1, std::shared_ptr<Point3> p2,
-                 std::shared_ptr<Point3> p3);
+                 std::shared_ptr<Point3> p3, std::shared_ptr<Vector3> n1,
+                 std::shared_ptr<Vector3> n2, std::shared_ptr<Vector3> n3);
 
     /**
      * @brief Constructs a MeshTriangle given three Point3 objects.
@@ -148,6 +152,10 @@ class PRISM_EXPORT MeshTriangle {
     std::shared_ptr<Point3> point1; ///< The first point of the triangle
     std::shared_ptr<Point3> point2; ///< The second point of the triangle
     std::shared_ptr<Point3> point3; ///< The third point of the triangle
+
+    std::shared_ptr<Vector3> normal1; ///< The normal vector at the first point
+    std::shared_ptr<Vector3> normal2; ///< The normal vector at the second point
+    std::shared_ptr<Vector3> normal3; ///< The normal vector at the third point
 };
 
 } // namespace Prism

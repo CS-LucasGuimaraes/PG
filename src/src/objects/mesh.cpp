@@ -13,8 +13,20 @@ Mesh::Mesh(std::filesystem::path& path) {
     for (auto& point : reader.vertices) {
         points.emplace_back(std::make_shared<Point3>(point[0], point[1], point[2]));
     }
-    for (auto& triangle : reader.triangles) {
-        mesh.push_back({points[triangle[0]], points[triangle[1]], points[triangle[2]]});
+
+    for (auto& normal : reader.normals) {
+        normals.emplace_back(std::make_shared<Vector3>(normal[0], normal[1], normal[2]));
+    }
+
+    for (auto& face : reader.faces) {
+        mesh.emplace_back(
+            points[face.vertex_indices[0]],
+            points[face.vertex_indices[1]],
+            points[face.vertex_indices[2]],
+            normals[face.normal_indices[0]],
+            normals[face.normal_indices[1]],
+            normals[face.normal_indices[2]]
+        );
     }
 };
 
@@ -23,8 +35,20 @@ Mesh::Mesh(ObjReader& reader) : material(std::move(reader.curMaterial)) {
     for (auto& point : reader.vertices) {
         points.emplace_back(std::make_shared<Point3>(point[0], point[1], point[2]));
     }
-    for (auto& triangle : reader.triangles) {
-        mesh.push_back({points[triangle[0]], points[triangle[1]], points[triangle[2]]});
+
+    for (auto& normal : reader.normals) {
+        normals.emplace_back(std::make_shared<Vector3>(normal[0], normal[1], normal[2]));
+    }
+
+    for (auto& face : reader.faces) {
+        mesh.emplace_back(
+            points[face.vertex_indices[0]],
+            points[face.vertex_indices[1]],
+            points[face.vertex_indices[2]],
+            normals[face.normal_indices[0]],
+            normals[face.normal_indices[1]],
+            normals[face.normal_indices[2]]
+        );
     }
 };
 
