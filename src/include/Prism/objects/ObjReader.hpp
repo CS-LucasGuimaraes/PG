@@ -22,6 +22,8 @@ class ObjReader {
     std::vector<std::array<unsigned int, 3>> triangles;
 
     ObjReader(const std::string& filename) {
+        curMaterial = std::make_shared<Material>();
+
         file.open(filename);
         if (!file.is_open()) {
             Style::logError("Erro ao abrir o arquivo: " + filename);

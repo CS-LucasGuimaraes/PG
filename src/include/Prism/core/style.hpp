@@ -36,7 +36,7 @@ const std::string BOLD_YELLOW = "\033[1;33m";
  * @param message The message to display.
  */
 inline void logInfo(const std::string& message) {
-    std::clog << YELLOW << "[INFO] " << RESET << message << std::endl;
+    std::clog << YELLOW << "[INFO] " << RESET << message << RESET << std::endl;
 }
 
 /**
@@ -44,7 +44,7 @@ inline void logInfo(const std::string& message) {
  * @param message The message to display.
  */
 inline void logDone(const std::string& message) {
-    std::clog << GREEN << "[DONE] " << RESET << message << std::endl;
+    std::clog << GREEN << "[DONE] " << RESET << message << RESET << std::endl;
 }
 
 /**
