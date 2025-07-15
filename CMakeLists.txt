@@ -21,16 +21,30 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
 option(PRISM_BUILD_DEMO "Build the Prism demo application" ON)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Building in Debug mode.")
+    set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Suffix for debug binaries" FORCE)
+else()
+    set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Suffix for non-debug binaries" FORCE)
+endif()
+
 # Set a common output directory for all executables.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # --- Sub-projects ---
 add_subdirectory(src) # The Prism library
-add_subdirectory(demo) # The demo application
+
+if (PRISM_BUILD_DEMO)
+    message(STATUS "Building the Prism demo application.")
+    add_subdirectory(demo) # The demo application
+else()
+    message(STATUS "Skipping the Prism demo application build.")
+endif()
 
 # --- Testing ---
 enable_testing()
 if(BUILD_TESTING)
+    message(STATUS "Building tests for the Prism library.")
     # Fetch GoogleTest only when tests are enabled.
     include(FetchContent)
     FetchContent_Declare(
