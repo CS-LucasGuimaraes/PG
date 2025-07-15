@@ -50,7 +50,7 @@ class PRISM_EXPORT Color {
 
     Color operator+= (Color other);
 
-    void clamp();
+    Color& clamp();
 
 
 

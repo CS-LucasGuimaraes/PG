@@ -58,6 +58,12 @@ class PRISM_EXPORT Point3 {
     bool operator==(const Point3& p) const;
 
     /**
+     * @brief Negates the point.
+     * @return A new point that is the negation of this point.
+     */
+    Point3 operator-() const;
+
+    /**
      * @brief Gets a vector from this point to another point.
      * @param p The point to get the vector to.
      * @return The vector from this point to the specified point.

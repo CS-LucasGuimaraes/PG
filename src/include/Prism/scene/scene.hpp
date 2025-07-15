@@ -63,6 +63,8 @@ class PRISM_EXPORT Scene {
     void render() const;
 
   private:
+    Color trace(const Ray& ray, int depth) const;
+
     std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene
     std::vector<std::unique_ptr<Light>> lights_; ///< Collection of light sources in the scene
     Color ambient_color_ = Color(0.1, 0.1, 0.1); ///< Ambient color for the scene

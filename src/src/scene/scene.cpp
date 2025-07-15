@@ -3,6 +3,7 @@
 #include "Prism/core/color.hpp"
 #include "Prism/core/material.hpp"
 #include "Prism/core/style.hpp"
+#include "Prism/core/utils.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -25,7 +26,8 @@ PRISM_EXPORT std::ostream& operator<<(std::ostream& os, const Color& color) {
     return os;
 }
 
-Scene::Scene(Camera camera, Color ambient_light) : camera_(std::move(camera)), ambient_color_(ambient_light) {
+Scene::Scene(Camera camera, Color ambient_light)
+    : camera_(std::move(camera)), ambient_color_(ambient_light) {
 }
 
 void Scene::addObject(std::unique_ptr<Object> object) {
@@ -63,6 +65,79 @@ std::filesystem::path generate_filename() {
     return "render_fallback.ppm";
 }
 
+Color Scene::trace(const Ray& ray, int depth) const {
+    if (depth <= 0) {
+        return Color(0, 0, 0); // Base case for recursion, return black color
+    }
+
+    HitRecord rec;
+    bool hit_anything = false;
+    double closest_t = INFINITY;
+
+    for (const auto& object_ptr : objects_) {
+        HitRecord temp_rec;
+        if (object_ptr->hit(ray, 0.001, closest_t, temp_rec)) {
+            hit_anything = true;
+            closest_t = temp_rec.t;
+            rec = temp_rec;
+        }
+    }
+
+    if (!hit_anything) {
+        return ambient_color_; // Return ambient color if no hit
+    }
+
+    auto mat = rec.material;
+
+    Vector3 view_dir = (ray.origin() - rec.p).normalize();
+
+    Color surface_color = mat->ka * ambient_color_;
+
+    for (const auto& light_ptr : lights_) {
+        Vector3 light_dir = (light_ptr->position - rec.p).normalize();
+        double light_distance = (light_ptr->position - rec.p).magnitude();
+
+        Ray shadow_ray(rec.p, light_dir);
+        bool in_shadow = false;
+        for (const auto& obj_ptr : objects_) {
+            HitRecord shadow_rec;
+            if (obj_ptr->hit(shadow_ray, 0.001, light_distance, shadow_rec)) {
+                in_shadow = true;
+                break;
+            }
+        }
+
+        if (!in_shadow) {
+            double diff_factor = std::max(rec.normal.dot(light_dir), 0.0);
+            surface_color += mat->color * diff_factor * light_ptr->color;
+
+            Vector3 reflect_dir = (-light_dir) - rec.normal * 2 * (-light_dir).dot(rec.normal);
+            double spec_factor = std::pow(std::max(view_dir.dot(reflect_dir), 0.0), mat->ns);
+            surface_color += mat->ks * spec_factor * light_ptr->color;
+        }
+    }
+
+    if (mat->ks.r > 0 || mat->ks.g > 0 || mat->ks.b > 0) {
+        Vector3 reflect_dir = ray.direction() - rec.normal * 2 * ray.direction().dot(rec.normal);
+        Ray reflection_ray(rec.p, reflect_dir);
+        surface_color += mat->ks * trace(reflection_ray, depth - 1);
+    }
+
+    double opacity = mat->d;
+    if (opacity < 1.0) {
+        double refraction_ratio = rec.front_face ? (1.0 / mat->ni) : mat->ni;
+
+        Vector3 refracted_dir = refract(ray.direction().normalize(), rec.normal, refraction_ratio);
+        Ray refracted_ray(rec.p, refracted_dir);
+
+        Color refracted_color = trace(refracted_ray, depth - 1);
+
+        surface_color = (surface_color * opacity) + (refracted_color * (1.0 - opacity));
+    }
+
+    return surface_color.clamp();
+}
+
 void Scene::render() const {
     std::filesystem::path output_dir = "./data/output";
     std::filesystem::create_directories(output_dir);
@@ -88,64 +163,7 @@ void Scene::render() const {
     int last_progress_percent = -1;
 
     for (Ray const& ray : camera_) {
-        HitRecord closest_hit_rec;
-        bool hit_anything = false;
-        double closest_t = INFINITY;
-
-        for (const auto& object_ptr : objects_) {
-            HitRecord temp_rec;
-            if (object_ptr->hit(ray, 0.001, closest_t, temp_rec)) {
-                hit_anything = true;
-                closest_t = temp_rec.t;
-                closest_hit_rec = temp_rec;
-            }
-        }
-
-        Color pixel_color;
-        if (hit_anything) {
-            Point3 hit_point = closest_hit_rec.p;
-            Vector3 normal = closest_hit_rec.normal;
-            Vector3 view_dir = (ray.origin() - hit_point).normalize();
-            auto mat = closest_hit_rec.material;
-
-            for (const auto& light_ptr : lights_) {
-                Vector3 light_dir = (light_ptr->position - hit_point).normalize();
-                double light_distance = (light_ptr->position - hit_point).magnitude();
-
-                Ray shadow_ray(hit_point, light_dir);
-                bool in_shadow = false;
-                for (const auto& obj_ptr : objects_) {
-                    HitRecord shadow_rec;
-                    if (obj_ptr->hit(shadow_ray, 0.001, light_distance, shadow_rec)) {
-                        in_shadow = true;
-                        break;
-                    }
-                }
-
-                Color ambient = mat->ka * this->ambient_color_;
-
-                if (in_shadow) {
-                    pixel_color += ambient;
-                    continue;
-                }
-
-                double diff_factor = std::max(0.0, normal.dot(light_dir));
-                Color diffuse = mat->color * diff_factor * light_ptr->color;
-
-                Vector3 reflect_dir = (normal * 2 * (light_dir.dot(normal))) - light_dir;
-                double spec_factor = std::pow(std::max(0.0, view_dir.dot(reflect_dir)), mat->ns);
-                Color specular = mat->ks * spec_factor * light_ptr->color;
-
-                pixel_color += ambient + diffuse + specular;
-            }
-
-            pixel_color.clamp();
-
-        } else {
-            pixel_color = Color(0, 0, 0);
-        }
-
-        image_file << pixel_color << '\n';
+        image_file << trace(ray, 5) << '\n';
 
         pixels_done++;
         int current_progress_percent =

@@ -33,10 +33,12 @@ Color Color::operator+=(Color other) {
     return *this;
 }
 
-void Color::clamp() {
-    r = std::min(r, 1.0);
-    g = std::min(g, 1.0);
-    b = std::min(b, 1.0);
+Color& Color::clamp() {
+    r = std::max(0.0,std::min(r, 1.0));
+    g = std::max(0.0,std::min(g, 1.0));
+    b = std::max(0.0,std::min(b, 1.0));
+    
+    return *this;
 }
 
 } // namespace Prism

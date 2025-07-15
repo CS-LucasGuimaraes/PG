@@ -68,6 +68,12 @@ class PRISM_EXPORT Vector3 {
     Vector3& operator=(const Vector3& v);
 
     /**
+     * @brief Negates the vector.
+     * @return A new vector that is the negation of this vector.
+     */
+    Vector3 operator-() const;
+
+    /**
      * @brief Adds two vectors.
      * @param v The vector to add.
      * @return The resulting vector.

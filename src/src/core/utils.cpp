@@ -48,4 +48,11 @@ Matrix orthonormalBasisContaining(const Vector3& v) {
     return basis;
 }
 
+Vector3 refract(const Vector3& uv, const Vector3& n, double etai_over_etat) {
+    auto cos_theta = std::fmin((-uv).dot(n), 1.0);
+    Vector3 r_out_perp = (uv + n * cos_theta) * etai_over_etat;
+    Vector3 r_out_parallel = n * -sqrt(std::abs(1.0 - r_out_perp.magnitude() * r_out_perp.magnitude()));
+    return r_out_perp + r_out_parallel;
+}
+
 } // namespace Prism

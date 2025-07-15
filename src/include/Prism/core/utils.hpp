@@ -42,6 +42,17 @@ template <typename T> T sqr(const T& value) {
     return value * value;
 }
 
+/**
+ * @brief Computes the refracted vector based on Snell's law.
+ * This function calculates the refracted vector given an incident vector, a normal vector,
+ * and the ratio of indices of refraction.
+ * @param uv The incident vector (unit vector).
+ * @param n The normal vector at the point of incidence (unit vector).
+ * @param etai_over_etat The ratio of indices of refraction (etai/etat).
+ * @return The refracted vector as a Vector3.
+ */
+Vector3 refract(const Vector3& uv, const Vector3& n, double etai_over_etat);
+
 } // namespace Prism
 
 #endif // PRISM_UTILS_HPP_
