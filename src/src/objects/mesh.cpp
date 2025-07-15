@@ -47,4 +47,8 @@ bool Mesh::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const
     return false;
 };
 
+void Mesh::setMaterial(std::shared_ptr<Material> new_material) {
+    material = std::move(new_material);
+}
+
 }; // namespace Prism

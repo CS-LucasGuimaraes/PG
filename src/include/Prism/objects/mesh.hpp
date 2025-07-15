@@ -56,6 +56,8 @@ class PRISM_EXPORT Mesh : public Object {
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
 
+    void setMaterial(std::shared_ptr<Material> new_material);
+
   private:
     std::vector<std::shared_ptr<Point3>> points; ///< Points that define the vertices of the mesh
     std::vector<MeshTriangle>

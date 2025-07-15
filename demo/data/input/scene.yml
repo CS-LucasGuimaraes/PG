@@ -1,93 +1,103 @@
 # -----------------------------------------------------------------
-# Exemplo de Arquivo de Cena para o Renderizador Prism
-# Este arquivo demonstra o uso de múltiplos objetos, materiais
-# e transformações para criar uma cena complexa.
+# Arquivo de Cena Completo para o Renderizador Prism com Iluminação Phong
 # -----------------------------------------------------------------
 
-# Definições reutilizáveis da cena, como materiais.
+# Luz ambiente global que afeta todos os objetos da cena.
+ambient_light: [0.15, 0.15, 0.15]
+
+# Definições reutilizáveis, como materiais, para manter o arquivo organizado.
 # Usamos âncoras (&) para definir um material e aliases (*) para reutilizá-lo.
 definitions:
   materials:
-    # Material fosco para o chão
+    # Material fosco para o chão com pouca especularidade.
     chao_cinza: &material_chao
       color: [0.8, 0.8, 0.8]
-      ka: [0.1, 0.1, 0.1] # Pouca reflexão ambiente
-      ks: [0.1, 0.1, 0.1] # Pouco brilho especular
-      ns: 10
+      ka: [0.9, 0.9, 0.9]   # Reflete bastante a luz ambiente
+      ks: [0.1, 0.1, 0.1]   # Pouco brilho especular
+      ns: 10                # Expoente de brilho baixo
 
-    # Material de plástico vermelho, com brilho moderado
+    # Material de plástico vermelho, com brilho moderado e cor forte.
     plastico_vermelho: &material_esfera_vermelha
       color: [1.0, 0.2, 0.2]
-      ka: [0.2, 0.05, 0.05]
-      ks: [0.7, 0.7, 0.7] # Brilho especular forte
-      ns: 128 # Expoente de brilho alto para um highlight pequeno e intenso
+      ka: [0.2, 0.05, 0.05] # Coeficiente ambiente baixo para não "lavar" a cor
+      ks: [0.7, 0.7, 0.7]   # Brilho especular branco e forte
+      ns: 128               # Expoente de brilho alto para um highlight pequeno e intenso
 
-    # Material metálico/refletivo para o cubo
+    # Material que simula um metal azul, altamente reflexivo.
     metal_azul: &material_cubo_metalico
-      color: [0.2, 0.3, 1.0]
-      ka: [0.1, 0.1, 0.2]
-      ks: [0.9, 0.9, 0.9] # Reflexão especular muito alta
-      ns: 256
+      color: [0.2, 1.0, 0.2]
+      ka: [0.1, 0.15, 0.3]  # Baixa reflexão ambiente
+      ks: [0.9, 0.9, 0.9]   # Reflexão especular muito alta
+      ns: 256               # Expoente de brilho muito alto, para um reflexo nítido
 
-    # Material de vidro para o triângulo
+    # Material que simula vidro, com um leve tom e reflexo agudo.
     vidro_transparente: &material_vidro
-      color: [0.9, 0.9, 1.0]  # Cor levemente azulada
+      color: [0.9, 0.9, 1.0]  # Cor de base levemente azulada
       ka: [0.1, 0.1, 0.1]
-      ks: [0.8, 0.8, 0.8]
-      ns: 200
-      ni: 1.5   # Índice de refração (típico para vidro)
-      d: 0.1    # Opacidade (valor 'd' baixo significa mais transparente)
+      ks: [0.9, 0.9, 0.9]   # Reflexo especular forte como vidro
+      ns: 512               # Expoente de brilho altíssimo
+      # ni: 1.5             # (Índice de refração, para uso futuro com transparência)
+      # d: 0.1              # (Opacidade, para uso futuro com transparência)
 
 # -----------------------------------------------------------------
 # Configurações da Câmera
 # -----------------------------------------------------------------
 camera:
-  image_width: 960
-  image_height: 540
-  screen_distance: 1.5
+  image_width: 1280
+  image_height: 720
+  screen_distance: 1.0
   viewport_width: 2.0
+  # A altura do viewport é calculada para manter a proporção da imagem (16:9)
   viewport_height: 1.125
-  lookfrom: [0, 2, 8]   # Posição da câmera
-  lookat: [0, 0, 0]     # Ponto para onde a câmera olha
+  lookfrom: [0, 2, 8]   # Posição da câmera um pouco elevada e para trás
+  lookat: [0, 0.5, 0]   # Ponto para onde a câmera olha, um pouco acima do chão
   vup: [0, 1, 0]        # Vetor "para cima"
+
+# -----------------------------------------------------------------
+# Fontes de Luz na Cena
+# -----------------------------------------------------------------
+lights:
+  - name: Luz Principal
+    position: [-8, 10, 8]
+    color: [1.0, 1.0, 1.0] # Luz branca, forte e principal
+
+  - name: Luz de Preenchimento (Fill Light)
+    position: [8, 4, 6]
+    color: [0.8, 0.8, 1.0] # Luz fria para preencher as sombras
 
 # -----------------------------------------------------------------
 # Lista de Objetos na Cena
 # -----------------------------------------------------------------
 objects:
-  - name: Chão
+  - name: Chao
     type: plane
-    point_on_plane: [0, -1, 0]  # Ponto que define a altura do plano
+    point_on_plane: [0, -1, 0]  # Ponto que define a altura do plano no Y=-1
     normal: [0, 1, 0]           # Vetor normal aponta para cima
-    material: *material_chao    # Reutiliza o material do chão definido acima
+    material: *material_chao    # Reutiliza o material do chão
 
-  - name: Esfera Vermelha Principal
+  - name: Esfera Vermelha
     type: sphere
-    center: [-1.5, 0, 0]
+    center: [-2, 0, 0]
     radius: 1.0
     material: *material_esfera_vermelha # Reutiliza o material de plástico
 
-  - name: Malha de Cubo Metálico
+  - name: Esfera de vidro
+    type: sphere
+    center: [2, 1, -1]
+    radius: 0.8
+    material: *material_vidro # Reutiliza o material de vidro
+
+  - name: Malha de Cubo Metalico
     type: mesh
-    path: "./cubo.obj" # Caminho para o arquivo .obj
+    # Certifique-se que o caminho para o .obj está correto em relação ao executável
+    path: "cubo.obj"
     material: *material_cubo_metalico # Reutiliza o material metálico
-    # Múltiplas transformações são aplicadas em ordem
+    # Múltiplas transformações são aplicadas em ordem (de baixo para cima)
     transform:
       - type: scaling
-        factors: [0.7, 0.7, 0.7]  # Primeiro, diminui a escala do cubo
+        factors: [0.7, 0.7, 0.7]  # 3. Diminui a escala do cubo
       - type: rotation
-        angle: 45 # Em graus (o parser converterá para radianos)
-        axis: [0, 1, 0] # Rotaciona em torno do eixo Y
+        angle: 45                 # 2. Rotaciona 45 graus em torno do eixo Y
+        axis: [0, 1, 0]
       - type: translation
-        vector: [1.5, 0, -1]  # Por último, move o cubo para sua posição final
-
-  - name: Triângulo de Vidro
-    type: triangle
-    # Vértices definidos diretamente no arquivo de cena
-    p1: [-3, -1, -5]
-    p2: [3, -1, -5]
-    p3: [0, 4, -5]
-    material: *material_vidro # Reutiliza o material de vidro
-    transform:
-      - type: translation
-        vector: [0, 0, 2] # Move o triângulo um pouco para frente
+        vector: [2, -0.3, -1]     # 1. Move o cubo para sua posição final

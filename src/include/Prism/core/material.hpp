@@ -30,18 +30,17 @@ class PRISM_EXPORT Material {
      * - Index of refraction (ni): 0
      * - Transparency (d): 0
      */
-    Material(Color color = Color(), Vector3 ka = Vector3(), Vector3 ks = Vector3(),
-             Vector3 ke = Vector3(), double ns = 0, double ni = 0, double d = 0)
+    Material(Color color = Color(), Color ka = Color(), Color ks = Color(),
+             Color ke = Color(), double ns = 0, double ni = 0, double d = 0)
         : color(color), ka(ka), ks(ks), ke(ke), ns(ns), ni(ni), d(d) {
     }
 
     Color color; ///< The color of the material, typically used for diffuse reflection.
-    Vector3 ka;  ///< Ambient reflectivity of the material, representing how much ambient light it
+    Color ka;  ///< Ambient reflectivity of the material, representing how much ambient light it
                  ///< reflects.
-    Vector3 ks;  ///< Specular reflectivity of the material, representing how much specular light it
+    Color ks;  ///< Specular reflectivity of the material, representing how much specular light it
                  ///< reflects.
-    Vector3
-        ke; ///< Emissive color of the material, representing light emitted by the material itself.
+    Color ke; ///< Emissive color of the material, representing light emitted by the material itself.
     double ns; ///< Shininess factor of the material, affecting the size and intensity of specular
                ///< highlights.
     double ni; ///< Index of refraction of the material, used for simulating refraction effects.

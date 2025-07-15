@@ -25,11 +25,15 @@ PRISM_EXPORT std::ostream& operator<<(std::ostream& os, const Color& color) {
     return os;
 }
 
-Scene::Scene(Camera camera) : camera_(std::move(camera)) {
+Scene::Scene(Camera camera, Color ambient_light) : camera_(std::move(camera)), ambient_color_(ambient_light) {
 }
 
 void Scene::addObject(std::unique_ptr<Object> object) {
     objects_.push_back(std::move(object));
+}
+
+void Scene::addLight(std::unique_ptr<Light> light) {
+    lights_.push_back(std::move(light));
 }
 
 bool get_local_time(std::tm* tm_out, const std::time_t* time_in) {
@@ -99,9 +103,45 @@ void Scene::render() const {
 
         Color pixel_color;
         if (hit_anything) {
-            pixel_color = closest_hit_rec.material->color;
+            Point3 hit_point = closest_hit_rec.p;
+            Vector3 normal = closest_hit_rec.normal;
+            Vector3 view_dir = (ray.origin() - hit_point).normalize();
+            auto mat = closest_hit_rec.material;
+
+            for (const auto& light_ptr : lights_) {
+                Vector3 light_dir = (light_ptr->position - hit_point).normalize();
+                double light_distance = (light_ptr->position - hit_point).magnitude();
+
+                Ray shadow_ray(hit_point, light_dir);
+                bool in_shadow = false;
+                for (const auto& obj_ptr : objects_) {
+                    HitRecord shadow_rec;
+                    if (obj_ptr->hit(shadow_ray, 0.001, light_distance, shadow_rec)) {
+                        in_shadow = true;
+                        break;
+                    }
+                }
+
+                Color ambient = mat->ka * this->ambient_color_;
+
+                if (in_shadow) {
+                    pixel_color += ambient;
+                    continue;
+                }
+
+                double diff_factor = std::max(0.0, normal.dot(light_dir));
+                Color diffuse = mat->color * diff_factor * light_ptr->color;
+
+                Vector3 reflect_dir = (normal * 2 * (light_dir.dot(normal))) - light_dir;
+                double spec_factor = std::pow(std::max(0.0, view_dir.dot(reflect_dir)), mat->ns);
+                Color specular = mat->ks * spec_factor * light_ptr->color;
+
+                pixel_color += ambient + diffuse + specular;
+            }
+
+            pixel_color.clamp();
+
         } else {
-            Vector3 unit_direction = ray.direction().normalize();
             pixel_color = Color(0, 0, 0);
         }
 
@@ -120,7 +160,7 @@ void Scene::render() const {
     image_file.close();
 
     Style::logDone("Rendering complete.");
-    Style::logDone("Image saved as: " + Prism::Style::CYAN + generate_filename().string());
+    Style::logDone("Image saved as: " + Prism::Style::CYAN + full_path.string());
 }
 
 } // namespace Prism
