@@ -5,6 +5,8 @@
 # manages its dependencies, and sets up installation rules.
 # ===================================================================
 
+message(STATUS "Configuring Prism Library (v${PROJECT_VERSION}).") 
+
 # --- Dependencies ---
 
 include(FetchContent)
@@ -15,6 +17,8 @@ FetchContent_Declare(
   GIT_TAG        2f86d13775d119edbb69af52e5f566fd65c6953b
 )
 FetchContent_MakeAvailable(yaml-cpp)
+
+message(STATUS "Configuring yaml-cpp dependency: building SHARED library, tests/tools DISABLED.")
 
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Disable building yaml-cpp contrib tools" FORCE)
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Disable building yaml-cpp parse tools" FORCE)
@@ -31,9 +35,21 @@ option(PRISM_BUILD_CORE "Build the Core module (math, etc.)" ON)
 option(PRISM_BUILD_OBJECTS "Build the Objects module (Sphere, Plane, Mesh, etc.)" ON)
 option(PRISM_BUILD_SCENE "Build the Scene module (Scene, Camera)" ON)
 
+# --- Dependecy Management ---
+
 # The CORE module is essential for all other parts of the library.
 if(NOT PRISM_BUILD_CORE)
     message(FATAL_ERROR "PRISM_BUILD_CORE is a required module and cannot be disabled.")
+endif()
+
+# The OBJECTS module depends on the CORE module.
+if(PRISM_BUILD_OBJECTS AND NOT PRISM_BUILD_CORE)
+    message(FATAL_ERROR "PRISM_BUILD_OBJECTS requires PRISM_BUILD_CORE to be enabled. Please enable PRISM_BUILD_CORE.")
+endif()
+
+# The SCENE module depends on the OBJECTS module.
+if(PRISM_BUILD_SCENE AND NOT PRISM_BUILD_OBJECTS)
+    message(FATAL_ERROR "PRISM_BUILD_SCENE requires PRISM_BUILD_OBJECTS to be enabled. Please enable PRISM_BUILD_OBJECTS.")
 endif()
 
 
@@ -44,19 +60,26 @@ set(PRISM_SOURCES "")
 
 # Always add the core source files.
 if(PRISM_BUILD_CORE)
+    message(STATUS "Prism Library: Core module ENABLED.") 
     file(GLOB CORE_SOURCES CONFIGURE_DEPENDS "src/core/*.cpp")
     list(APPEND PRISM_SOURCES ${CORE_SOURCES})
 endif()
 
 # Conditionally add sources for the other modules.
 if(PRISM_BUILD_OBJECTS)
+    message(STATUS "Prism Library: Objects module ENABLED.")
     file(GLOB GEOMETRY_SOURCES CONFIGURE_DEPENDS "src/objects/*.cpp")
     list(APPEND PRISM_SOURCES ${GEOMETRY_SOURCES})
+else()
+    message(STATUS "Prism Library: Objects module DISABLED.")
 endif()
 
 if(PRISM_BUILD_SCENE)
+    message(STATUS "Prism Library: Scene module ENABLED.")
     file(GLOB SCENE_SOURCES CONFIGURE_DEPENDS "src/scene/*.cpp")
     list(APPEND PRISM_SOURCES ${SCENE_SOURCES})
+else()
+    message(STATUS "Prism Library: Scene module DISABLED.")
 endif()
 
 # Add any remaining top-level source files (e.g., init.cpp)
