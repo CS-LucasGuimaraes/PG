@@ -117,25 +117,46 @@ Color Scene::trace(const Ray& ray, int depth) const {
         }
     }
 
-    if (mat->ks.r > 0 || mat->ks.g > 0 || mat->ks.b > 0) {
-        Vector3 reflect_dir = ray.direction() - rec.normal * 2 * ray.direction().dot(rec.normal);
-        Ray reflection_ray(rec.p, reflect_dir);
-        surface_color += mat->ks * trace(reflection_ray, depth - 1);
-    }
+    Color final_color = mat->ke + surface_color;
 
     double opacity = mat->d;
     if (opacity < 1.0) {
+        double reflectance;
         double refraction_ratio = rec.front_face ? (1.0 / mat->ni) : mat->ni;
+        Vector3 unit_direction = ray.direction().normalize();
 
-        Vector3 refracted_dir = refract(ray.direction().normalize(), rec.normal, refraction_ratio);
-        Ray refracted_ray(rec.p, refracted_dir);
+        double cos_theta = fmin((-unit_direction).dot(rec.normal), 1.0);
+        double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
-        Color refracted_color = trace(refracted_ray, depth - 1);
+        if (refraction_ratio * sin_theta > 1.0) {
+            reflectance = 1.0;
+        } else {
+            reflectance = schlick(cos_theta, refraction_ratio);
+        }
 
-        surface_color = (surface_color * opacity) + (refracted_color * (1.0 - opacity));
+        Color reflection_color = Color(0, 0, 0);
+        Color refraction_color = Color(0, 0, 0);
+
+        Vector3 reflect_dir = ray.direction() - rec.normal * 2 * ray.direction().dot(rec.normal);
+        Ray reflection_ray(rec.p, reflect_dir);
+        reflection_color = trace(reflection_ray, depth - 1);
+
+        if (reflectance < 1.0) {
+            Vector3 refracted_dir = refract(unit_direction, rec.normal, refraction_ratio);
+            Ray refracted_ray(rec.p, refracted_dir);
+            refraction_color = trace(refracted_ray, depth - 1);
+        }
+
+        Color trasmited_color =  reflection_color * reflectance + refraction_color * (1.0 - reflectance);
+        final_color = final_color * opacity + trasmited_color * (1.0 - opacity);
+    } 
+    else if (mat->ks.r > 0 || mat->ks.g > 0 || mat->ks.b > 0) {
+        Vector3 reflect_dir = ray.direction() - rec.normal * 2 * ray.direction().dot(rec.normal);
+        Ray reflection_ray(rec.p, reflect_dir);
+        final_color += mat->ks * trace(reflection_ray, depth - 1);
     }
 
-    return surface_color.clamp();
+    return final_color.clamp();
 }
 
 void Scene::render() const {

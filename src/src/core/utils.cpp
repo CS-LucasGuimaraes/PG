@@ -55,4 +55,10 @@ Vector3 refract(const Vector3& uv, const Vector3& n, double etai_over_etat) {
     return r_out_perp + r_out_parallel;
 }
 
+double schlick(double cos, double ref_idx) {
+    auto r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
+    r0 = r0 * r0;
+    return r0 + (1.0 - r0) * pow((1.0 - cos), 5);
+}
+
 } // namespace Prism

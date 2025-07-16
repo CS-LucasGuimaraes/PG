@@ -1,30 +1,51 @@
 # -----------------------------------------------------------------
-# Cena de Demonstração Final (Versão Corrigida)
+# Cena da Cornell Box Final - Com Esferas em Destaque (Avançadas)
 # -----------------------------------------------------------------
 
 ambient_light: [0.1, 0.1, 0.1]
 
+# --- Definições de Materiais ---
 definitions:
   materials:
-    chao_fosco: &chao
-      color: [0.5, 0.5, 0.5]
+    # Materiais das paredes
+    parede_branca: &branco
+      color: [0.73, 0.73, 0.73]
       ka: [1.0, 1.0, 1.0]
-      ks: [0.1, 0.1, 0.1]
+      ks: [0.0, 0.0, 0.0]
       ns: 10
 
-    plastico_magenta: &plastico
-      color: [0.8, 0.1, 0.4]
-      ka: [0.2, 0.2, 0.2]
-      ks: [0.8, 0.8, 0.8]
-      ns: 128
+    parede_vermelha: &vermelho
+      color: [0.65, 0.05, 0.05]
+      ka: [1.0, 1.0, 1.0]
+      ks: [0.0, 0.0, 0.0]
+      ns: 10
 
-    metal_dourado: &metal
-      color: [0.8, 0.6, 0.2]
-      ka: [0.2, 0.2, 0.2]
-      ks: [0.9, 0.9, 0.9]
-      ns: 512
+    parede_verde: &verde
+      color: [0.12, 0.45, 0.15]
+      ka: [1.0, 1.0, 1.0]
+      ks: [0.0, 0.0, 0.0]
+      ns: 10
+      
+    # Materiais para os objetos internos
+    bloco_azul: &azul
+      color: [0.1, 0.2, 0.8]
+      ka: [0.8, 0.8, 0.8]
+      ks: [0.3, 0.3, 0.3]
+      ns: 64
 
-    vidro_cristalino: &vidro
+    bloco_laranja: &laranja
+      color: [0.9, 0.5, 0.1]
+      ka: [0.8, 0.8, 0.8]
+      ks: [0.2, 0.2, 0.2]
+      ns: 32
+      
+    esfera_espelho: &espelho
+      color: [0.0, 0.0, 0.0]
+      ka: [0.0, 0.0, 0.0]
+      ks: [0.98, 0.98, 0.98]
+      ns: 2048
+
+    esfera_vidro: &vidro
       color: [1.0, 1.0, 1.0]
       ka: [0.0, 0.0, 0.0]
       ks: [0.1, 0.1, 0.1]
@@ -32,65 +53,88 @@ definitions:
       ni: 1.52
       d: 0.05
 
-    mercurio_reflexivo: &espelho
-      color: [0.0, 0.0, 0.0] # Espelhos não têm cor difusa
-      ka: [0.0, 0.0, 0.0]
-      ks: [0.98, 0.98, 0.98] # Quase 100% reflexivo
-      ns: 2048
-
+# --- Configurações da Câmera ---
 camera:
-  image_width: 1280
-  image_height: 720
+  image_width: 800
+  image_height: 800
   screen_distance: 1.5
   viewport_width: 2.0
-  viewport_height: 1.125
-  lookfrom: [0, 2.5, 10]
-  lookat: [0, 1, 0]
+  viewport_height: 2.0
+  lookfrom: [278, 278, -800]
+  lookat: [278, 278, 0]
   vup: [0, 1, 0]
 
+# --- Fontes de Luz ---
 lights:
-  - name: Luz Principal
-    position: [-10, 10, 10]
+  - name: Luz do Teto
+    position: [278, 548, 278]
     color: [1.0, 1.0, 1.0]
 
-  - name: Luz de Preenchimento
-    position: [10, 5, -5]
-    color: [0.3, 0.5, 1.0]
-
+# --- Objetos na Cena ---
 objects:
-  - name: Chao
+  # As 5 paredes da caixa
+  - name: Chão
     type: plane
-    point_on_plane: [0, -0.01, 0] # Chão um pouco mais baixo
+    point_on_plane: [0, 0, 0]
     normal: [0, 1, 0]
-    material: *chao
+    material: *branco
+  - name: Teto
+    type: plane
+    point_on_plane: [0, 555, 0]
+    normal: [0, -1, 0]
+    material: *branco
+  - name: Parede do Fundo
+    type: plane
+    point_on_plane: [0, 0, 555]
+    normal: [0, 0, -1]
+    material: *branco
+  - name: Parede Direita (Verde)
+    type: plane
+    point_on_plane: [555, 0, 0]
+    normal: [-1, 0, 0]
+    material: *verde
+  - name: Parede Esquerda (Vermelha)
+    type: plane
+    point_on_plane: [0, 0, 0]
+    normal: [1, 0, 0]
+    material: *vermelho
 
-  - name: Esfera de Espelho (Esquerda)
-    type: sphere
-    center: [-2.5, 1, 1]
-    radius: 1.0
-    material: *espelho
-
-  - name: Esfera de Vidro (Direita)
-    type: sphere
-    center: [2.5, 1, 1]
-    radius: 1.0
-    material: *vidro
-
-  - name: Esfera de Plástico (Frente)
-    type: sphere
-    center: [0, 0.5, 4]
-    radius: 1.0
-    material: *plastico
-
-  - name: Cubo de Metal (Fundo)
+  # Blocos com tamanho e posição originais
+  - name: Bloco Alto (Laranja)
     type: mesh
     path: "cubo.obj"
-    material: *metal
+    material: *laranja
     transform:
       - type: scaling
-        factors: [1.2, 1.2, 1.2]
+        factors: [82.5, 165, 82.5] 
       - type: rotation
-        angle: 25 # Ângulo ajustado
+        angle: 18
         axis: [0, 1, 0]
       - type: translation
-        vector: [0, 0.7, -2.5] # Posição ajustada
+        vector: [180, 165, 250] 
+
+  - name: Bloco Baixo (Azul)
+    type: mesh
+    path: "cubo.obj"
+    material: *azul
+    transform:
+      - type: scaling
+        factors: [82.5, 82.5, 82.5]
+      - type: rotation
+        angle: -20
+        axis: [0, 1, 0]
+      - type: translation
+        vector: [370, 82.5, 150]
+
+  # ESFERAS COM POSIÇÃO AJUSTADA (AINDA MAIS PERTO)
+  - name: Esfera de Vidro
+    type: sphere
+    center: [380, 90, -140]  # Z foi de 120 para 80
+    radius: 90
+    material: *vidro
+
+  - name: Esfera de Espelho
+    type: sphere
+    center: [180, 90, -200] # Z foi de 180 para 100
+    radius: 90
+    material: *espelho
