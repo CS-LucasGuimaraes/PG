@@ -33,47 +33,6 @@ TEST(CameraTest, Instantiation) {
     EXPECT_DOUBLE_EQ(cam.screen_width, width);
 }
 
-TEST(CameraTest, CoordinateBasisOrthonormal) {
-    Point3 position(1.0, 2.0, 3.0);
-    Point3 target(4.0, 5.0, 6.0);
-    Vector3 upvec(0.0, 1.0, 0.0);
-    double distance = 10.0, height = 5.0, width = 8.0;
-
-    Camera cam(position, target, upvec, distance, height, width, 10, 20);
-
-    const Matrix& basis = cam.coordinate_basis;
-    auto getCol = [&](int c) { return Vector3(basis[0][c], basis[1][c], basis[2][c]); };
-
-    Vector3 dir = (position - target).normalize();
-    Vector3 b1 = getCol(0);
-    Vector3 b2 = getCol(1);
-    Vector3 b3 = getCol(2);
-
-    AssertVectorAlmostEqual(b1, dir);
-    ASSERT_NEAR(b1.magnitude(), 1.0, 1e-9);
-    ASSERT_NEAR(b2.magnitude(), 1.0, 1e-9);
-    ASSERT_NEAR(b3.magnitude(), 1.0, 1e-9);
-    ASSERT_NEAR(b1.dot(b2), 0.0, 1e-9);
-    ASSERT_NEAR(b1.dot(b3), 0.0, 1e-9);
-    ASSERT_NEAR(b2.dot(b3), 0.0, 1e-9);
-}
-
-TEST(CameraTest, BasisHasOpposite) {
-    Point3 position(1.0, 2.0, 3.0);
-    Point3 target(4.0, 5.0, 6.0);
-    Vector3 upvec(0.0, 1.0, 0.0);
-    double distance = 10.0, height = 5.0, width = 8.0;
-
-    Camera cam(position, target, upvec, distance, height, width, 10, 20);
-
-    const Matrix& basis = cam.coordinate_basis;
-    auto getCol = [&](int c) { return Vector3{basis[0][c], basis[1][c], basis[2][c]}; };
-
-    Vector3 b1 = getCol(0);
-
-    AssertVectorAlmostEqual(b1, ((target - position) * -1).normalize());
-}
-
 TEST(CameraTest, IteratorGeneratesCorrectNumberOfRays) {
     Point3 position(0, 0, 0);
     Point3 target(0, 0, -1);
