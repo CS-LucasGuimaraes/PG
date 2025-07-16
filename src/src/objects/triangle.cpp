@@ -27,8 +27,8 @@ bool Triangle::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) c
     const Vector3 edge1 = this->getPoint2() - this->getPoint1();
     const Vector3 edge2 = this->getPoint3() - this->getPoint1();
 
-    const Vector3 h = transformed_ray.direction() ^ edge2;
-    const double a = edge1 * h;
+    const Vector3 h = transformed_ray.direction().cross(edge2);
+    const double a = edge1.dot(h);
 
     if (a > -epsilon && a < epsilon) {
         return false;
@@ -36,34 +36,37 @@ bool Triangle::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) c
 
     const double f = 1.0 / a;
     const Vector3 s = transformed_ray.origin() - this->getPoint1();
-    const double u = f * (s * h);
+    const double u = f * s.dot(h);
 
     if (u < 0.0 || u > 1.0) {
         return false;
     }
 
-    const Vector3 q = s ^ edge1;
+    const Vector3 q = s.cross(edge1);
     const double v = f * (transformed_ray.direction() * q);
 
     if (v < 0.0 || u + v > 1.0) {
         return false;
     }
 
-    const double t = f * (edge2 * q);
+    const double t_local = f * edge2.dot(q);
+    Point3 world_hit_point = transform * transformed_ray.at(t_local);
+    const double t_global = (world_hit_point - ray.origin()).dot(ray.direction());
 
-    if (t > t_min && t < t_max) {
-        rec.t = t;
-        rec.p = transform * transformed_ray.at(t);
-
-        Vector3 local_normal = edge1 ^ edge2;
-        Vector3 world_normal = (inverseTransposeTransform * local_normal).normalize();
-        rec.set_face_normal(ray, world_normal);
-
-        rec.material = material;
-        return true;
+    if (t_global < t_min || t_global > t_max) {
+        return false;
     }
 
-    return false;
+    rec.t = t_global;
+    rec.p = world_hit_point;
+
+    Vector3 local_normal = edge1.cross(edge2);
+    Vector3 world_normal = (inverseTransposeTransform * local_normal).normalize();
+    rec.set_face_normal(ray, world_normal);
+
+    rec.material = material;
+
+    return true;
 }
 
 MeshTriangle::MeshTriangle(std::shared_ptr<Point3> p1, std::shared_ptr<Point3> p2,
@@ -128,7 +131,6 @@ bool MeshTriangle::hit(const Ray& ray, double t_min, double t_max, HitRecord& re
     if (t > t_min && t < t_max) {
 
         const double w = 1.0 - u - v;
-        ;
         rec.t = t;
         rec.normal = ((*normal1 * w) + (*normal2 * u) + (*normal3 * v)).normalize();
         return true;
