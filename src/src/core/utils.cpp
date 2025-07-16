@@ -51,7 +51,12 @@ Matrix orthonormalBasisContaining(const Vector3& v) {
 Vector3 refract(const Vector3& uv, const Vector3& n, double etai_over_etat) {
     auto cos_theta = std::fmin((-uv).dot(n), 1.0);
     Vector3 r_out_perp = (uv + n * cos_theta) * etai_over_etat;
-    Vector3 r_out_parallel = n * -sqrt(std::abs(1.0 - r_out_perp.magnitude() * r_out_perp.magnitude()));
+    Vector3 r_out_parallel = n * -sqrt(fabs(1.0 - sqr(r_out_perp.magnitude())));
+
+    if (sqr(r_out_perp.magnitude()) > 1.0) {
+        return Vector3(0, 0, 0);
+    }
+    
     return r_out_perp + r_out_parallel;
 }
 

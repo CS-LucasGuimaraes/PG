@@ -57,11 +57,20 @@ bool Mesh::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const
 
     rec.t = t_max;
     for (const auto& triangle : mesh) {
-        triangle.hit(transformed_ray, 0.001, rec.t, rec);
+        triangle.hit(transformed_ray, t_min, rec.t, rec);
     }
 
+    Point3 world_p;
+    double world_t = INFINITY;
+
     if (rec.t < t_max) {
-        rec.p = transform * transformed_ray.at(rec.t);
+        world_p = transform * transformed_ray.at(rec.t);
+        world_t = (world_p - ray.origin()).dot(ray.direction().normalize());
+    }
+
+    if (world_t < t_max) {
+        rec.p = world_p;
+        rec.t = world_t;
         Vector3 world_normal = (inverseTransposeTransform * rec.normal).normalize();
         rec.set_face_normal(ray, world_normal);
         rec.material = material;

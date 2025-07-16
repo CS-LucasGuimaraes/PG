@@ -10,32 +10,32 @@ definitions:
     # Materiais das paredes
     parede_branca: &branco
       color: [0.73, 0.73, 0.73]
-      ka: [1.0, 1.0, 1.0]
+      ka: [0.73, 0.73, 0.73]
       ks: [0.0, 0.0, 0.0]
       ns: 10
 
     parede_vermelha: &vermelho
       color: [0.65, 0.05, 0.05]
-      ka: [1.0, 1.0, 1.0]
+      ka: [0.65, 0.05, 0.05]
       ks: [0.0, 0.0, 0.0]
       ns: 10
 
     parede_verde: &verde
       color: [0.12, 0.45, 0.15]
-      ka: [1.0, 1.0, 1.0]
+      ka: [0.12, 0.45, 0.15]
       ks: [0.0, 0.0, 0.0]
       ns: 10
       
     # Materiais para os objetos internos
     bloco_azul: &azul
       color: [0.1, 0.2, 0.8]
-      ka: [0.8, 0.8, 0.8]
+      ka: [0.1, 0.2, 0.8]
       ks: [0.3, 0.3, 0.3]
       ns: 64
 
     bloco_laranja: &laranja
       color: [0.9, 0.5, 0.1]
-      ka: [0.8, 0.8, 0.8]
+      ka: [0.9, 0.5, 0.1]
       ks: [0.2, 0.2, 0.2]
       ns: 32
       
@@ -47,7 +47,7 @@ definitions:
 
     esfera_vidro: &vidro
       color: [1.0, 1.0, 1.0]
-      ka: [0.0, 0.0, 0.0]
+      ka: [1.0, 1.0, 1.0]
       ks: [0.1, 0.1, 0.1]
       ns: 256
       ni: 1.52
@@ -69,6 +69,9 @@ lights:
   - name: Luz do Teto
     position: [278, 548, 278]
     color: [1.0, 1.0, 1.0]
+  - name: Flash da Câmera
+    position: [278, 278, -800]
+    color: [0.5, 0.5, 0.5]
 
 # --- Objetos na Cena ---
 objects:
