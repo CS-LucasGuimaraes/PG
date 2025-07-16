@@ -3,10 +3,10 @@
 
 #include "prism_export.h"
 
+#include "Prism/core/color.hpp"
 #include "Prism/objects/objects.hpp"
 #include "Prism/scene/camera.hpp"
 #include "Prism/scene/light.hpp"
-#include "Prism/core/color.hpp"
 
 #include <filesystem>
 #include <memory>
@@ -66,8 +66,8 @@ class PRISM_EXPORT Scene {
     Color trace(const Ray& ray, int depth) const;
 
     std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene
-    std::vector<std::unique_ptr<Light>> lights_; ///< Collection of light sources in the scene
-    Color ambient_color_ = Color(0.1, 0.1, 0.1); ///< Ambient color for the scene
+    std::vector<std::unique_ptr<Light>> lights_;   ///< Collection of light sources in the scene
+    Color ambient_color_ = Color(0.1, 0.1, 0.1);   ///< Ambient color for the scene
     Camera camera_;                                ///< The camera used to view the scene
 };
 } // namespace Prism

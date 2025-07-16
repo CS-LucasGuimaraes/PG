@@ -56,7 +56,7 @@ Vector3 refract(const Vector3& uv, const Vector3& n, double etai_over_etat) {
     if (sqr(r_out_perp.magnitude()) > 1.0) {
         return Vector3(0, 0, 0);
     }
-    
+
     return r_out_perp + r_out_parallel;
 }
 

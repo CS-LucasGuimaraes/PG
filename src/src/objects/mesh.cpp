@@ -1,6 +1,7 @@
 #include "Prism/objects/mesh.hpp"
 
 #include "Prism/core/matrix.hpp"
+
 #include <cmath>
 
 namespace Prism {
@@ -19,14 +20,9 @@ Mesh::Mesh(std::filesystem::path& path) {
     }
 
     for (auto& face : reader.faces) {
-        mesh.emplace_back(
-            points[face.vertex_indices[0]],
-            points[face.vertex_indices[1]],
-            points[face.vertex_indices[2]],
-            normals[face.normal_indices[0]],
-            normals[face.normal_indices[1]],
-            normals[face.normal_indices[2]]
-        );
+        mesh.emplace_back(points[face.vertex_indices[0]], points[face.vertex_indices[1]],
+                          points[face.vertex_indices[2]], normals[face.normal_indices[0]],
+                          normals[face.normal_indices[1]], normals[face.normal_indices[2]]);
     }
 };
 
@@ -41,14 +37,9 @@ Mesh::Mesh(ObjReader& reader) : material(std::move(reader.curMaterial)) {
     }
 
     for (auto& face : reader.faces) {
-        mesh.emplace_back(
-            points[face.vertex_indices[0]],
-            points[face.vertex_indices[1]],
-            points[face.vertex_indices[2]],
-            normals[face.normal_indices[0]],
-            normals[face.normal_indices[1]],
-            normals[face.normal_indices[2]]
-        );
+        mesh.emplace_back(points[face.vertex_indices[0]], points[face.vertex_indices[1]],
+                          points[face.vertex_indices[2]], normals[face.normal_indices[0]],
+                          normals[face.normal_indices[1]], normals[face.normal_indices[2]]);
     }
 };
 

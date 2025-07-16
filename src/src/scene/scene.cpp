@@ -147,10 +147,10 @@ Color Scene::trace(const Ray& ray, int depth) const {
             refraction_color = trace(refracted_ray, depth - 1);
         }
 
-        Color trasmited_color =  reflection_color * reflectance + refraction_color * (1.0 - reflectance);
+        Color trasmited_color =
+            reflection_color * reflectance + refraction_color * (1.0 - reflectance);
         final_color = final_color * opacity + trasmited_color * (1.0 - opacity);
-    } 
-    else if (mat->ks.r > 0 || mat->ks.g > 0 || mat->ks.b > 0) {
+    } else if (mat->ks.r > 0 || mat->ks.g > 0 || mat->ks.b > 0) {
         Vector3 reflect_dir = ray.direction() - rec.normal * 2 * ray.direction().dot(rec.normal);
         Ray reflection_ray(rec.p, reflect_dir);
         final_color += mat->ks * trace(reflection_ray, depth - 1);

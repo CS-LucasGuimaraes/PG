@@ -55,8 +55,8 @@ Vector3 PRISM_EXPORT refract(const Vector3& uv, const Vector3& n, double etai_ov
 
 /**
  * @brief Calcs the reflectance using Schlick's approximation.
- * This function computes the reflectance based on the angle of incidence and the index of refraction
- * using Schlick's approximation.
+ * This function computes the reflectance based on the angle of incidence and the index of
+ * refraction using Schlick's approximation.
  * @param cosine The cosine of the angle between the incident vector and the normal.
  * @param ref_idx The index of refraction of the material.
  * @return The reflectance value as a double, which is the probability of reflection at the
@@ -64,7 +64,6 @@ Vector3 PRISM_EXPORT refract(const Vector3& uv, const Vector3& n, double etai_ov
  * This value is used in ray tracing to determine how much light is reflected versus refracted.
  */
 double PRISM_EXPORT schlick(double cosine, double ref_idx);
-
 
 } // namespace Prism
 
