@@ -22,6 +22,7 @@
 #include <iostream>
 #include <random>
 #include <sstream>
+#include <thread>
 
 namespace Prism {
 
@@ -182,18 +183,55 @@ Color Scene::trace(const Ray& ray, int depth) const {
     return final_color.clamp();
 }
 
+void Scene::render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done, std::mutex& progress_mutex) const {
+    const int ANTI_ALIASING_SAMPLES = 16;
+    const int MAX_DEPTH = 5;
+    const int total_pixels_global = camera_.pixel_height * camera_.pixel_width;
+    int last_progress_percent = -1;
+
+    thread_local std::mt19937 generator(std::random_device{}());
+    std::uniform_real_distribution<double> distribution(0.0, 1.0);
+
+    for (int y = start_y; y < end_y; ++y) {
+        for (int x = 0; x < camera_.pixel_width; ++x) {
+            Color pixel_color(0, 0, 0);
+            for (int s = 0; s < ANTI_ALIASING_SAMPLES; ++s) {
+                double random_dx = distribution(generator) - 0.5;
+                double random_dy = distribution(generator) - 0.5;
+
+                // Corrigi a chamada de `pixel_00_loc` para ser um acesso de membro.
+                Point3 pixel_center = camera_.pixel_00_loc() +
+                                      (camera_.pixel_delta_u() * x) -
+                                      (camera_.pixel_delta_v() * y);
+
+                Point3 sample_target = pixel_center +
+                                       (camera_.pixel_delta_u() * random_dx) +
+                                       (camera_.pixel_delta_v() * random_dy);
+
+                Ray sample_ray(camera_.pos, sample_target);
+                pixel_color += trace(sample_ray, MAX_DEPTH);
+            }
+
+            buffer[y * camera_.pixel_width + x] = pixel_color / static_cast<double>(ANTI_ALIASING_SAMPLES);
+
+            {
+                std::lock_guard<std::mutex> lock(progress_mutex); // Trava o mutex
+                pixels_done++;
+                int current_progress_percent = static_cast<int>((static_cast<double>(pixels_done) / total_pixels_global) * 100.0);
+                if (current_progress_percent > last_progress_percent) {
+                    last_progress_percent = current_progress_percent;
+                    Style::logStatusBar(static_cast<double>(current_progress_percent) / 100.0);
+                }
+            }
+        }
+    }
+}
+
 void Scene::render() const {
     std::filesystem::path output_dir = "./data/output";
     std::filesystem::create_directories(output_dir);
     auto filename = generate_filename();
     auto full_path = output_dir / filename;
-
-    std::ofstream image_file(full_path, std::ios::trunc);
-    if (!image_file.is_open()) {
-        Style::logError("could not open the file for writing.");
-        return;
-    }
-
     auto clean_path = std::filesystem::weakly_canonical(output_dir);
 
     Style::logInfo("Output directory: " + Prism::Style::CYAN + clean_path.string());
@@ -201,49 +239,40 @@ void Scene::render() const {
 
     auto start_time = std::chrono::steady_clock::now();
 
+    const int num_threads = std::thread::hardware_concurrency();
+    Style::logInfo("Using " + std::to_string(num_threads) + " threads.");
+
+    std::vector<std::thread> threads;
+    std::vector<Color> image_buffer(camera_.pixel_width * camera_.pixel_height);
+    
+    int pixels_done = 0;
+    std::mutex progress_mutex;
+
+    int rows_per_thread = camera_.pixel_height / num_threads;
+
+    for (int i = 0; i < num_threads; ++i) {
+        int start_y = i * rows_per_thread;
+        int end_y = (i == num_threads - 1) ? camera_.pixel_height : start_y + rows_per_thread;
+
+        threads.emplace_back(&Scene::render_tile, this, std::ref(image_buffer), start_y, end_y, std::ref(pixels_done), std::ref(progress_mutex));
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    std::ofstream image_file(full_path, std::ios::trunc);
+    if (!image_file.is_open()) {
+        Style::logError("could not open the file for writing.");
+        return;
+    }
+
     image_file << "P3\n" << camera_.pixel_width << " " << camera_.pixel_height << "\n255\n";
 
-    const int ANTI_ALIASING_SAMPLES = 16;
-    const int MAX_DEPTH = 5;
-
-    thread_local std::mt19937 generator(std::random_device{}());
-    std::uniform_real_distribution<double> distribution(0.0, 1.0);
-
-    int total_pixels = camera_.pixel_height * camera_.pixel_width;
-    int pixels_done = 0;
-    const int progress_bar_width = 25;
-    int last_progress_percent = -1;
-
-    for (int y = 0; y < camera_.pixel_height; ++y) {
-        for (int x = 0; x < camera_.pixel_width; ++x) {
-
-            Color pixel_color(0, 0, 0);
-
-            for (int s = 0; s < ANTI_ALIASING_SAMPLES; ++s) {
-                double random_dx = distribution(generator) - 0.5;
-                double random_dy = distribution(generator) - 0.5;
-
-                Point3 sample_target = camera_.pixel_00_loc() +
-                                       (camera_.pixel_delta_u() * (x + random_dx)) -
-                                       (camera_.pixel_delta_v() * (y + random_dy));
-
-                Ray sample_ray(camera_.pos, sample_target);
-
-                pixel_color += trace(sample_ray, MAX_DEPTH);
-            }
-
-            image_file << pixel_color / static_cast<double>(ANTI_ALIASING_SAMPLES) << '\n';
-
-            pixels_done++;
-            int current_progress_percent =
-                static_cast<int>((static_cast<double>(pixels_done) / total_pixels) * 100.0);
-
-            if (current_progress_percent > last_progress_percent) {
-                last_progress_percent = current_progress_percent;
-                Style::logStatusBar(static_cast<double>(current_progress_percent) / 100.0);
-            }
-        }
+    for (const auto& color : image_buffer) {
+        image_file << color << "\n";
     }
+
     image_file.close();
 
     auto end_time = std::chrono::steady_clock::now();

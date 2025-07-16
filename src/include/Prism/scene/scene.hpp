@@ -21,6 +21,7 @@
 #include <memory>
 #include <ostream>
 #include <vector>
+#include <mutex>
 
 namespace Prism {
 
@@ -77,6 +78,8 @@ class PRISM_EXPORT Scene {
     bool is_in_shadow(const std::unique_ptr<Light>& light, const HitRecord& rec) const;
 
     bool hit_closest(const Ray& ray, double t_min, double t_max, HitRecord& rec) const;
+
+    void render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done, std::mutex& progress_mutex) const;
 
     std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene
     std::vector<std::unique_ptr<Light>> lights_;   ///< Collection of light sources in the scene
