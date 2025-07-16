@@ -12,15 +12,22 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 namespace Prism {
 
 class ObjReader {
   public:
+    struct FaceIndices {
+        std::array<unsigned int, 3> vertex_indices;
+        std::array<unsigned int, 3> normal_indices;
+    };
+
     std::shared_ptr<Material> curMaterial;
     std::vector<std::array<double, 3>> vertices;
-    std::vector<std::array<unsigned int, 3>> triangles;
-
+    std::vector<std::array<double, 3>> normals;
+    std::vector<FaceIndices> faces;
+        
     ObjReader(const std::string& filename) {
         curMaterial = std::make_shared<Material>();
 
@@ -51,16 +58,23 @@ class ObjReader {
                 double x, y, z;
                 iss >> x >> y >> z;
                 vertices.push_back({x, y, z});
+            } else if (prefix == "vn") {
+                double nx, ny, nz;
+                iss >> nx >> ny >> nz;
+                normals.push_back({nx, ny, nz});
             } else if (prefix == "f") {
-                unsigned int vi[3], ni[3];
-                char slash;
-                int _; // for skipping texture indices
+                FaceIndices face;
+                std::string vertex_info;
                 for (int i = 0; i < 3; ++i) {
-                    iss >> vi[i] >> slash >> _ >> slash >> ni[i];
-                    --vi[i];
-                    --ni[i];
+                    iss >> vertex_info;
+                    std::replace(vertex_info.begin(), vertex_info.end(), '/', ' ');
+                    std::istringstream v_iss(vertex_info);
+                    unsigned int t_idx;
+                    v_iss >> face.vertex_indices[i] >> t_idx >> face.normal_indices[i];
+                    --face.vertex_indices[i]; // Convert to 0-based index
+                    --face.normal_indices[i]; // Convert to 0-based index
                 }
-                triangles.push_back({vi[0], vi[1], vi[2]});
+                faces.push_back(face);
             }
         }
 

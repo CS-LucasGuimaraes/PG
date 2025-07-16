@@ -5,7 +5,7 @@
 # It sets global settings and includes the sub-projects.
 # ===================================================================
 cmake_minimum_required(VERSION 3.22)
-project(Prism VERSION 0.1.0 LANGUAGES CXX)
+project(Prism VERSION 0.2.0 LANGUAGES CXX)
 
 # Set the policy for FetchContent to use modern, safer behavior.
 cmake_policy(SET CMP0135 NEW)

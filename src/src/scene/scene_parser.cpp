@@ -45,6 +45,13 @@ Vector3 parseVector(const YAML::Node& node) {
     return Vector3(node[0].as<double>(), node[1].as<double>(), node[2].as<double>());
 }
 
+Color parseColor(const YAML::Node& node) {
+    if (!node.IsSequence() || node.size() != 3) {
+        throw std::runtime_error("Parsing error: Malformed color.");
+    }
+    return Color(node[0].as<double>(), node[1].as<double>(), node[2].as<double>());
+}
+
 // Converts a YAML node with material properties to a Material
 std::shared_ptr<Material> parseMaterial(const YAML::Node& node) {
     auto mat = std::make_shared<Material>();
@@ -54,11 +61,11 @@ std::shared_ptr<Material> parseMaterial(const YAML::Node& node) {
         mat->color = Color(v.x, v.y, v.z);
     }
     if (node["ka"])
-        mat->ka = parseVector(node["ka"]);
+        mat->ka = parseColor(node["ka"]);
     if (node["ks"])
-        mat->ks = parseVector(node["ks"]);
+        mat->ks = parseColor(node["ks"]);
     if (node["ke"])
-        mat->ke = parseVector(node["ke"]);
+        mat->ke = parseColor(node["ke"]);
     if (node["ns"])
         mat->ns = node["ns"].as<double>();
     if (node["ni"])
@@ -125,7 +132,15 @@ Scene SceneParser::parse() {
                   cam_node["viewport_height"].as<double>(), cam_node["viewport_width"].as<double>(),
                   cam_node["image_height"].as<int>(), cam_node["image_width"].as<int>());
 
-    Scene scene(std::move(camera));
+    Color ambient_light(0.1, 0.1, 0.1); // Valor padrão
+    if (root["ambient_light"]) {
+        Vector3 v = parseVector(root["ambient_light"]);
+        ambient_light = Color(v.x, v.y, v.z);
+    } else {
+        Style::logWarning("Ambient light not defined. Using default (0.1, 0.1, 0.1).");
+    }
+
+    Scene scene(std::move(camera), ambient_light);
 
     // Parse Material Definitions (for reuse)
     std::map<std::string, std::shared_ptr<Material>> materials;
@@ -134,6 +149,18 @@ Scene SceneParser::parse() {
             std::string name = mat_node.first.as<std::string>();
             materials[name] = parseMaterial(mat_node.second);
         }
+    }
+
+    if (root["lights"] && root["lights"].IsSequence()) {
+        for (const auto& light_node : root["lights"]) {
+            Point3 pos = parsePoint(light_node["position"]);
+            Vector3 color_vec = parseVector(light_node["color"]);
+            Color color(color_vec.x, color_vec.y, color_vec.z);
+            scene.addLight(std::make_unique<Light>(pos, color));
+        }
+    }
+    else {
+        Style::logWarning("'lights' node not found or is not a list. No lights will be added.");
     }
 
     // Parse Objects
@@ -180,7 +207,7 @@ Scene SceneParser::parse() {
             // Overrides the .obj material with the one from the .yml, if specified
             if (obj_node["material"]) {
                 auto mesh_ptr = static_cast<Mesh*>(object.get());
-                // (A material setter would be needed in the Mesh class here)
+                mesh_ptr->setMaterial(material);
             }
         } else {
             Style::logWarning("Unknown object type: " + type + ". Skipping this object.");

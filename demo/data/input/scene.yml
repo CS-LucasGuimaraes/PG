@@ -1,93 +1,143 @@
 # -----------------------------------------------------------------
-# Exemplo de Arquivo de Cena para o Renderizador Prism
-# Este arquivo demonstra o uso de múltiplos objetos, materiais
-# e transformações para criar uma cena complexa.
+# Cena da Cornell Box Final - Com Esferas em Destaque (Avançadas)
 # -----------------------------------------------------------------
 
-# Definições reutilizáveis da cena, como materiais.
-# Usamos âncoras (&) para definir um material e aliases (*) para reutilizá-lo.
+ambient_light: [0.1, 0.1, 0.1]
+
+# --- Definições de Materiais ---
 definitions:
   materials:
-    # Material fosco para o chão
-    chao_cinza: &material_chao
-      color: [0.8, 0.8, 0.8]
-      ka: [0.1, 0.1, 0.1] # Pouca reflexão ambiente
-      ks: [0.1, 0.1, 0.1] # Pouco brilho especular
+    # Materiais das paredes
+    parede_branca: &branco
+      color: [0.73, 0.73, 0.73]
+      ka: [0.73, 0.73, 0.73]
+      ks: [0.0, 0.0, 0.0]
       ns: 10
 
-    # Material de plástico vermelho, com brilho moderado
-    plastico_vermelho: &material_esfera_vermelha
-      color: [1.0, 0.2, 0.2]
-      ka: [0.2, 0.05, 0.05]
-      ks: [0.7, 0.7, 0.7] # Brilho especular forte
-      ns: 128 # Expoente de brilho alto para um highlight pequeno e intenso
+    parede_vermelha: &vermelho
+      color: [0.65, 0.05, 0.05]
+      ka: [0.65, 0.05, 0.05]
+      ks: [0.0, 0.0, 0.0]
+      ns: 10
 
-    # Material metálico/refletivo para o cubo
-    metal_azul: &material_cubo_metalico
-      color: [0.2, 0.3, 1.0]
-      ka: [0.1, 0.1, 0.2]
-      ks: [0.9, 0.9, 0.9] # Reflexão especular muito alta
+    parede_verde: &verde
+      color: [0.12, 0.45, 0.15]
+      ka: [0.12, 0.45, 0.15]
+      ks: [0.0, 0.0, 0.0]
+      ns: 10
+      
+    # Materiais para os objetos internos
+    bloco_azul: &azul
+      color: [0.1, 0.2, 0.8]
+      ka: [0.1, 0.2, 0.8]
+      ks: [0.3, 0.3, 0.3]
+      ns: 64
+
+    bloco_laranja: &laranja
+      color: [0.9, 0.5, 0.1]
+      ka: [0.9, 0.5, 0.1]
+      ks: [0.2, 0.2, 0.2]
+      ns: 32
+      
+    esfera_espelho: &espelho
+      color: [0.0, 0.0, 0.0]
+      ka: [0.0, 0.0, 0.0]
+      ks: [0.98, 0.98, 0.98]
+      ns: 2048
+
+    esfera_vidro: &vidro
+      color: [1.0, 1.0, 1.0]
+      ka: [1.0, 1.0, 1.0]
+      ks: [0.1, 0.1, 0.1]
       ns: 256
+      ni: 1.52
+      d: 0.05
 
-    # Material de vidro para o triângulo
-    vidro_transparente: &material_vidro
-      color: [0.9, 0.9, 1.0]  # Cor levemente azulada
-      ka: [0.1, 0.1, 0.1]
-      ks: [0.8, 0.8, 0.8]
-      ns: 200
-      ni: 1.5   # Índice de refração (típico para vidro)
-      d: 0.1    # Opacidade (valor 'd' baixo significa mais transparente)
-
-# -----------------------------------------------------------------
-# Configurações da Câmera
-# -----------------------------------------------------------------
+# --- Configurações da Câmera ---
 camera:
-  image_width: 960
-  image_height: 540
+  image_width: 800
+  image_height: 800
   screen_distance: 1.5
   viewport_width: 2.0
-  viewport_height: 1.125
-  lookfrom: [0, 2, 8]   # Posição da câmera
-  lookat: [0, 0, 0]     # Ponto para onde a câmera olha
-  vup: [0, 1, 0]        # Vetor "para cima"
+  viewport_height: 2.0
+  lookfrom: [278, 278, -800]
+  lookat: [278, 278, 0]
+  vup: [0, 1, 0]
 
-# -----------------------------------------------------------------
-# Lista de Objetos na Cena
-# -----------------------------------------------------------------
+# --- Fontes de Luz ---
+lights:
+  - name: Luz do Teto
+    position: [278, 548, 278]
+    color: [1.0, 1.0, 1.0]
+  - name: Flash da Câmera
+    position: [278, 278, -800]
+    color: [0.5, 0.5, 0.5]
+
+# --- Objetos na Cena ---
 objects:
+  # As 5 paredes da caixa
   - name: Chão
     type: plane
-    point_on_plane: [0, -1, 0]  # Ponto que define a altura do plano
-    normal: [0, 1, 0]           # Vetor normal aponta para cima
-    material: *material_chao    # Reutiliza o material do chão definido acima
+    point_on_plane: [0, 0, 0]
+    normal: [0, 1, 0]
+    material: *branco
+  - name: Teto
+    type: plane
+    point_on_plane: [0, 555, 0]
+    normal: [0, -1, 0]
+    material: *branco
+  - name: Parede do Fundo
+    type: plane
+    point_on_plane: [0, 0, 555]
+    normal: [0, 0, -1]
+    material: *branco
+  - name: Parede Direita (Verde)
+    type: plane
+    point_on_plane: [555, 0, 0]
+    normal: [-1, 0, 0]
+    material: *verde
+  - name: Parede Esquerda (Vermelha)
+    type: plane
+    point_on_plane: [0, 0, 0]
+    normal: [1, 0, 0]
+    material: *vermelho
 
-  - name: Esfera Vermelha Principal
-    type: sphere
-    center: [-1.5, 0, 0]
-    radius: 1.0
-    material: *material_esfera_vermelha # Reutiliza o material de plástico
-
-  - name: Malha de Cubo Metálico
+  # Blocos com tamanho e posição originais
+  - name: Bloco Alto (Laranja)
     type: mesh
-    path: "./cubo.obj" # Caminho para o arquivo .obj
-    material: *material_cubo_metalico # Reutiliza o material metálico
-    # Múltiplas transformações são aplicadas em ordem
+    path: "cubo.obj"
+    material: *laranja
     transform:
       - type: scaling
-        factors: [0.7, 0.7, 0.7]  # Primeiro, diminui a escala do cubo
+        factors: [82.5, 165, 82.5] 
       - type: rotation
-        angle: 45 # Em graus (o parser converterá para radianos)
-        axis: [0, 1, 0] # Rotaciona em torno do eixo Y
+        angle: 18
+        axis: [0, 1, 0]
       - type: translation
-        vector: [1.5, 0, -1]  # Por último, move o cubo para sua posição final
+        vector: [180, 165, 250] 
 
-  - name: Triângulo de Vidro
-    type: triangle
-    # Vértices definidos diretamente no arquivo de cena
-    p1: [-3, -1, -5]
-    p2: [3, -1, -5]
-    p3: [0, 4, -5]
-    material: *material_vidro # Reutiliza o material de vidro
+  - name: Bloco Baixo (Azul)
+    type: mesh
+    path: "cubo.obj"
+    material: *azul
     transform:
+      - type: scaling
+        factors: [82.5, 82.5, 82.5]
+      - type: rotation
+        angle: -20
+        axis: [0, 1, 0]
       - type: translation
-        vector: [0, 0, 2] # Move o triângulo um pouco para frente
+        vector: [370, 82.5, 150]
+
+  # ESFERAS COM POSIÇÃO AJUSTADA (AINDA MAIS PERTO)
+  - name: Esfera de Vidro
+    type: sphere
+    center: [380, 90, -140]  # Z foi de 120 para 80
+    radius: 90
+    material: *vidro
+
+  - name: Esfera de Espelho
+    type: sphere
+    center: [180, 90, -200] # Z foi de 180 para 100
+    radius: 90
+    material: *espelho

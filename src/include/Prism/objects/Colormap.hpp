@@ -72,19 +72,19 @@ class colormap {
                 double ksR, ksG, ksB;
                 iss >> ksR >> ksG >> ksB;
                 if (!currentMaterial.empty()) {
-                    mp[currentMaterial].ks = Vector3(ksR, ksG, ksB);
+                    mp[currentMaterial].ks = Color(ksR, ksG, ksB);
                 }
             } else if (keyword == "Ke") {
                 double keR, keG, keB;
                 iss >> keR >> keG >> keB;
                 if (!currentMaterial.empty()) {
-                    mp[currentMaterial].ke = Vector3(keR, keG, keB);
+                    mp[currentMaterial].ke = Color(keR, keG, keB);
                 }
             } else if (keyword == "Ka") {
                 double kaR, kaG, kaB;
                 iss >> kaR >> kaG >> kaB;
                 if (!currentMaterial.empty()) {
-                    mp[currentMaterial].ka = Vector3(kaR, kaG, kaB);
+                    mp[currentMaterial].ka = Color(kaR, kaG, kaB);
                 }
             } else if (keyword == "Ns") {
                 iss >> mp[currentMaterial].ns;

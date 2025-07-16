@@ -1,4 +1,5 @@
 #include "Prism/core/color.hpp"
+#include <algorithm>
 
 namespace Prism {
 
@@ -11,6 +12,33 @@ Color::Color(int red, int green, int blue)
       b(static_cast<double>(blue) / 255.0) {
 }
 Color::Color(const Color& other) : r(other.r), g(other.g), b(other.b) {
+}
+
+Color Color::operator*(Color other) const {
+    return Color(r * other.r, g * other.g, b * other.b);
+}
+
+Color Color::operator*(double scalar) const {
+    return Color(r * scalar, g * scalar, b * scalar);
+}
+
+Color Color::operator+(Color other) const {
+    return Color(r + other.r, g + other.g, b + other.b);
+}
+
+Color Color::operator+=(Color other) {
+    r += other.r;
+    g += other.g;
+    b += other.b;
+    return *this;
+}
+
+Color& Color::clamp() {
+    r = std::max(0.0,std::min(r, 1.0));
+    g = std::max(0.0,std::min(g, 1.0));
+    b = std::max(0.0,std::min(b, 1.0));
+    
+    return *this;
 }
 
 } // namespace Prism

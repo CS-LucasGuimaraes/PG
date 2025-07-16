@@ -5,6 +5,8 @@
 
 #include "Prism/objects/objects.hpp"
 #include "Prism/scene/camera.hpp"
+#include "Prism/scene/light.hpp"
+#include "Prism/core/color.hpp"
 
 #include <filesystem>
 #include <memory>
@@ -28,7 +30,7 @@ class PRISM_EXPORT Scene {
      * @param camera The Camera object that defines the viewpoint and projection parameters for
      * rendering the scene.
      */
-    explicit Scene(Camera camera);
+    explicit Scene(Camera camera, Color ambient_light = Color(0.1, 0.1, 0.1));
 
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;
@@ -44,6 +46,14 @@ class PRISM_EXPORT Scene {
     void addObject(std::unique_ptr<Object> object);
 
     /**
+     * @brief Adds a light source to the scene.
+     * @param light The Light object to be added to the scene.
+     * This method stores the light in the scene's collection, allowing it to be used during
+     * rendering for illumination calculations.
+     */
+    void addLight(std::unique_ptr<Light> light);
+
+    /**
      * @brief Renders the scene from the camera's perspective.
      * This method iterates over all objects in the scene, checks for ray-object intersections, and
      * generates the final image. The rendered image is saved to a file with a timestamped filename.
@@ -53,7 +63,11 @@ class PRISM_EXPORT Scene {
     void render() const;
 
   private:
+    Color trace(const Ray& ray, int depth) const;
+
     std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene
+    std::vector<std::unique_ptr<Light>> lights_; ///< Collection of light sources in the scene
+    Color ambient_color_ = Color(0.1, 0.1, 0.1); ///< Ambient color for the scene
     Camera camera_;                                ///< The camera used to view the scene
 };
 } // namespace Prism
