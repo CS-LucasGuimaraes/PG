@@ -54,21 +54,24 @@ bool Mesh::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const
     Point3 world_p;
     double world_t = INFINITY;
 
-    if (rec.t < t_max) {
+    if (rec.t < t_max) { // If a hit was found, transform the hit point back to world space
         world_p = transform * transformed_ray.at(rec.t);
         world_t = (world_p - ray.origin()).dot(ray.direction().normalize());
     }
 
-    if (world_t < t_max) {
-        rec.p = world_p;
-        rec.t = world_t;
-        Vector3 world_normal = (inverseTransposeTransform * rec.normal).normalize();
-        rec.set_face_normal(ray, world_normal);
-        rec.material = material;
-        return true;
+    if (world_t < t_min || world_t > t_max) {
+        return false;
     }
 
-    return false;
+    rec.t = world_t;
+    rec.p = world_p;
+
+    Vector3 world_normal = (inverseTransposeTransform * rec.normal).normalize();
+    rec.set_face_normal(ray, world_normal);
+
+    rec.material = material;
+
+    return true;
 };
 
 void Mesh::setMaterial(std::shared_ptr<Material> new_material) {

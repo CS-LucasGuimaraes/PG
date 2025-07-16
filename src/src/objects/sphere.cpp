@@ -33,21 +33,30 @@ bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) con
     }
     auto sqrtd = sqrt(discriminant);
 
+    
     auto root = (-halfb - sqrtd) / a;
-    if (root < t_min || t_max < root) {
+
+    Point3 local_hit_point = transformed_ray.at(root);
+    Point3 world_hit_point = transform * local_hit_point;
+    double t = (world_hit_point - ray.origin()).dot(ray.direction());
+
+    if (t < t_min || t > t_max) {
         root = (-halfb + sqrtd) / a;
-        if (root < t_min || t_max < root) {
+        local_hit_point = transformed_ray.at(root);
+        world_hit_point = transform * local_hit_point;
+        t = (world_hit_point - ray.origin()).dot(ray.direction());
+        if (t < t_min || t > t_max) {
             return false;
         }
     }
 
-    rec.t = root;
-    Point3 local_hit_point = transformed_ray.at(rec.t);
-    Vector3 outward_normal_local = (local_hit_point - center) / radius;
+    rec.t = t;
+    rec.p = world_hit_point;
+    
+    Vector3 normal_local = (local_hit_point - center) / radius;
+    Vector3 normal_world = (inverseTransposeTransform * normal_local).normalize();
+    rec.set_face_normal(ray, normal_world);
 
-    rec.p = transform * local_hit_point;
-    Vector3 outward_normal_world = (inverseTransposeTransform * outward_normal_local).normalize();
-    rec.set_face_normal(ray, outward_normal_world);
     rec.material = material;
 
     return true;

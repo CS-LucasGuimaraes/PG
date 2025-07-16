@@ -63,7 +63,7 @@ TEST(TransformationsTest, SphereHitWithNonUniformScale) {
 
     // Act & Assert
     EXPECT_TRUE(s->hit(ray_that_hits, 0, 100, rec));
-    EXPECT_NEAR(rec.t, 1.5, 1e-6);
+    EXPECT_NEAR(rec.t, 3, 1e-6);
 
     // As asserções mais importantes (ponto e normal em espaço global) continuam as mesmas.
     AssertPointAlmostEqual(rec.p, Point3(0, 2, 0));
