@@ -65,6 +65,10 @@ class PRISM_EXPORT Scene {
   private:
     Color trace(const Ray& ray, int depth) const;
 
+    bool is_in_shadow(const std::unique_ptr<Light>& light, const HitRecord& rec) const;
+
+    bool hit_closest(const Ray& ray, double t_min, double t_max, HitRecord& rec) const;
+
     std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene
     std::vector<std::unique_ptr<Light>> lights_;   ///< Collection of light sources in the scene
     Color ambient_color_ = Color(0.1, 0.1, 0.1);   ///< Ambient color for the scene
