@@ -1,3 +1,12 @@
+/**
+ * @file point.hpp
+ * @brief Prism Render Engine
+ *
+ * @copyright Copyright (c) 2025 src-lua
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef PRISM_POINT_HPP_
 #define PRISM_POINT_HPP_
 

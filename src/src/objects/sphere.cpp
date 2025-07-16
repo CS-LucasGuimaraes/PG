@@ -1,3 +1,12 @@
+/**
+ * @file sphere.cpp
+ * @brief Prism Render Engine
+ *
+ * @copyright Copyright (c) 2025 src-lua
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #include "Prism/objects/sphere.hpp"
 
 #include "Prism/core/matrix.hpp"
@@ -33,7 +42,6 @@ bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) con
     }
     auto sqrtd = sqrt(discriminant);
 
-    
     auto root = (-halfb - sqrtd) / a;
 
     Point3 local_hit_point = transformed_ray.at(root);
@@ -52,7 +60,7 @@ bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) con
 
     rec.t = t;
     rec.p = world_hit_point;
-    
+
     Vector3 normal_local = (local_hit_point - center) / radius;
     Vector3 normal_world = (inverseTransposeTransform * normal_local).normalize();
     rec.set_face_normal(ray, normal_world);

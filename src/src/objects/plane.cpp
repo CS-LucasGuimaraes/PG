@@ -1,3 +1,12 @@
+/**
+ * @file plane.cpp
+ * @brief Prism Render Engine
+ *
+ * @copyright Copyright (c) 2025 src-lua
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #include "Prism/objects/plane.hpp"
 
 #include "Prism/core/matrix.hpp"
@@ -29,7 +38,7 @@ bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) cons
     }
 
     rec.t = t;
-    rec.p = ray.at(t); // Ponto de volta para o espaço global
+    rec.p = ray.at(t);                      // Ponto de volta para o espaço global
     rec.set_face_normal(ray, world_normal); // Usa o raio original
     rec.material = material;
 

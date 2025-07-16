@@ -1,3 +1,12 @@
+/**
+ * @file scene.cpp
+ * @brief Prism Render Engine
+ *
+ * @copyright Copyright (c) 2025 src-lua
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #include "Prism/scene/scene.hpp"
 
 #include "Prism/core/color.hpp"
@@ -216,9 +225,9 @@ void Scene::render() const {
     std::chrono::duration<double> elapsed_seconds = end_time - start_time;
 
     Style::logDone("Rendering complete.");
-    Style::logDone("Total render time: " + Prism::Style::CYAN + std::to_string(elapsed_seconds.count()) + "s");
+    Style::logDone("Total render time: " + Prism::Style::CYAN +
+                   std::to_string(elapsed_seconds.count()) + "s");
     Style::logDone("Image saved as: " + Prism::Style::CYAN + full_path.string());
-
 }
 
 } // namespace Prism

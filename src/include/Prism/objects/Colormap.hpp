@@ -1,3 +1,11 @@
+/**
+ * @file Colormap.hpp
+ * @brief Prism Render Engine
+ *
+ * @copyright Copyright (c) 2025 src-lua
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
 #ifndef PRISM_COLORMAP_HPP_
 #define PRISM_COLORMAP_HPP_
@@ -39,7 +47,7 @@ class colormap {
     map<string, Material> mp;
 
     // Construtor
-    colormap(){};
+    colormap() {};
     colormap(string input) {
 
         // construtor: lê arquivo cores.mtl e guarda valores RGB associados a cada nome
