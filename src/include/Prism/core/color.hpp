@@ -42,17 +42,15 @@ class PRISM_EXPORT Color {
      */
     Color(const Color& other);
 
-    Color operator* (Color other) const;
+    Color operator*(Color other) const;
 
-    Color operator* (double scalar) const;
-    
-    Color operator+ (Color other) const;
+    Color operator*(double scalar) const;
 
-    Color operator+= (Color other);
+    Color operator+(Color other) const;
+
+    Color operator+=(Color other);
 
     Color& clamp();
-
-
 
     double r; ///< Red component of the color (0.0 to 1.0)
     double g; ///< Green component of the color (0.0 to 1.0)

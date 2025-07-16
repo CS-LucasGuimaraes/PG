@@ -5,6 +5,7 @@
 
 #include "Prism/objects/Colormap.hpp"
 
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -12,7 +13,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 namespace Prism {
 
@@ -27,7 +27,7 @@ class ObjReader {
     std::vector<std::array<double, 3>> vertices;
     std::vector<std::array<double, 3>> normals;
     std::vector<FaceIndices> faces;
-        
+
     ObjReader(const std::string& filename) {
         curMaterial = std::make_shared<Material>();
 

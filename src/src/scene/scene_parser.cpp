@@ -158,8 +158,7 @@ Scene SceneParser::parse() {
             Color color(color_vec.x, color_vec.y, color_vec.z);
             scene.addLight(std::make_unique<Light>(pos, color));
         }
-    }
-    else {
+    } else {
         Style::logWarning("'lights' node not found or is not a list. No lights will be added.");
     }
 

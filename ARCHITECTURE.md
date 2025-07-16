@@ -125,6 +125,7 @@ graph TD;
         SCENE["🎬 Scene"];
         CAMERA["📷 Camera"];
         SCENE_PARSER["📄 SceneParser"];
+        LIGHT["💡 Light"];
     end
 
     subgraph "External Dependency"
@@ -132,7 +133,10 @@ graph TD;
     end
 
     SCENE --> CAMERA;
+    SCENE --> LIGHT;
+    
     SCENE_PARSER --> CAMERA;
     SCENE_PARSER --> YAML_CPP;
     SCENE_PARSER --> SCENE;
+
 ```

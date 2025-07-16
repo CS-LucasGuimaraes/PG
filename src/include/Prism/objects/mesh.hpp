@@ -11,9 +11,9 @@
 #include "Prism/objects/triangle.hpp"
 
 #include <array>
+#include <filesystem>
 #include <memory>
 #include <vector>
-#include <filesystem>
 
 namespace Prism {
 
@@ -59,7 +59,7 @@ class PRISM_EXPORT Mesh : public Object {
     void setMaterial(std::shared_ptr<Material> new_material);
 
   private:
-    std::vector<std::shared_ptr<Point3>> points; ///< Points that define the vertices of the mesh
+    std::vector<std::shared_ptr<Point3>> points;   ///< Points that define the vertices of the mesh
     std::vector<std::shared_ptr<Vector3>> normals; ///< Normals for each vertex in the mesh
     std::vector<MeshTriangle>
         mesh; ///< Triangles that make up the mesh, each defined by three points
