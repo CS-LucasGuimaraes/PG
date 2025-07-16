@@ -10,6 +10,7 @@
 #include "Prism/core/color.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 namespace Prism {
 
@@ -41,6 +42,13 @@ Color Color::operator+=(Color other) {
     g += other.g;
     b += other.b;
     return *this;
+}
+
+Color Color::operator/(double scalar) const {
+    if (scalar == 0) {
+        throw std::invalid_argument("Division by zero in Color division");
+    }
+    return Color(r / scalar, g / scalar, b / scalar);
 }
 
 Color& Color::clamp() {

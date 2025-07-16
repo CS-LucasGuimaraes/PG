@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <random>
 #include <sstream>
 
 namespace Prism {
@@ -202,21 +203,45 @@ void Scene::render() const {
 
     image_file << "P3\n" << camera_.pixel_width << " " << camera_.pixel_height << "\n255\n";
 
+    const int ANTI_ALIASING_SAMPLES = 16;
+    const int MAX_DEPTH = 5;
+
+    thread_local std::mt19937 generator(std::random_device{}());
+    std::uniform_real_distribution<double> distribution(0.0, 1.0);
+
     int total_pixels = camera_.pixel_height * camera_.pixel_width;
     int pixels_done = 0;
     const int progress_bar_width = 25;
     int last_progress_percent = -1;
 
-    for (Ray const& ray : camera_) {
-        image_file << trace(ray, 5) << '\n';
+    for (int y = 0; y < camera_.pixel_height; ++y) {
+        for (int x = 0; x < camera_.pixel_width; ++x) {
 
-        pixels_done++;
-        int current_progress_percent =
-            static_cast<int>((static_cast<double>(pixels_done) / total_pixels) * 100.0);
+            Color pixel_color(0, 0, 0);
 
-        if (current_progress_percent > last_progress_percent) {
-            last_progress_percent = current_progress_percent;
-            Style::logStatusBar(static_cast<double>(current_progress_percent) / 100.0);
+            for (int s = 0; s < ANTI_ALIASING_SAMPLES; ++s) {
+                double random_dx = distribution(generator) - 0.5;
+                double random_dy = distribution(generator) - 0.5;
+
+                Point3 sample_target = camera_.pixel_00_loc() +
+                                       (camera_.pixel_delta_u() * (x + random_dx)) -
+                                       (camera_.pixel_delta_v() * (y + random_dy));
+
+                Ray sample_ray(camera_.pos, sample_target);
+
+                pixel_color += trace(sample_ray, MAX_DEPTH);
+            }
+
+            image_file << pixel_color / static_cast<double>(ANTI_ALIASING_SAMPLES) << '\n';
+
+            pixels_done++;
+            int current_progress_percent =
+                static_cast<int>((static_cast<double>(pixels_done) / total_pixels) * 100.0);
+
+            if (current_progress_percent > last_progress_percent) {
+                last_progress_percent = current_progress_percent;
+                Style::logStatusBar(static_cast<double>(current_progress_percent) / 100.0);
+            }
         }
     }
     image_file.close();

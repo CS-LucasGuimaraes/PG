@@ -30,9 +30,9 @@ Camera::Camera(const Point3& position, const Point3& target, const Vector3& upve
     Point3 top_left_corner =
         screen_center - (u * (screen_width / 2.0)) + (v * (screen_height / 2.0));
 
-    pixel_delta_u = u * (screen_width / pixel_width);
-    pixel_delta_v = v * (screen_height / pixel_height);
-    pixel_00_loc = top_left_corner + (pixel_delta_u * 0.5) - (pixel_delta_v * 0.5);
+    pixel_delta_u_ = u * (screen_width / pixel_width);
+    pixel_delta_v_ = v * (screen_height / pixel_height);
+    pixel_00_loc_ = top_left_corner + (pixel_delta_u_ * 0.5) - (pixel_delta_v_ * 0.5);
 }
 
 } // namespace Prism

@@ -81,8 +81,8 @@ class PRISM_EXPORT Camera {
          * @return A Ray object representing the ray for the current pixel.
          */
         Ray operator*() const {
-            Point3 pixel_center = camera->pixel_00_loc + (camera->pixel_delta_u * current_x) -
-                                  (camera->pixel_delta_v * current_y);
+            Point3 pixel_center = camera->pixel_00_loc_ + (camera->pixel_delta_u_ * current_x) -
+                                  (camera->pixel_delta_v_ * current_y);
 
             return Ray(camera->pos, pixel_center);
         }
@@ -138,8 +138,6 @@ class PRISM_EXPORT Camera {
     Point3 aim; ///< Point the camera is looking at (the target point)
     Vector3 up; ///< Up vector indicating the upward direction from the camera
 
-    Matrix coordinate_basis; ///< Coordinate basis matrix for the camera, defining its orientation
-                             ///< in space
 
     double screen_distance; ///< Distance from the camera to the projection screen (view plane)
     double screen_height;   ///< Height of the projection screen (view plane)
@@ -148,11 +146,23 @@ class PRISM_EXPORT Camera {
     int pixel_height; ///< Height of the image in pixels
     int pixel_width;  ///< Width of the image in pixels
 
+    Point3 pixel_00_loc() const {
+        return pixel_00_loc_;
+    }
+
+    Vector3 pixel_delta_u() const {
+        return pixel_delta_u_;
+    }
+
+    Vector3 pixel_delta_v() const {
+        return pixel_delta_v_;
+    }
+
   private:
-    Point3 pixel_00_loc;   ///< Location of the pixel at (0, 0) in the camera's view
-    Vector3 pixel_delta_u; ///< Vector representing the change in position along the u direction
+    Point3 pixel_00_loc_;   ///< Location of the pixel at (0, 0) in the camera's view
+    Vector3 pixel_delta_u_; ///< Vector representing the change in position along the u direction
                            ///< (horizontal)
-    Vector3 pixel_delta_v; ///< Vector representing the change in position along the v direction
+    Vector3 pixel_delta_v_; ///< Vector representing the change in position along the v direction
                            ///< (vertical)
 };
 

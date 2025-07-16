@@ -59,6 +59,8 @@ class PRISM_EXPORT Color {
 
     Color operator+=(Color other);
 
+    Color operator/(double scalar) const;
+
     Color& clamp();
 
     double r; ///< Red component of the color (0.0 to 1.0)
