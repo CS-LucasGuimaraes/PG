@@ -85,7 +85,7 @@ void VulkanContext::createLogicalDevice() {
 
     m_device = m_physicalDevice.createDevice(deviceCreateInfo);
 
-    // VULKAN_HPP_DEFAULT_DISPATCHER.init(m_device);
+    VULKAN_HPP_DEFAULT_DISPATCHER.init(m_device);
 
     m_computeQueue = m_device.getQueue(m_computeQueueFamilyIndex, 0); // Get the first queue
     Style::logInfo("Vulkan Logical Device and Compute Queue created.");

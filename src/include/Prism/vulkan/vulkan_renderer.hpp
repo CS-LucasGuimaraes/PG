@@ -17,14 +17,16 @@ public:
     void saveImage(const std::string& filename);
 
 private:
+    // Vulkan context reference
     VulkanContext& m_context;
     uint32_t m_imageWidth;
     uint32_t m_imageHeight;
 
-
+    // Vulkan resources
     vk::Buffer m_outputBuffer;
     VmaAllocation m_outputBufferAllocation;
 
+    // Descriptor set and pipeline objects
     vk::DescriptorSetLayout m_descriptorSetLayout;
     vk::DescriptorPool m_descriptorPool;
     vk::DescriptorSet m_descriptorSet;
@@ -32,19 +34,23 @@ private:
     vk::PipelineLayout m_pipelineLayout;
     vk::Pipeline m_computePipeline;
 
-
+    // Command buffer and synchronization objects
     vk::CommandPool m_commandPool;
     vk::CommandBuffer m_commandBuffer;
     vk::Fence m_fence;
 
+    // GPU Buffers
     vk::Buffer m_cameraBuffer;
     VmaAllocation m_cameraBufferAllocation;
 
-    vk::Buffer m_sphereBuffer;
-    VmaAllocation m_sphereBufferAllocation;
+    vk::Buffer m_objectBuffer;
+    VmaAllocation m_objectBufferAllocation;
+
+    vk::Buffer m_materialBuffer;
+    VmaAllocation m_materialBufferAllocation;
 
     
-    void createBuffers(const Camera& camera, const std::vector<GPUSphere>& spheres);
+    void createBuffers(const Camera& camera, const std::vector<GPUObject>& objects, const std::vector<GPUMaterial>& materials);
     void createDescriptorSet();
     void createComputePipeline();
     void createCommandObjects();

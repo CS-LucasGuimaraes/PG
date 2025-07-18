@@ -10,11 +10,19 @@ struct Camera {
     vec3 pixel_00_loc;
 };
 
-struct Sphere {
-    vec3 center;
-    float radius;
+struct Material {
+    vec3 color;
+    vec3 ambient;
+    vec3 specular;
+    float shininess;
 };
 
+struct SceneObject {
+    vec3 center;
+    float radius;
+    int type;
+    int material_index;
+};
 
 // ========= BUFFERS (Bindings) =========
 // Conecta o shader aos buffers que você configurou no C++
@@ -29,16 +37,14 @@ layout(set = 0, binding = 1) uniform UBO {
     Camera camera;
 } ubo;
 
-// binding 2: Buffer de armazenamento com a lista de esferas (somente leitura)
-layout(set = 0, binding = 2) readonly buffer SphereBuffer {
-    Sphere spheres[];
-} sphereBuffer;
+layout(set = 0, binding = 2) readonly buffer ObjectBuffer { SceneObject objects[]; } objectBuffer;
+layout(set = 0, binding = 3) readonly buffer MaterialBuffer { Material materials[]; } materialBuffer;
 
 
 // ========= FUNÇÃO DE INTERSEÇÃO =========
 // Lógica de Ray-Tracing para uma única esfera.
 // Retorna a distância 't' do acerto, ou um número grande se não acertar.
-float hit_sphere(in Sphere s, in vec3 ray_origin, in vec3 ray_direction) {
+float hit_sphere(in SceneObject s, in vec3 ray_origin, in vec3 ray_direction) {
     vec3 oc = ray_origin - s.center;
     float a = dot(ray_direction, ray_direction);
     float half_b = dot(oc, ray_direction);
@@ -87,20 +93,27 @@ void main() {
     // --- LÓGICA DO RAY TRACING ---
     vec3 final_color = vec3(0.5, 0.7, 1.0); // Cor do céu (padrão)
     float closest_hit = 100000.0;
+    int hit_material_index = -1;
+    vec3 hit_normal;
+
 
     // Itera por todas as esferas no buffer
-    for (int i = 0; i < sphereBuffer.spheres.length(); i++) {
-        float t = hit_sphere(sphereBuffer.spheres[i], ray_origin, ray_direction);
-        
-        // Se encontramos um acerto mais próximo do que os anteriores...
-        if (t < closest_hit) {
-            closest_hit = t;
-            // Calcula o ponto de acerto e a normal da superfície
-            vec3 hit_point = ray_origin + t * ray_direction;
-            vec3 normal = normalize(hit_point - sphereBuffer.spheres[i].center);
-            // Colore o pixel baseado na direção da normal (para visualização)
-            final_color = 0.5 * (normal + 1.0);
+    for (int i = 0; i < objectBuffer.objects.length(); i++) {
+        if (objectBuffer.objects[i].type == 0) { // Sphere
+            float t = hit_sphere(objectBuffer.objects[i], ray_origin, ray_direction);
+
+            // Se encontramos um acerto mais próximo do que os anteriores...
+            if (t < closest_hit) {
+                closest_hit = t;
+                hit_material_index = objectBuffer.objects[i].material_index;
+                vec3 hit_point = ray_origin + t * ray_direction;
+                hit_normal = normalize(hit_point - objectBuffer.objects[i].center);
+            }
         }
+    }
+
+    if (hit_material_index > -1) {
+        final_color = materialBuffer.materials[hit_material_index].color;
     }
 
     // Escreve a cor final no buffer de saída

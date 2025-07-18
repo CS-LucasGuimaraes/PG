@@ -6,26 +6,21 @@
 
 namespace Prism {
 
-struct GPUCameraData {
-    alignas(16) float position[3];
-    alignas(16) float view_u[3];
-    alignas(16) float view_v[3];
-    alignas(16) float pixel_00_loc[3];
-};
-
-struct GPUSphere {
-    alignas(16) float center[3];
-    alignas(4) float radius;
-};
+#define TYPE_SPHERE 0
 
 VulkanRenderer::VulkanRenderer(VulkanContext& context, const Camera& camera, uint32_t imageWidth, uint32_t imageHeight)
     : m_context(context), m_imageWidth(imageWidth), m_imageHeight(imageHeight) {
     try {
-        std::vector<GPUSphere> spheres;
-        spheres.push_back({{0.0f, 0.0f, -1.0f}, 0.5f});
-        spheres.push_back({{0.0f, -100.5f, -1.0f}, 100.0f});
+        std::vector<GPUMaterial> materials;
+        materials.push_back({ {1.0f, 0.5f, 0.5f} }); // Material 0: Vermelho claro
+        materials.push_back({ {0.5f, 1.0f, 0.5f} }); // Material 1: Verde claro
 
-        createBuffers(camera, spheres);
+        // 2. Crie os objetos da cena
+        std::vector<GPUObject> objects;
+        objects.push_back({ {0.0f, 0.0f, -1.0f}, 0.5f, TYPE_SPHERE, 0 });    // Esfera 1 usa material 0
+        objects.push_back({ {0.0f, -100.5f, -1.0f}, 100.0f, TYPE_SPHERE, 1 }); // Esfera 2 usa material 1
+
+        createBuffers(camera, objects, materials);
         createDescriptorSet();
         createComputePipeline();
         createCommandObjects();
@@ -51,8 +46,10 @@ VulkanRenderer::~VulkanRenderer() {
         m_context.getDevice().destroyDescriptorPool(m_descriptorPool);
     if (m_descriptorSetLayout)
         m_context.getDevice().destroyDescriptorSetLayout(m_descriptorSetLayout);
-    if (m_sphereBuffer)
-        vmaDestroyBuffer(m_context.getAllocator(), m_sphereBuffer, m_sphereBufferAllocation);
+    if (m_materialBuffer)
+        vmaDestroyBuffer(m_context.getAllocator(), m_materialBuffer, m_materialBufferAllocation);
+    if (m_objectBuffer)
+        vmaDestroyBuffer(m_context.getAllocator(), m_objectBuffer, m_objectBufferAllocation);
     if (m_cameraBuffer)
         vmaDestroyBuffer(m_context.getAllocator(), m_cameraBuffer, m_cameraBufferAllocation);
     if (m_outputBuffer)
@@ -143,7 +140,7 @@ void VulkanRenderer::saveImage(const std::string& filename) {
     Style::logDone("Image saved to " + filename);
 }
 
-void VulkanRenderer::createBuffers(const Camera& camera, const std::vector<GPUSphere>& spheres) {
+void VulkanRenderer::createBuffers(const Camera& camera, const std::vector<GPUObject>& objects, const std::vector<GPUMaterial>& materials) {
     // 1. Criar o buffer de saída
     vk::DeviceSize outputBufferSize = m_imageWidth * m_imageHeight * 4 * sizeof(float);
     vk::BufferCreateInfo outputBufferInfo({}, outputBufferSize, vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive);
@@ -183,33 +180,41 @@ void VulkanRenderer::createBuffers(const Camera& camera, const std::vector<GPUSp
     vmaUnmapMemory(m_context.getAllocator(), m_cameraBufferAllocation);
     Style::logInfo("Camera uniform buffer created and updated.");
 
-    // 3. Criar e preencher o buffer de esferas
-    vk::DeviceSize sphereBufferSize = sizeof(GPUSphere) * spheres.size();
-    vk::BufferCreateInfo sphereBufferInfo({}, sphereBufferSize, vk::BufferUsageFlagBits::eStorageBuffer, vk::SharingMode::eExclusive);
-    VmaAllocationCreateInfo sphereAllocInfo = {};
-    sphereAllocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    // Buffer de Objetos
+    vk::DeviceSize objectBufferSize = sizeof(GPUObject) * objects.size();
+    vk::BufferCreateInfo objectBufferInfo({}, objectBufferSize, vk::BufferUsageFlagBits::eStorageBuffer);
+    VmaAllocationCreateInfo objectAllocInfo = { {}, VMA_MEMORY_USAGE_CPU_TO_GPU };
+    vmaCreateBuffer(m_context.getAllocator(), reinterpret_cast<const VkBufferCreateInfo*>(&objectBufferInfo), &objectAllocInfo, reinterpret_cast<VkBuffer*>(&m_objectBuffer), &m_objectBufferAllocation, nullptr);
+    vmaMapMemory(m_context.getAllocator(), m_objectBufferAllocation, &mappedData);
+    memcpy(mappedData, objects.data(), objectBufferSize);
+    vmaUnmapMemory(m_context.getAllocator(), m_objectBufferAllocation);
+    Style::logInfo("Object storage buffer created.");
 
-    vmaCreateBuffer(m_context.getAllocator(), reinterpret_cast<const VkBufferCreateInfo*>(&sphereBufferInfo), &sphereAllocInfo, reinterpret_cast<VkBuffer*>(&m_sphereBuffer), &m_sphereBufferAllocation, nullptr);
-
-    vmaMapMemory(m_context.getAllocator(), m_sphereBufferAllocation, &mappedData);
-    memcpy(mappedData, spheres.data(), sphereBufferSize);
-    vmaUnmapMemory(m_context.getAllocator(), m_sphereBufferAllocation);
-    Style::logInfo("Sphere storage buffer created and updated.");
+    // Buffer de Materiais
+    vk::DeviceSize materialBufferSize = sizeof(GPUMaterial) * materials.size();
+    vk::BufferCreateInfo materialBufferInfo({}, materialBufferSize, vk::BufferUsageFlagBits::eStorageBuffer);
+    VmaAllocationCreateInfo materialAllocInfo = { {}, VMA_MEMORY_USAGE_CPU_TO_GPU };
+    vmaCreateBuffer(m_context.getAllocator(), reinterpret_cast<const VkBufferCreateInfo*>(&materialBufferInfo), &materialAllocInfo, reinterpret_cast<VkBuffer*>(&m_materialBuffer), &m_materialBufferAllocation, nullptr);
+    vmaMapMemory(m_context.getAllocator(), m_materialBufferAllocation, &mappedData);
+    memcpy(mappedData, materials.data(), materialBufferSize);
+    vmaUnmapMemory(m_context.getAllocator(), m_materialBufferAllocation);
+    Style::logInfo("Material storage buffer created.");
 }
 
 void VulkanRenderer::createDescriptorSet() {
-    // 1. Definir os Bindings: um para o buffer de saída (binding 0) e um para a câmera (binding 1)
-    vk::DescriptorSetLayoutBinding storageBinding(0, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eCompute);
-    vk::DescriptorSetLayoutBinding uniformBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eCompute);
-    vk::DescriptorSetLayoutBinding sphereBinding(2, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eCompute);
-    std::array<vk::DescriptorSetLayoutBinding, 3> bindings = {storageBinding, uniformBinding, sphereBinding};
-
+    // 1. Definir os Bindings:
+    std::array<vk::DescriptorSetLayoutBinding, 4> bindings = {
+        vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eCompute), // Output
+        vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eCompute), // Camera
+        vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eCompute), // Objects
+        vk::DescriptorSetLayoutBinding(3, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eCompute)  // Materials
+    };
     vk::DescriptorSetLayoutCreateInfo layoutCreateInfo({}, static_cast<uint32_t>(bindings.size()), bindings.data());
     m_descriptorSetLayout = m_context.getDevice().createDescriptorSetLayout(layoutCreateInfo);
 
-    // 2. Criar o Pool com tamanho para todos os tipos de descritores
-    std::array<vk::DescriptorPoolSize, 3> poolSizes = {
-        vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, 2),
+    // 2. Criar o Pool
+    std::array<vk::DescriptorPoolSize, 2> poolSizes = {
+        vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, 3),
         vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, 1),
     };
     vk::DescriptorPoolCreateInfo poolCreateInfo({}, 1, static_cast<uint32_t>(poolSizes.size()), poolSizes.data());
@@ -220,16 +225,17 @@ void VulkanRenderer::createDescriptorSet() {
     m_descriptorSet = m_context.getDevice().allocateDescriptorSets(allocInfo)[0];
 
     // 4. Conectar os Buffers ao Set
-    vk::DescriptorBufferInfo outputBufferInfo(m_outputBuffer, 0, VK_WHOLE_SIZE);
-    vk::WriteDescriptorSet outputWriteSet(m_descriptorSet, 0, 0, 1, vk::DescriptorType::eStorageBuffer, nullptr, &outputBufferInfo);
+    vk::DescriptorBufferInfo outputInfo(m_outputBuffer, 0, VK_WHOLE_SIZE);
+    vk::DescriptorBufferInfo cameraInfo(m_cameraBuffer, 0, VK_WHOLE_SIZE);
+    vk::DescriptorBufferInfo objectInfo(m_objectBuffer, 0, VK_WHOLE_SIZE);
+    vk::DescriptorBufferInfo materialInfo(m_materialBuffer, 0, VK_WHOLE_SIZE);
 
-    vk::DescriptorBufferInfo cameraBufferInfo(m_cameraBuffer, 0, VK_WHOLE_SIZE);
-    vk::WriteDescriptorSet cameraWriteSet(m_descriptorSet, 1, 0, 1, vk::DescriptorType::eUniformBuffer, nullptr, &cameraBufferInfo);
-
-    vk::DescriptorBufferInfo sphereBufferInfo(m_sphereBuffer, 0, VK_WHOLE_SIZE);
-    vk::WriteDescriptorSet sphereWriteSet(m_descriptorSet, 2, 0, 1, vk::DescriptorType::eStorageBuffer, nullptr, &sphereBufferInfo);
-
-    std::array<vk::WriteDescriptorSet, 3> writeSets = {outputWriteSet, cameraWriteSet, sphereWriteSet};
+    std::array<vk::WriteDescriptorSet, 4> writeSets = {
+        vk::WriteDescriptorSet(m_descriptorSet, 0, 0, 1, vk::DescriptorType::eStorageBuffer, nullptr, &outputInfo),
+        vk::WriteDescriptorSet(m_descriptorSet, 1, 0, 1, vk::DescriptorType::eUniformBuffer, nullptr, &cameraInfo),
+        vk::WriteDescriptorSet(m_descriptorSet, 2, 0, 1, vk::DescriptorType::eStorageBuffer, nullptr, &objectInfo),
+        vk::WriteDescriptorSet(m_descriptorSet, 3, 0, 1, vk::DescriptorType::eStorageBuffer, nullptr, &materialInfo)
+    };
     m_context.getDevice().updateDescriptorSets(static_cast<uint32_t>(writeSets.size()), writeSets.data(), 0, nullptr);
     
     Style::logInfo("Descriptor Set created for all buffers.");
@@ -237,7 +243,7 @@ void VulkanRenderer::createDescriptorSet() {
 
 void VulkanRenderer::createComputePipeline() {
     // Carrega o shader compilado (SPIR-V)
-    std::ifstream file("./data/output/raytracer.spv", std::ios::ate | std::ios::binary);
+    std::ifstream file("./shaders/raytracer.spv", std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
         throw std::runtime_error("Falha ao abrir o arquivo do shader!");
     }

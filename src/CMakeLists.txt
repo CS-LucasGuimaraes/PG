@@ -97,6 +97,8 @@ list(APPEND PRISM_SOURCES ${OTHER_SOURCES})
 # Define the library target using the conditionally populated source list.
 add_library(Prism SHARED ${PRISM_SOURCES})
 
+add_dependencies(Prism CompileShaders)
+
 # Automatically generate export headers for Windows/Linux/macOS.
 include(GenerateExportHeader)
 generate_export_header(Prism)
@@ -191,3 +193,59 @@ if(PRISM_BUILD_OBJECTS)
         )
     endif()
 endif()
+
+
+# ===================================================================
+# Shader Compilation Configuration
+#
+# This section configures the shader compilation process using glslc.
+# It finds the glslc compiler, sets up the output directory,
+# and creates custom commands to compile all shader files found in the
+# 'src/shaders' directory.
+# ===================================================================
+message(STATUS "Configuring shader compilation...")
+
+# 1. Find the glslc compiler.
+# This is the compiler for GLSL shaders, part of the Vulkan SDK.
+find_program(GLSLC_COMPILER glslc)
+if(NOT GLSLC_COMPILER)
+    message(FATAL_ERROR "glslc compiler not found! Please ensure the Vulkan SDK is installed and in your PATH.")
+endif()
+message(STATUS "Found glslc compiler: ${GLSLC_COMPILER}")
+
+# 2. Set the directory where the compiled shaders (.spv) will be placed.
+set(SHADER_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders")
+file(MAKE_DIRECTORY ${SHADER_OUTPUT_DIR})
+
+# 3. Find all shader files in the 'src/shaders' directory.
+file(GLOB_RECURSE SHADER_SOURCES "src/shaders/*.comp" "src/shaders/*.vert" "src/shaders/*.frag")
+
+set(SHADER_OUTPUT_FILES "")
+
+# 4. Create a build rule for each shader found.
+foreach(SHADER_SOURCE_FILE ${SHADER_SOURCES})
+    # Get the filename without the extension (e.g., 'raytracer')
+    get_filename_component(SHADER_NAME ${SHADER_SOURCE_FILE} NAME_WE)
+
+    # Define the output file name (e.g., '.../build/shaders/raytracer.spv')
+    set(SHADER_OUTPUT_FILE "${SHADER_OUTPUT_DIR}/${SHADER_NAME}.spv")
+
+    # Add the output file to the list of shader output files.
+    list(APPEND SHADER_OUTPUT_FILES ${SHADER_OUTPUT_FILE})
+
+    # Add a custom command to CMake.
+    # This tells the build system how to transform a .comp file into a .spv.
+    add_custom_command(
+        OUTPUT ${SHADER_OUTPUT_FILE}
+        COMMAND ${GLSLC_COMPILER} -o ${SHADER_OUTPUT_FILE} ${SHADER_SOURCE_FILE}
+        DEPENDS ${SHADER_SOURCE_FILE} # Only recompile if the source file changes
+        COMMENT "Compiling shader: ${SHADER_SOURCE_FILE}"
+    )
+endforeach()
+
+# 5. Create a custom target that depends on all shaders.
+# This gives us an easy way to ensure all shaders are compiled.
+add_custom_target(CompileShaders ALL DEPENDS ${SHADER_OUTPUT_FILES})
+
+# 6. Add the shader output directory to the include path for the Prism library.
+add_dependencies(Prism CompileShaders)

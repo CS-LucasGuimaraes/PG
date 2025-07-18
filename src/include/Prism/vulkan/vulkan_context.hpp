@@ -3,12 +3,12 @@
 
 #include "prism_export.h"
 
+#include "Prism/vulkan/vulkan_gpu_structs.hpp"
+
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.hpp>
 
 namespace Prism {
-
-struct GPUSphere; // Forward declaration of GPUSphere
 
 class PRISM_EXPORT VulkanContext {
 public:
