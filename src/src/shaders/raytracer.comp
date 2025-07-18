@@ -1,49 +1,49 @@
 #version 450
 
-// ========= STRUCTS =========
-// Definições que espelham as structs do seu código C++
-
+// ========= STRUCTS (espelhando o C++) =========
 struct Camera {
     vec3 position;
-    vec3 view_u;
-    vec3 view_v;
+    vec3 pixel_delta_u;
+    vec3 pixel_delta_v;
     vec3 pixel_00_loc;
 };
 
 struct Material {
+    // Alinhado a 16 bytes (vec4)
     vec3 color;
+    float padding1; // Preenchimento para alinhar o próximo vec3
+
+    // Alinhado a 16 bytes
     vec3 ambient;
+    float padding2;
+
+    // Alinhado a 16 bytes
     vec3 specular;
-    float shininess;
+    float shininess; // shininess se encaixa aqui perfeitamente
 };
 
 struct SceneObject {
-    vec3 center;
-    float radius;
     int type;
     int material_index;
+    vec2 padding; // Espaço reservado para alinhamento
+
+    // Dados da Esfera
+    vec3 center;
+    float radius;
+
+    // Dados do Plano
+    vec3 point_on_plane;
+    vec3 normal;
 };
 
 // ========= BUFFERS (Bindings) =========
-// Conecta o shader aos buffers que você configurou no C++
-
-// binding 0: Buffer de saída para escrever a imagem final
-layout(set = 0, binding = 0) buffer OutputBuffer {
-    vec4 imageData[];
-} outBuffer;
-
-// binding 1: Buffer uniforme com os dados da câmera
-layout(set = 0, binding = 1) uniform UBO {
-    Camera camera;
-} ubo;
-
+layout(set = 0, binding = 0) buffer OutputBuffer { vec4 imageData[]; } outBuffer;
+layout(set = 0, binding = 1) uniform UBO { Camera camera; } ubo;
 layout(set = 0, binding = 2) readonly buffer ObjectBuffer { SceneObject objects[]; } objectBuffer;
 layout(set = 0, binding = 3) readonly buffer MaterialBuffer { Material materials[]; } materialBuffer;
 
+// ========= FUNÇÕES DE INTERSEÇÃO =========
 
-// ========= FUNÇÃO DE INTERSEÇÃO =========
-// Lógica de Ray-Tracing para uma única esfera.
-// Retorna a distância 't' do acerto, ou um número grande se não acertar.
 float hit_sphere(in SceneObject s, in vec3 ray_origin, in vec3 ray_direction) {
     vec3 oc = ray_origin - s.center;
     float a = dot(ray_direction, ray_direction);
@@ -52,24 +52,28 @@ float hit_sphere(in SceneObject s, in vec3 ray_origin, in vec3 ray_direction) {
     float discriminant = half_b * half_b - a * c;
 
     if (discriminant < 0.0) {
-        return 100000.0; // Retorna um valor grande para "sem acerto"
-    } else {
-        // Retorna a raiz mais próxima que esteja na frente da câmera
-        float t = (-half_b - sqrt(discriminant)) / a;
-        if (t > 0.001) {
-            return t;
-        }
-        t = (-half_b + sqrt(discriminant)) / a;
+        return -1.0;
+    }
+    float t = (-half_b - sqrt(discriminant)) / a;
+    if (t > 0.001) { return t; }
+    t = (-half_b + sqrt(discriminant)) / a;
+    if (t > 0.001) { return t; }
+    return -1.0;
+}
+
+float hit_plane(in SceneObject p, in vec3 ray_origin, in vec3 ray_direction) {
+    float denominator = dot(p.normal, ray_direction);
+    if (abs(denominator) > 0.0001) {
+        vec3 p0_l0 = p.point_on_plane - ray_origin;
+        float t = dot(p0_l0, p.normal) / denominator;
         if (t > 0.001) {
             return t;
         }
     }
-    return 100000.0;
+    return -1.0;
 }
 
-
 // ========= PROGRAMA PRINCIPAL =========
-// Define o tamanho do grupo de trabalho da GPU
 layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 void main() {
@@ -77,45 +81,48 @@ void main() {
     if (pixelCoords.x >= 800 || pixelCoords.y >= 600) {
         return;
     }
+    uint index = pixelCoords.y * 800 + pixelCoords.x;
 
-    // Calcula o índice do pixel que este shader específico está processando
-    uint index = gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
-
-    // Calcula as coordenadas (u,v) do centro do pixel
-    float u = float(gl_GlobalInvocationID.x + 0.5);
-    float v = float(gl_GlobalInvocationID.y + 0.5);
-
-    // Calcula a origem e a direção do raio usando os dados da câmera
+    // --- Cálculo do Raio ---
+    float u = float(pixelCoords.x + 0.5);
+    float v = float(pixelCoords.y + 0.5);
+    vec3 target_point = ubo.camera.pixel_00_loc + (ubo.camera.pixel_delta_u * u) - (ubo.camera.pixel_delta_v * v);
     vec3 ray_origin = ubo.camera.position;
-    vec3 target_point = ubo.camera.pixel_00_loc + (ubo.camera.view_u * u) - (ubo.camera.view_v * v);
     vec3 ray_direction = normalize(target_point - ray_origin);
 
-    // --- LÓGICA DO RAY TRACING ---
-    vec3 final_color = vec3(0.5, 0.7, 1.0); // Cor do céu (padrão)
-    float closest_hit = 100000.0;
+    // --- Lógica do Ray Tracing ---
+    vec3 final_color = vec3(0.2, 0.2, 0.2); // Céu mais escuro para contraste
+    float closest_hit = 1.0/0.0; // Infinito
+
     int hit_material_index = -1;
-    vec3 hit_normal;
+    vec3 hit_normal = vec3(0.0);
 
-
-    // Itera por todas as esferas no buffer
+    // Itera por todos os objetos na cena
     for (int i = 0; i < objectBuffer.objects.length(); i++) {
-        if (objectBuffer.objects[i].type == 0) { // Sphere
-            float t = hit_sphere(objectBuffer.objects[i], ray_origin, ray_direction);
+        float t = -1.0;
+        // Seleciona a função de interseção baseada no tipo do objeto
+        if (objectBuffer.objects[i].type == 0) { // Esfera
+            t = hit_sphere(objectBuffer.objects[i], ray_origin, ray_direction);
+        } else if (objectBuffer.objects[i].type == 1) { // Plano
+            t = hit_plane(objectBuffer.objects[i], ray_origin, ray_direction);
+        }
 
-            // Se encontramos um acerto mais próximo do que os anteriores...
-            if (t < closest_hit) {
-                closest_hit = t;
-                hit_material_index = objectBuffer.objects[i].material_index;
-                vec3 hit_point = ray_origin + t * ray_direction;
-                hit_normal = normalize(hit_point - objectBuffer.objects[i].center);
+        if (t > 0.0 && t < closest_hit) {
+            closest_hit = t;
+            hit_material_index = objectBuffer.objects[i].material_index;
+            if (objectBuffer.objects[i].type == 0) {
+                hit_normal = normalize(ray_origin + ray_direction * t - objectBuffer.objects[i].center);
+            } else if (objectBuffer.objects[i].type == 1) {
+                hit_normal = objectBuffer.objects[i].normal;
             }
         }
     }
 
     if (hit_material_index > -1) {
+        // Se acertou um objeto, use a cor do seu material
         final_color = materialBuffer.materials[hit_material_index].color;
+        // final_color = hit_normal * 0.5 + 0.5; // Cor baseada na normal para efeito de iluminação
     }
 
-    // Escreve a cor final no buffer de saída
     outBuffer.imageData[index] = vec4(final_color, 1.0);
 }

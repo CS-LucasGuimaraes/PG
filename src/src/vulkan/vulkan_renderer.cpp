@@ -7,6 +7,7 @@
 namespace Prism {
 
 #define TYPE_SPHERE 0
+#define TYPE_PLANE 1
 
 VulkanRenderer::VulkanRenderer(VulkanContext& context, const Camera& camera, uint32_t imageWidth, uint32_t imageHeight)
     : m_context(context), m_imageWidth(imageWidth), m_imageHeight(imageHeight) {
@@ -14,11 +15,35 @@ VulkanRenderer::VulkanRenderer(VulkanContext& context, const Camera& camera, uin
         std::vector<GPUMaterial> materials;
         materials.push_back({ {1.0f, 0.5f, 0.5f} }); // Material 0: Vermelho claro
         materials.push_back({ {0.5f, 1.0f, 0.5f} }); // Material 1: Verde claro
+        materials.push_back({ {0.5f, 1.0f, 1.0f} }); // Material 2: Azul claro
 
         // 2. Crie os objetos da cena
         std::vector<GPUObject> objects;
-        objects.push_back({ {0.0f, 0.0f, -1.0f}, 0.5f, TYPE_SPHERE, 0 });    // Esfera 1 usa material 0
-        objects.push_back({ {0.0f, -100.5f, -1.0f}, 100.0f, TYPE_SPHERE, 1 }); // Esfera 2 usa material 1
+        // Esfera vermelha
+        GPUObject sphere = {}; // Inicializa tudo a zero
+        sphere.type = TYPE_SPHERE;
+        sphere.material_index = 0;
+        sphere.center[0] = 0.0f; sphere.center[1] = 0.0f; sphere.center[2] = -1.0f;
+        sphere.radius = 0.5f;
+        objects.push_back(sphere);
+
+        // Chão verde
+        GPUObject floor = {}; // Inicializa tudo a zero
+        floor.type = TYPE_PLANE;
+        floor.material_index = 1;
+        floor.point_on_plane[0] = 0.0f; floor.point_on_plane[1] = -0.5f; floor.point_on_plane[2] = 0.0f;
+        floor.normal[0] = 0.0f; floor.normal[1] = 1.0f; floor.normal[2] = 0.0f;
+        objects.push_back(floor);
+
+        // Plano de corte azul
+        GPUObject cutting_plane = {}; // Inicializa tudo a zero
+        cutting_plane.type = TYPE_PLANE;
+        cutting_plane.material_index = 2;
+        // Define um plano vertical em x = 1.5
+        cutting_plane.point_on_plane[0] = 1.5f; cutting_plane.point_on_plane[1] = 0.0f; cutting_plane.point_on_plane[2] = 0.0f;
+        // Normal aponta para a esquerda (para ser visível da origem)
+        cutting_plane.normal[0] = -1.0f; cutting_plane.normal[1] = 0.0f; cutting_plane.normal[2] = 0.0f;
+        objects.push_back(cutting_plane);
 
         createBuffers(camera, objects, materials);
         createDescriptorSet();
