@@ -15,10 +15,29 @@
 int main() {
     try {
         Prism::VulkanContext vulkanContext;
-        Prism::VulkanRenderer renderer(vulkanContext);
 
-        // 3. Chame a função de renderização
+        const int imageWidth = 800;
+        const int imageHeight = 600;
+        Prism::Camera camera(
+            Prism::Point3(0, 0, 1),   // Posição
+            Prism::Point3(0, 0, 0),   // Alvo
+            Prism::Vector3(0, 1, 0),  // Vetor 'up'
+            1.0,                      // Distância da tela
+            1.0,                      // Altura do viewport
+            (double)imageWidth / imageHeight, // Largura do viewport (aspect ratio)
+            imageHeight, imageWidth
+        );
+
+        Prism::VulkanRenderer renderer(vulkanContext, camera, imageWidth, imageHeight);
+
+        auto start = std::chrono::high_resolution_clock::now();
         renderer.render();
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> elapsed = end - start;
+        Prism::Style::logInfo("GPU Render Time: " + std::to_string(elapsed.count()) + " ms");
+
+        renderer.saveImage("output_gpu.ppm");
+
 
         // Prism::SceneParser("./data/input/scene.yml").parse().render();
 

@@ -66,27 +66,28 @@ void VulkanContext::createLogicalDevice() {
     // We need to find a queue family that supports compute operations
     auto queueFamilyProperties = m_physicalDevice.getQueueFamilyProperties();
 
-    int computeFamilyIndex = -1;
+    m_computeQueueFamilyIndex = -1;
+
     for (uint32_t i = 0; i < queueFamilyProperties.size(); ++i) {
         if (queueFamilyProperties[i].queueFlags & vk::QueueFlagBits::eCompute) {
-            computeFamilyIndex = i;
+            m_computeQueueFamilyIndex = i;
             break;
         }
     }
 
-    if (computeFamilyIndex < 0) {
+    if (m_computeQueueFamilyIndex < 0) {
         throw std::runtime_error("Failed to find a queue family that supports compute!");
     }
 
     float queuePriority = 1.0f;
-    vk::DeviceQueueCreateInfo queueCreateInfo({}, computeFamilyIndex, 1, &queuePriority);
+    vk::DeviceQueueCreateInfo queueCreateInfo({}, m_computeQueueFamilyIndex, 1, &queuePriority);
     vk::DeviceCreateInfo deviceCreateInfo({}, 1, &queueCreateInfo);
 
     m_device = m_physicalDevice.createDevice(deviceCreateInfo);
 
     // VULKAN_HPP_DEFAULT_DISPATCHER.init(m_device);
 
-    m_computeQueue = m_device.getQueue(computeFamilyIndex, 0); // Get the first queue
+    m_computeQueue = m_device.getQueue(m_computeQueueFamilyIndex, 0); // Get the first queue
     Style::logInfo("Vulkan Logical Device and Compute Queue created.");
 }
 

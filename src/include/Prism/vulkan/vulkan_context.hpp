@@ -8,6 +8,8 @@
 
 namespace Prism {
 
+struct GPUSphere; // Forward declaration of GPUSphere
+
 class PRISM_EXPORT VulkanContext {
 public:
     VulkanContext();
@@ -16,6 +18,11 @@ public:
     // Disable copying and moving for simplicity
     VulkanContext(const VulkanContext&) = delete;
     VulkanContext& operator=(const VulkanContext&) = delete;
+
+    VmaAllocator getAllocator() const { return m_allocator; }
+    vk::Device getDevice() const { return m_device; }
+    vk::Queue getComputeQueue() const { return m_computeQueue; }
+    uint32_t getComputeQueueFamilyIndex() const { return m_computeQueueFamilyIndex; }
 
 private:
     void createInstance();
@@ -28,6 +35,7 @@ private:
     vk::Device m_device;
     VmaAllocator m_allocator;
     vk::Queue m_computeQueue;
+    uint32_t m_computeQueueFamilyIndex;
 };
 
 } // namespace Prism

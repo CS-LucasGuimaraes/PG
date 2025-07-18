@@ -1,0 +1,108 @@
+#version 450
+
+// ========= STRUCTS =========
+// Definições que espelham as structs do seu código C++
+
+struct Camera {
+    vec3 position;
+    vec3 view_u;
+    vec3 view_v;
+    vec3 pixel_00_loc;
+};
+
+struct Sphere {
+    vec3 center;
+    float radius;
+};
+
+
+// ========= BUFFERS (Bindings) =========
+// Conecta o shader aos buffers que você configurou no C++
+
+// binding 0: Buffer de saída para escrever a imagem final
+layout(set = 0, binding = 0) buffer OutputBuffer {
+    vec4 imageData[];
+} outBuffer;
+
+// binding 1: Buffer uniforme com os dados da câmera
+layout(set = 0, binding = 1) uniform UBO {
+    Camera camera;
+} ubo;
+
+// binding 2: Buffer de armazenamento com a lista de esferas (somente leitura)
+layout(set = 0, binding = 2) readonly buffer SphereBuffer {
+    Sphere spheres[];
+} sphereBuffer;
+
+
+// ========= FUNÇÃO DE INTERSEÇÃO =========
+// Lógica de Ray-Tracing para uma única esfera.
+// Retorna a distância 't' do acerto, ou um número grande se não acertar.
+float hit_sphere(in Sphere s, in vec3 ray_origin, in vec3 ray_direction) {
+    vec3 oc = ray_origin - s.center;
+    float a = dot(ray_direction, ray_direction);
+    float half_b = dot(oc, ray_direction);
+    float c = dot(oc, oc) - s.radius * s.radius;
+    float discriminant = half_b * half_b - a * c;
+
+    if (discriminant < 0.0) {
+        return 100000.0; // Retorna um valor grande para "sem acerto"
+    } else {
+        // Retorna a raiz mais próxima que esteja na frente da câmera
+        float t = (-half_b - sqrt(discriminant)) / a;
+        if (t > 0.001) {
+            return t;
+        }
+        t = (-half_b + sqrt(discriminant)) / a;
+        if (t > 0.001) {
+            return t;
+        }
+    }
+    return 100000.0;
+}
+
+
+// ========= PROGRAMA PRINCIPAL =========
+// Define o tamanho do grupo de trabalho da GPU
+layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+
+void main() {
+    uvec2 pixelCoords = gl_GlobalInvocationID.xy;
+    if (pixelCoords.x >= 800 || pixelCoords.y >= 600) {
+        return;
+    }
+
+    // Calcula o índice do pixel que este shader específico está processando
+    uint index = gl_GlobalInvocationID.y * (gl_NumWorkGroups.x * gl_WorkGroupSize.x) + gl_GlobalInvocationID.x;
+
+    // Calcula as coordenadas (u,v) do centro do pixel
+    float u = float(gl_GlobalInvocationID.x + 0.5);
+    float v = float(gl_GlobalInvocationID.y + 0.5);
+
+    // Calcula a origem e a direção do raio usando os dados da câmera
+    vec3 ray_origin = ubo.camera.position;
+    vec3 target_point = ubo.camera.pixel_00_loc + (ubo.camera.view_u * u) - (ubo.camera.view_v * v);
+    vec3 ray_direction = normalize(target_point - ray_origin);
+
+    // --- LÓGICA DO RAY TRACING ---
+    vec3 final_color = vec3(0.5, 0.7, 1.0); // Cor do céu (padrão)
+    float closest_hit = 100000.0;
+
+    // Itera por todas as esferas no buffer
+    for (int i = 0; i < sphereBuffer.spheres.length(); i++) {
+        float t = hit_sphere(sphereBuffer.spheres[i], ray_origin, ray_direction);
+        
+        // Se encontramos um acerto mais próximo do que os anteriores...
+        if (t < closest_hit) {
+            closest_hit = t;
+            // Calcula o ponto de acerto e a normal da superfície
+            vec3 hit_point = ray_origin + t * ray_direction;
+            vec3 normal = normalize(hit_point - sphereBuffer.spheres[i].center);
+            // Colore o pixel baseado na direção da normal (para visualização)
+            final_color = 0.5 * (normal + 1.0);
+        }
+    }
+
+    // Escreve a cor final no buffer de saída
+    outBuffer.imageData[index] = vec4(final_color, 1.0);
+}
