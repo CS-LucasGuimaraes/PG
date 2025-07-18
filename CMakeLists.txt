@@ -5,7 +5,7 @@
 # It sets global settings and includes the sub-projects.
 # ===================================================================
 cmake_minimum_required(VERSION 3.22)
-project(Prism VERSION 0.2.0 LANGUAGES CXX)
+project(Prism VERSION 0.3.0 LANGUAGES CXX)
 
 # Set the policy for FetchContent to use modern, safer behavior.
 cmake_policy(SET CMP0135 NEW)
@@ -14,6 +14,12 @@ cmake_policy(SET CMP0135 NEW)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# --- Find Vulkan ---
+find_package(Vulkan REQUIRED)
+message(STATUS "Found Vulkan: ${Vulkan_FOUND}")
+
+message(STATUS "DEBUG: Vulkan Include Dirs Found: ${Vulkan_INCLUDE_DIRS}")
 
 # --- Build Options ---
 # Add an option to control whether the demo application is built.
@@ -33,6 +39,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # --- Sub-projects ---
 add_subdirectory(src) # The Prism library
+
+target_include_directories(Prism
+  PRIVATE
+    ${Vulkan_INCLUDE_DIRS}
+)
 
 if (PRISM_BUILD_DEMO)
     message(STATUS "Building the Prism demo application.")

@@ -8,6 +8,8 @@
 
 add_executable(prism_demo src/main.cpp)
 
+target_include_directories(prism_demo PRIVATE ${Vulkan_INCLUDE_DIRS})
+
 target_link_libraries(prism_demo PRIVATE Prism)
 
 set_target_properties(prism_demo PROPERTIES

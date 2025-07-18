@@ -8,11 +8,19 @@
  */
 
 #include "Prism.hpp"
+#include "Prism/vulkan/vulkan_context.hpp"
+#include "Prism/vulkan/vulkan_renderer.hpp"
 #include <iostream>
 
 int main() {
     try {
-        Prism::SceneParser("./data/input/scene.yml").parse().render();
+        Prism::VulkanContext vulkanContext;
+        Prism::VulkanRenderer renderer(vulkanContext);
+
+        // 3. Chame a função de renderização
+        renderer.render();
+
+        // Prism::SceneParser("./data/input/scene.yml").parse().render();
 
     } catch (const std::exception& e) {
         Prism::Style::logError(e.what());

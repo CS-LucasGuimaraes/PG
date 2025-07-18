@@ -16,14 +16,16 @@ FetchContent_Declare(
   # Pinned to a specific commit to fix build issues with modern compilers.
   GIT_TAG        2f86d13775d119edbb69af52e5f566fd65c6953b
 )
-FetchContent_MakeAvailable(yaml-cpp)
-
 message(STATUS "Configuring yaml-cpp dependency: building SHARED library, tests/tools DISABLED.")
 
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Disable building yaml-cpp contrib tools" FORCE)
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Disable building yaml-cpp parse tools" FORCE)
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable building yaml-cpp tests" FORCE)
 set(YAML_CPP_FORMAT_SOURCE OFF CACHE BOOL "Disable yaml-cpp source formatting" FORCE)
+set(YAML_CPP_BUILD_SHARED_LIBS ON CACHE BOOL "Build yaml-cpp as shared library" FORCE) # Garanta que SHARED_LIBS também está com FORCE
+set(YAML_CPP_INSTALL ON CACHE BOOL "Install yaml-cpp" FORCE)
+
+FetchContent_MakeAvailable(yaml-cpp)
 
 
 # --- Build Options ---
@@ -82,6 +84,9 @@ else()
     message(STATUS "Prism Library: Scene module DISABLED.")
 endif()
 
+file(GLOB VULKAN_SOURCES CONFIGURE_DEPENDS "src/vulkan/*.cpp")
+list(APPEND PRISM_SOURCES ${VULKAN_SOURCES})
+
 # Add any remaining top-level source files (e.g., init.cpp)
 file(GLOB OTHER_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 list(APPEND PRISM_SOURCES ${OTHER_SOURCES})
@@ -126,7 +131,10 @@ set_target_properties(Prism PROPERTIES
 # Link the library against its dependencies.
 # The yaml-cpp dependency is only needed if the IO module is built.
 if(PRISM_BUILD_OBJECTS)
-    target_link_libraries(Prism PRIVATE yaml-cpp::yaml-cpp)
+    target_link_libraries(Prism PRIVATE 
+        yaml-cpp::yaml-cpp
+        Vulkan::Vulkan
+    )
 endif()
 # Set Submodule flags for the library.
 # This ensures that the library is built with the correct visibility settings.
@@ -142,6 +150,8 @@ if (PRISM_BUILD_SCENE)
     target_compile_definitions(Prism PUBLIC PRISM_BUILD_SCENE)
 endif()
 
+target_compile_definitions(Prism PRIVATE VULKAN_HPP_DISPATCH_LOADER_DYNAMIC_STORAGE)
+target_compile_definitions(Prism PRIVATE VULKAN_HPP_DISPATCH_LOADER_DYNAMIC)
 
 # --- Installation ---
 

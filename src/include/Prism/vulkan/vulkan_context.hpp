@@ -1,0 +1,35 @@
+#ifndef PRISM_VULKAN_CONTEXT_HPP_
+#define PRISM_VULKAN_CONTEXT_HPP_
+
+#include "prism_export.h"
+
+#include <vma/vk_mem_alloc.h>
+#include <vulkan/vulkan.hpp>
+
+namespace Prism {
+
+class PRISM_EXPORT VulkanContext {
+public:
+    VulkanContext();
+    ~VulkanContext();
+
+    // Disable copying and moving for simplicity
+    VulkanContext(const VulkanContext&) = delete;
+    VulkanContext& operator=(const VulkanContext&) = delete;
+
+private:
+    void createInstance();
+    void pickPhysicalDevice();
+    void createLogicalDevice();
+    void createAllocator();
+
+    vk::Instance m_instance;
+    vk::PhysicalDevice m_physicalDevice;
+    vk::Device m_device;
+    VmaAllocator m_allocator;
+    vk::Queue m_computeQueue;
+};
+
+} // namespace Prism
+
+#endif // PRISM_VULKAN_CONTEXT_HPP_
