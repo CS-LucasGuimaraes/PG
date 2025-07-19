@@ -85,6 +85,14 @@ class PRISM_EXPORT Object {
         return transform;
     }
 
+    Matrix getInverseTransform() const {
+        return inverseTransform;
+    }
+
+    Matrix getInverseTransposeTransform() const {
+        return inverseTransposeTransform;
+    }
+
   protected:
     Matrix transform = Matrix::identity(4);        ///< Transformation matrix for the object
     Matrix inverseTransform = Matrix::identity(4); ///< Inverse of the transformation matrix

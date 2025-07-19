@@ -310,6 +310,10 @@ class PRISM_EXPORT Matrix {
      */
     static Matrix rotation(double angle, const Vector3& axis);
 
+    const double* data() const {
+        return data_.data();
+    }
+
   private:
     size_t rows_;              // Number of rows in the matrix
     size_t cols_;              // Number of columns in the matrix

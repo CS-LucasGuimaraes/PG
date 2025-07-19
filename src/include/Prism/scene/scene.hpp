@@ -19,9 +19,9 @@
 
 #include <filesystem>
 #include <memory>
+#include <mutex>
 #include <ostream>
 #include <vector>
-#include <mutex>
 
 namespace Prism {
 
@@ -72,6 +72,16 @@ class PRISM_EXPORT Scene {
      */
     void render() const;
 
+    const Camera getCamera() const {
+        return camera_;
+    }
+    const std::vector<std::unique_ptr<Object>>& getObjects() const {
+        return objects_;
+    }
+    const std::vector<std::unique_ptr<Light>>& getLights() const {
+        return lights_;
+    }
+
   private:
     Color trace(const Ray& ray, int depth) const;
 
@@ -79,7 +89,8 @@ class PRISM_EXPORT Scene {
 
     bool hit_closest(const Ray& ray, double t_min, double t_max, HitRecord& rec) const;
 
-    void render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done, std::mutex& progress_mutex) const;
+    void render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done,
+                     std::mutex& progress_mutex) const;
 
     std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene
     std::vector<std::unique_ptr<Light>> lights_;   ///< Collection of light sources in the scene

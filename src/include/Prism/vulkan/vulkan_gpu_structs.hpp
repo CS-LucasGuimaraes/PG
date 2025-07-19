@@ -1,6 +1,8 @@
 #ifndef PRISM_VULKAN_GPU_STRUCTS_HPP_
 #define PRISM_VULKAN_GPU_STRUCTS_HPP_
 
+#include <cstdint>
+
 namespace Prism {
 
 struct GPUCameraData {
@@ -9,6 +11,8 @@ struct GPUCameraData {
     alignas(16) float view_v[3];
     alignas(16) float pixel_00_loc[3];
     alignas(16) float ambient_color[3];
+    uint32_t image_width;
+    uint32_t image_height;
 };
 
 struct GPUMaterial {

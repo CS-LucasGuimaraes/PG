@@ -9,99 +9,10 @@ namespace Prism {
 #define TYPE_SPHERE 0
 #define TYPE_PLANE 1
 
-VulkanRenderer::VulkanRenderer(VulkanContext& context, const Camera& camera, uint32_t imageWidth, uint32_t imageHeight)
+VulkanRenderer::VulkanRenderer(VulkanContext& context, const SceneDataGPU& sceneData, uint32_t imageWidth, uint32_t imageHeight)
     : m_context(context), m_imageWidth(imageWidth), m_imageHeight(imageHeight) {
     try {
-        // 1. Crie os materiais da cena
-        std::vector<GPUMaterial> materials;
-
-        // Material 0: Plástico vermelho, opaco e com brilho
-        GPUMaterial red_plastic = {};
-        red_plastic.color[0] = 0.8f; red_plastic.color[1] = 0.1f; red_plastic.color[2] = 0.1f;
-        red_plastic.refraction_index = 1.4f; // IOR de plástico
-        red_plastic.ambient[0] = 0.1f; red_plastic.ambient[1] = 0.01f; red_plastic.ambient[2] = 0.01f;
-        red_plastic.transparency = 1.0f;     // Totalmente opaco
-        red_plastic.specular[0] = 0.8f; red_plastic.specular[1] = 0.8f; red_plastic.specular[2] = 0.8f;
-        red_plastic.shininess = 32.0f;
-        red_plastic.emission[0] = 0.0f; red_plastic.emission[1] = 0.0f; red_plastic.emission[2] = 0.0f;
-        materials.push_back(red_plastic);
-
-        // Material 1: Chão verde, fosco (sem brilho especular)
-        GPUMaterial green_matte = {};
-        green_matte.color[0] = 0.2f; green_matte.color[1] = 0.8f; green_matte.color[2] = 0.2f;
-        green_matte.refraction_index = 1.0f;
-        green_matte.ambient[0] = 0.02f; green_matte.ambient[1] = 0.1f; green_matte.ambient[2] = 0.02f;
-        green_matte.transparency = 1.0f;    // Totalmente opaco
-        green_matte.specular[0] = 0.0f; green_matte.specular[1] = 0.0f; green_matte.specular[2] = 0.0f; // Sem brilho
-        green_matte.shininess = 0.0f;
-        green_matte.emission[0] = 0.0f; green_matte.emission[1] = 0.0f; green_matte.emission[2] = 0.0f;
-        materials.push_back(green_matte);
-
-        // Material 2: Vidro azul, transparente e refrativo
-        GPUMaterial blue_glass = {};
-        blue_glass.color[0] = 0.8f; blue_glass.color[1] = 0.9f; blue_glass.color[2] = 1.0f;
-        blue_glass.refraction_index = 1.52f; // IOR de vidro
-        blue_glass.ambient[0] = 0.0f; blue_glass.ambient[1] = 0.0f; blue_glass.ambient[2] = 0.0f;
-        blue_glass.transparency = 0.1f;      // Bem transparente
-        blue_glass.specular[0] = 0.8f; blue_glass.specular[1] = 0.8f; blue_glass.specular[2] = 0.8f;
-        blue_glass.shininess = 256.0f;       // Brilho alto e concentrado
-        blue_glass.emission[0] = 0.0f; blue_glass.emission[1] = 0.0f; blue_glass.emission[2] = 0.0f;
-        materials.push_back(blue_glass);
-
-
-        // 2. Crie os objetos da cena
-        std::vector<GPUObject> objects;
-
-        // Matriz identidade (4x4) para inicializar as transformações
-        const float identity_matrix[16] = {
-            1.0f, 0.0f, 0.0f, 0.0f,  // Coluna 1
-            0.0f, 1.0f, 0.0f, 0.0f,  // Coluna 2
-            0.0f, 0.0f, 1.0f, 0.0f,  // Coluna 3
-            0.0f, 0.0f, 0.0f, 1.0f   // Coluna 4
-        };
-
-        // Esfera vermelha
-        GPUObject sphere = {}; // Inicializa tudo a zero
-        sphere.type = TYPE_SPHERE;
-        sphere.material_index = 0;
-        sphere.center[0] = 0.0f; sphere.center[1] = 0.0f; sphere.center[2] = -1.0f;
-        sphere.radius = 0.5f;
-        memcpy(sphere.transform, identity_matrix, sizeof(identity_matrix));
-        memcpy(sphere.inverse_transform, identity_matrix, sizeof(identity_matrix));
-        memcpy(sphere.inverse_transpose_transform, identity_matrix, sizeof(identity_matrix));
-        objects.push_back(sphere);
-
-        // Chão verde
-        GPUObject floor = {};
-        floor.type = TYPE_PLANE;
-        floor.material_index = 1;
-        floor.point_on_plane[0] = 0.0f; floor.point_on_plane[1] = -0.5f; floor.point_on_plane[2] = 0.0f;
-        floor.normal[0] = 0.0f; floor.normal[1] = 1.0f; floor.normal[2] = 0.0f;
-        memcpy(floor.transform, identity_matrix, sizeof(identity_matrix));
-        memcpy(floor.inverse_transform, identity_matrix, sizeof(identity_matrix));
-        memcpy(floor.inverse_transpose_transform, identity_matrix, sizeof(identity_matrix));
-        objects.push_back(floor);
-
-        // Plano de corte azul (de vidro)
-        GPUObject cutting_plane = {};
-        cutting_plane.type = TYPE_PLANE;
-        cutting_plane.material_index = 2;
-        cutting_plane.point_on_plane[0] = 1.5f; cutting_plane.point_on_plane[1] = 0.0f; cutting_plane.point_on_plane[2] = 0.0f;
-        cutting_plane.normal[0] = -1.0f; cutting_plane.normal[1] = 0.0f; cutting_plane.normal[2] = 0.0f;
-        memcpy(cutting_plane.transform, identity_matrix, sizeof(identity_matrix));
-        memcpy(cutting_plane.inverse_transform, identity_matrix, sizeof(identity_matrix));
-        memcpy(cutting_plane.inverse_transpose_transform, identity_matrix, sizeof(identity_matrix));
-        objects.push_back(cutting_plane);
-
-
-        // 3. Crie as luzes da cena
-        std::vector<GPULight> lights;
-        GPULight light = {};
-        light.position[0] = 0.0f; light.position[1] = 2.0f; light.position[2] = -1.0f;
-        light.color[0] = 1.0f; light.color[1] = 1.0f; light.color[2] = 1.0f;
-        lights.push_back(light);
-
-        createBuffers(camera, objects, materials, lights);
+        createBuffers(sceneData.getCamera(), sceneData.getObjects(), sceneData.getMaterials(), sceneData.getLights());
         createDescriptorSet();
         createComputePipeline();
         createCommandObjects();
@@ -253,6 +164,9 @@ void VulkanRenderer::createBuffers(const Camera& camera, const std::vector<GPUOb
     camData.ambient_color[0] = 0.2f;
     camData.ambient_color[1] = 0.2f;
     camData.ambient_color[2] = 0.2f;
+
+    camData.image_width = m_imageWidth;
+    camData.image_height = m_imageHeight;
 
     vk::BufferCreateInfo cameraBufferInfo({}, sizeof(GPUCameraData), vk::BufferUsageFlagBits::eUniformBuffer, vk::SharingMode::eExclusive);
     VmaAllocationCreateInfo cameraAllocInfo = {};

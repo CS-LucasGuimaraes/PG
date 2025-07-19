@@ -4,14 +4,14 @@
 #include "prism_export.h"
 
 #include "Prism/vulkan/vulkan_context.hpp"
+#include "Prism/vulkan/vulkan_scene_data.hpp"
 #include "Prism/scene/camera.hpp"
 
 namespace Prism {
 
 class PRISM_EXPORT VulkanRenderer {
 public:
-    VulkanRenderer(VulkanContext& context, const Camera& camera, uint32_t imageWidth, uint32_t imageHeight);
-    ~VulkanRenderer();
+    VulkanRenderer(VulkanContext& context, const SceneDataGPU& sceneData, uint32_t imageWidth, uint32_t imageHeight);    ~VulkanRenderer();
 
     void render();
     void saveImage(const std::string& filename);

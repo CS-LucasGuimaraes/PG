@@ -46,6 +46,16 @@ class PRISM_EXPORT Plane : public Object {
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
 
+    Point3 getPointOnPlane() const {
+        return point_on_plane;
+    }
+    Vector3 getNormal() const {
+        return normal;
+    }
+    std::shared_ptr<Material> getMaterial() const {
+        return material;
+    }
+
   private:
     Point3 point_on_plane; ///< A point on the plane
     Vector3 normal;        ///< The normal vector of the plane

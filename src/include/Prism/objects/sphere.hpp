@@ -50,6 +50,19 @@ class PRISM_EXPORT Sphere : public Object {
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
 
+    Point3 getCenter() const {
+        return center;
+    }
+
+    double getRadius() const {
+        return radius;
+    }
+
+    std::shared_ptr<Material> getMaterial() const {
+        return material;
+    }
+
+
   private:
     Point3 center; ///< The center point of the sphere
     double radius; ///< The radius of the sphere
