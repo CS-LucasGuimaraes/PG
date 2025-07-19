@@ -34,7 +34,7 @@ int main() {
         renderer.render();
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> elapsed = end - start;
-        Prism::Style::logInfo("GPU Render Time: " + std::to_string(elapsed.count()) + " ms");
+        Prism::Style::logInfo("GPU Render Time: " + std::to_string(elapsed.count()) + " s");
 
         renderer.saveImage("output_gpu.ppm");
 

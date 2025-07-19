@@ -49,8 +49,11 @@ private:
     vk::Buffer m_materialBuffer;
     VmaAllocation m_materialBufferAllocation;
 
+    vk::Buffer m_lightBuffer;
+    VmaAllocation m_lightBufferAllocation;
+
     
-    void createBuffers(const Camera& camera, const std::vector<GPUObject>& objects, const std::vector<GPUMaterial>& materials);
+    void createBuffers(const Camera& camera, const std::vector<GPUObject>& objects, const std::vector<GPUMaterial>& materials, const std::vector<GPULight>& lights);
     void createDescriptorSet();
     void createComputePipeline();
     void createCommandObjects();
