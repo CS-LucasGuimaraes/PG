@@ -16,8 +16,8 @@
 #include "Prism/core/matrix.hpp"
 #include "Prism/core/point.hpp"
 #include "Prism/core/style.hpp"
-#include "Prism/core/vector.hpp"
 #include "Prism/core/utils.hpp"
+#include "Prism/core/vector.hpp"
 #include "Prism/objects/mesh.hpp"
 #include "Prism/objects/plane.hpp"
 #include "Prism/objects/sphere.hpp"
@@ -164,10 +164,39 @@ Scene SceneParser::parse(ACCELERATION acceleration) const {
 
     if (root["lights"] && root["lights"].IsSequence()) {
         for (const auto& light_node : root["lights"]) {
-            Point3 pos = parsePoint(light_node["position"]);
-            Vector3 color_vec = parseVector(light_node["color"]);
-            Color color(color_vec.x, color_vec.y, color_vec.z);
-            lights.push_back(std::make_unique<Light>(pos, color));
+            std::string name = "Unnamed Light";
+            if (light_node["name"]) {
+                name = light_node["name"].as<std::string>();
+            }
+
+            std::string type = "point";
+            if (light_node["type"]) {
+                type = light_node["type"].as<std::string>();
+            } else {
+                Style::logWarning("Light type not specified for '" + name +
+                                  "'. Defaulting to 'point'.");
+            }
+            
+            Color color = parseColor(light_node["color"]);
+
+            if (type == "point") {
+                Point3 pos = parsePoint(light_node["position"]);
+                lights.push_back(std::make_unique<PointLight>(pos, color));
+            }
+
+            else if (type == "quad") {
+                Point3 corner = parsePoint(light_node["corner"]);
+                Vector3 u_vec = parseVector(light_node["u_vec"]);
+                Vector3 v_vec = parseVector(light_node["v_vec"]);
+
+                lights.push_back(std::make_unique<QuadLight>(corner, u_vec, v_vec, color));
+            }
+
+            else if (type == "spherical") {
+                Point3 center = parsePoint(light_node["center"]);
+                double radius = light_node["radius"].as<double>();
+                lights.push_back(std::make_unique<SphericalLight>(center, radius, color));
+            }
         }
     } else {
         Style::logWarning("'lights' node not found or is not a list. No lights will be added.");
@@ -231,11 +260,9 @@ Scene SceneParser::parse(ACCELERATION acceleration) const {
     }
 
     Style::logDone("Scene parsing completed successfully.");
-    Style::logInfo("Scene contains: " + Style::CYAN +
-                   std::to_string(objects.size()) + " total objects, " +
-                   std::to_string(lights.size()) + " light sources.");
-    
-    
+    Style::logInfo("Scene contains: " + Style::CYAN + std::to_string(objects.size()) +
+                   " total objects, " + std::to_string(lights.size()) + " light sources.");
+
     Style::logSection();
     Style::logInfo("--- Scene Settings ---");
     Style::logInfo("Resolution: " + Style::CYAN +
@@ -244,7 +271,6 @@ Scene SceneParser::parse(ACCELERATION acceleration) const {
     Style::logInfo("Camera LookFrom: " + Style::CYAN + to_string(camera.pos));
     Style::logInfo("----------------------");
     Style::logSection();
-
 
     return Scene(camera, std::move(objects), std::move(lights), ambient_light, acceleration);
 }

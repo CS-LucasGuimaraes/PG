@@ -71,13 +71,42 @@ std::filesystem::path generate_filename() {
     return "render_fallback.ppm";
 }
 
-bool Scene::is_in_shadow(const std::unique_ptr<Light>& light, Point3 p) const {
-    double light_distance = (light->position - p).magnitude();
-    Vector3 light_dir = (light->position - p).normalize();
-    Ray shadow_ray(p, light_dir);
+double Scene::calculate_shadow_factor(const Light* light, const Point3& p) const {
+    if (const auto* area_light = dynamic_cast<const AreaLight*>(light)) {
+        // --- Logic for Soft Shadows (AreaLights) ---
+        int unblocked_rays = 0;
 
-    HitRecord rec;
-    return acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec);
+        for (int i = 0; i < SOFT_SHADOW_SAMPLES; ++i) {
+            // Get a new random point on the light's surface for each sample.
+            Point3 random_point_on_light = area_light->get_random_point_on_surface();
+
+            double light_distance = (random_point_on_light - p).magnitude();
+            Vector3 light_dir = (random_point_on_light - p).normalize();
+            Ray shadow_ray(p, light_dir);
+
+            HitRecord rec;
+            // If hit_any returns false, the ray was NOT blocked.
+            if (!acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec)) {
+                unblocked_rays++;
+            }
+        }
+        return static_cast<double>(unblocked_rays) / SOFT_SHADOW_SAMPLES;
+
+    } else {
+        // --- Logic for Hard Shadows (PointLights) ---
+        Point3 light_pos = light->get_position();
+        double light_distance = (light_pos - p).magnitude();
+        Vector3 light_dir = (light_pos - p).normalize();
+        Ray shadow_ray(p, light_dir);
+
+        HitRecord rec;
+        // If the ray is NOT blocked, it is fully lit (1.0). Otherwise, fully shadowed (0.0).
+        if (!acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec)) {
+            return 1.0;
+        } else {
+            return 0.0;
+        }
+    }
 }
 
 
@@ -97,21 +126,25 @@ Color Scene::trace(const Ray& ray, int depth) const {
     Vector3 view_dir = (ray.origin() - rec.p).normalize();
 
     for (const auto& light_ptr : lights_) {
-        if (!is_in_shadow(light_ptr, rec.p)) {
+        double shadow_factor = calculate_shadow_factor(light_ptr.get(), rec.p);
 
-            // Diffuse contribution
-            Vector3 light_dir = (light_ptr->position - rec.p).normalize();
-            double diff_factor = std::max(rec.normal.dot(light_dir), 0.0);
-            surface_color += mat->color * diff_factor * light_ptr->color;
+        if (shadow_factor < 1e-6) {
+            continue;
+        }
 
-            // Specular contribution
-            if (mat->ks.r == 0 && mat->ks.g == 0 && mat->ks.b == 0) {
-                continue; // Skip specular if ks is black
-            }
+        Vector3 light_dir = (light_ptr->get_position() - rec.p).normalize();
+
+        double diff_factor = std::max(rec.normal.dot(light_dir), 0.0);
+        Color diffuse_color = mat->color * diff_factor;
+
+        Color specular_color;
+        if (mat->ks.r > 0 || mat->ks.g > 0 || mat->ks.b > 0) { 
             Vector3 reflect_dir = (-light_dir) - rec.normal * 2 * (-light_dir).dot(rec.normal);
             double spec_factor = std::pow(std::max(view_dir.dot(reflect_dir), 0.0), mat->ns);
-            surface_color += mat->ks * spec_factor * light_ptr->color;
+            specular_color = mat->ks * spec_factor;
         }
+
+        surface_color += (diffuse_color + specular_color) * light_ptr->color * shadow_factor;
     }
 
     Color final_color = mat->ke + surface_color;
@@ -215,6 +248,7 @@ void Scene::render() const {
     Style::logInfo("--- Render Settings ---");
     Style::logInfo("Threads: " + Prism::Style::CYAN + std::to_string(std::thread::hardware_concurrency()));
     Style::logInfo("Samples per Pixel: " + Prism::Style::CYAN + std::to_string(ANTI_ALIASING_SAMPLES));
+    Style::logInfo("Soft Shadow Samples: " + Prism::Style::CYAN + std::to_string(SOFT_SHADOW_SAMPLES));
     Style::logInfo("Max Ray-tracing Depth: " + Prism::Style::CYAN + std::to_string(MAX_DEPTH));
     Style::logInfo("-----------------------");
     Style::logSection();

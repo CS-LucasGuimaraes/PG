@@ -67,9 +67,13 @@ camera:
 # --- Fontes de Luz ---
 lights:
   - name: Luz do Teto
-    position: [278, 548, 278]
+    type: quad
+    corner: [343, 554.8, 227]
+    u_vec: [-130, 0, 0]
+    v_vec: [0, 0, 105]
     color: [1.0, 1.0, 1.0]
   - name: Flash da Câmera
+    type: point
     position: [278, 278, -800]
     color: [0.5, 0.5, 0.5]
 
@@ -129,15 +133,14 @@ objects:
       - type: translation
         vector: [370, 82.5, 150]
 
-  # ESFERAS COM POSIÇÃO AJUSTADA (AINDA MAIS PERTO)
   - name: Esfera de Vidro
     type: sphere
-    center: [380, 90, -140]  # Z foi de 120 para 80
+    center: [380, 90, -140] 
     radius: 90
     material: *vidro
 
   - name: Esfera de Espelho
     type: sphere
-    center: [180, 90, -200] # Z foi de 180 para 100
+    center: [180, 90, -200]
     radius: 90
     material: *espelho

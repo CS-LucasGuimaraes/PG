@@ -63,11 +63,12 @@ class PRISM_EXPORT Scene {
   private:
     Color trace(const Ray& ray, int depth) const;
 
-    bool is_in_shadow(const std::unique_ptr<Light>& light, Point3 p) const;
+    double calculate_shadow_factor(const Light* light, const Point3& p) const;
 
     void render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done, std::mutex& progress_mutex) const;
 
     int ANTI_ALIASING_SAMPLES = 16;
+    int SOFT_SHADOW_SAMPLES = 16;
     int MAX_DEPTH = 5;
 
     std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene
