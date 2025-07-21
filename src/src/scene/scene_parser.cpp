@@ -16,6 +16,7 @@
 #include "Prism/core/matrix.hpp"
 #include "Prism/core/point.hpp"
 #include "Prism/core/style.hpp"
+#include "Prism/core/texture.hpp"
 #include "Prism/core/utils.hpp"
 #include "Prism/core/vector.hpp"
 #include "Prism/objects/mesh.hpp"
@@ -23,7 +24,6 @@
 #include "Prism/objects/sphere.hpp"
 #include "Prism/objects/triangle.hpp"
 #include "Prism/scene/camera.hpp"
-#include "Prism/core/texture.hpp"
 
 #include <cmath>
 #include <fstream>
@@ -64,7 +64,8 @@ Color parseColor(const YAML::Node& node) {
 }
 
 // Converts a YAML node with material properties to a Material
-std::shared_ptr<Material> parseMaterial(const YAML::Node& node) {
+std::shared_ptr<Material> parseMaterial(const YAML::Node& node,
+                                        const std::filesystem::path& scene_dir) {
     auto mat = std::make_shared<Material>();
 
     if (node["texture"]) {
@@ -74,18 +75,21 @@ std::shared_ptr<Material> parseMaterial(const YAML::Node& node) {
             Color color2 = parseColor(node["texture"]["color2"]);
             double scale = node["texture"]["scale"].as<double>(1.0);
             mat->texture = std::make_shared<CheckerTexture>(scale, color1, color2);
+        } else if (texture_type == "image" || texture_type == "img") {
+            std::string path_str = node["texture"]["path"].as<std::string>();
+            double scale = node["texture"]["scale"].as<double>(1.0);
+            std::filesystem::path full_path = scene_dir / path_str;
+            mat->texture = std::make_shared<ImageTexture>(full_path.string(), scale);
         }
+
         else {
             Style::logWarning("Unknown texture type: " + texture_type +
                               ". Defaulting to solid color.");
             mat->texture = std::make_shared<SolidColor>(1.0, 1.0, 1.0);
         }
-    }
-    else if (node["color"] && node["color"].IsSequence() && node["color"].size() == 3) {
-        mat->texture = std::make_shared<SolidColor>(
-            parseColor(node["color"]));
-    }
-    else if (node["color"]) {
+    } else if (node["color"] && node["color"].IsSequence() && node["color"].size() == 3) {
+        mat->texture = std::make_shared<SolidColor>(parseColor(node["color"]));
+    } else if (node["color"]) {
         Vector3 v = parseVector(node["color"]);
         mat->texture = std::make_shared<SolidColor>(v.x, v.y, v.z);
     }
@@ -178,7 +182,8 @@ Scene SceneParser::parse(ACCELERATION acceleration) const {
     if (root["definitions"] && root["definitions"]["materials"]) {
         for (const auto& mat_node : root["definitions"]["materials"]) {
             std::string name = mat_node.first.as<std::string>();
-            materials[name] = parseMaterial(mat_node.second);
+            materials[name] =
+                parseMaterial(mat_node.second, std::filesystem::path(filePath).parent_path());
         }
     }
 
@@ -196,7 +201,7 @@ Scene SceneParser::parse(ACCELERATION acceleration) const {
                 Style::logWarning("Light type not specified for '" + name +
                                   "'. Defaulting to 'point'.");
             }
-            
+
             Color color = parseColor(light_node["color"]);
 
             if (type == "point") {
@@ -233,7 +238,8 @@ Scene SceneParser::parse(ACCELERATION acceleration) const {
         // Find the material (whether defined inline or by reference)
         std::shared_ptr<Material> material;
         if (obj_node["material"].IsMap()) {
-            material = parseMaterial(obj_node["material"]);
+            material =
+                parseMaterial(obj_node["material"], std::filesystem::path(filePath).parent_path());
         } else if (obj_node["material"].IsScalar()) {
             std::string mat_name = obj_node["material"].as<std::string>();
             if (materials.count(mat_name)) {

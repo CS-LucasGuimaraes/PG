@@ -13,6 +13,9 @@
 #include "Prism/core/utils.hpp"
 
 #include <cmath>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 namespace Prism {
 
@@ -64,6 +67,12 @@ bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) con
     Vector3 normal_local = (local_hit_point - center) / radius;
     Vector3 normal_world = (inverseTransposeTransform * normal_local).normalize();
     rec.set_face_normal(ray, normal_world);
+
+    double theta = std::acos(-normal_local.y); // Elevação (ângulo do polo norte, 0 a PI)
+    double phi = std::atan2(-normal_local.z, normal_local.x) + M_PI; // Azimute (ângulo ao redor do equador, 0 a 2*PI)
+
+    rec.u = phi / (2 * M_PI);   // Normaliza phi para 0 a 1
+    rec.v = theta / M_PI;
 
     rec.material = material;
 

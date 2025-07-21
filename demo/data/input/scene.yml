@@ -59,8 +59,26 @@ definitions:
         scale: 50
         color1: [0.2, 0.3, 0.1]
         color2: [0.9, 0.9, 0.9]
-      ka: [1.0, 1.0, 1.0] # Para texturas, ka geralmente é 1
+      ka: [1.0, 1.0, 1.0]
       ks: [0.0, 0.0, 0.0]
+
+    parede_tijolo: &tijolo
+      texture:
+        type: image
+        path: "tijolo.jpg"
+        scale: 1000
+      ka: [1.0, 1.0, 1.0]
+      ks: [0.1, 0.1, 0.1]
+      ns: 32
+
+    textura_esfera: &textura_esfera
+      texture:
+        type: image
+        path: "textura.jpg"
+      ka: [1.0, 1.0, 1.0]
+      ks: [0.4, 0.4, 0.4]
+      ns: 2048
+      ni: 1.5    
 
 # --- Configurações da Câmera ---
 camera:
@@ -103,7 +121,7 @@ objects:
     type: plane
     point_on_plane: [0, 0, 555]
     normal: [0, 0, -1]
-    material: *branco
+    material: *tijolo
   - name: Parede Direita (Verde)
     type: plane
     point_on_plane: [555, 0, 0]
@@ -152,4 +170,4 @@ objects:
     type: sphere
     center: [180, 90, -200]
     radius: 90
-    material: *espelho
+    material: *textura_esfera

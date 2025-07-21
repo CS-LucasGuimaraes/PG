@@ -71,8 +71,8 @@ class PRISM_EXPORT Scene {
     void render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done,
                      std::mutex& progress_mutex) const;
 
-    int ANTI_ALIASING_SAMPLES = 16;
-    int SOFT_SHADOW_SAMPLES = 16;
+    int ANTI_ALIASING_SAMPLES = 1;
+    int SOFT_SHADOW_SAMPLES = 1;
     int MAX_DEPTH = 5;
 
     std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene

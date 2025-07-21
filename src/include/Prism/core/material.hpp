@@ -33,11 +33,14 @@ class PRISM_EXPORT Material {
     Material() {
         texture = std::make_shared<SolidColor>(1.0, 1.0, 1.0);
     }
-    explicit Material(Color c, Color ka, Color ks, Color ke, double ns, double ni, double d) :
+    Material(Color c) : texture(std::make_shared<SolidColor>(c)) {
+    };
+
+    Material(Color c, Color ka, Color ks, Color ke, double ns, double ni, double d) :
         texture(std::make_shared<SolidColor>(c)),
         ka(ka), ks(ks), ke(ke), ns(ns), ni(ni), d(d) {}
         
-    explicit Material(std::shared_ptr<Texture> tex, Color ka, Color ks, Color ke, double ns, double ni, double d) :
+    Material(std::shared_ptr<Texture> tex, Color ka, Color ks, Color ke, double ns, double ni, double d) :
         texture(tex), ka(ka), ks(ks), ke(ke), ns(ns), ni(ni), d(d) {}
 
     std::shared_ptr<Texture> texture;

@@ -14,9 +14,10 @@
 
 #include "prism_export.h"
 
-#include "Prism/scene/scene.hpp"
 #include "Prism/scene/acceleration.hpp"
+#include "Prism/scene/scene.hpp"
 
+#include <filesystem>
 #include <string>
 
 namespace Prism {
