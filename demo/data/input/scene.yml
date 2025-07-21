@@ -53,6 +53,15 @@ definitions:
       ni: 1.52
       d: 0.05
 
+    chao_xadrez: &chao_xadrez
+      texture:
+        type: checker
+        scale: 50
+        color1: [0.2, 0.3, 0.1]
+        color2: [0.9, 0.9, 0.9]
+      ka: [1.0, 1.0, 1.0] # Para texturas, ka geralmente é 1
+      ks: [0.0, 0.0, 0.0]
+
 # --- Configurações da Câmera ---
 camera:
   image_width: 800
@@ -84,7 +93,7 @@ objects:
     type: plane
     point_on_plane: [0, 0, 0]
     normal: [0, 1, 0]
-    material: *branco
+    material: *chao_xadrez
   - name: Teto
     type: plane
     point_on_plane: [0, 555, 0]

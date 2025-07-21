@@ -29,18 +29,34 @@ bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) cons
         return false;
     }
 
-    Vector3 world_normal = (this->inverseTransposeTransform * this->normal).normalize();
-    Vector3 world_point_on_plane = transform * point_on_plane;
-    double t = (world_point_on_plane - ray.origin()).dot(world_normal) / denominator;
+    double t_local = (point_on_plane - transformed_ray.origin()).dot(normal) / denominator;
+    Point3 world_hit_point = transform * transformed_ray.at(t_local);
 
-    if (t < t_min || t > t_max) {
+    double t_global = (world_hit_point - ray.origin()).dot(ray.direction().normalize());
+    
+    if (t_global < t_min || t_global > t_max) {
         return false;
     }
 
-    rec.t = t;
-    rec.p = ray.at(t);                      // Ponto de volta para o espaço global
+    
+    rec.t = t_global;
+    rec.p = world_hit_point;
+    Vector3 world_normal = (inverseTransposeTransform * normal).normalize();
     rec.set_face_normal(ray, world_normal); // Usa o raio original
     rec.material = material;
+
+    Vector3 up_reference(0.0, 1.0, 0.0);
+    if (std::abs(normal.dot(up_reference)) > 0.999) {
+        up_reference = Vector3(1.0, 0.0, 0.0);
+    }
+
+    Vector3 u_dir = up_reference.cross(normal).normalize();
+    Vector3 v_dir = normal.cross(u_dir);
+
+    Point3 local_hit_point = transformed_ray.at(t_local);
+    Vector3 hit_vec = local_hit_point - point_on_plane;
+    rec.u = hit_vec.dot(u_dir);
+    rec.v = hit_vec.dot(v_dir);
 
     return true;
 }

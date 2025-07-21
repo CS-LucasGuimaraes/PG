@@ -29,6 +29,7 @@ A classe precisa ser instânciada passando o caminho do arquivo .mtl corresponde
 
 #include "Prism/core/material.hpp"
 #include "Prism/core/style.hpp"
+#include "Prism/core/texture.hpp"
 #include "Prism/core/vector.hpp"
 
 #include <fstream>
@@ -74,7 +75,7 @@ class colormap {
                 double kdR, kdG, kdB;
                 iss >> kdR >> kdG >> kdB;
                 if (!currentMaterial.empty()) {
-                    mp[currentMaterial].color = Color(kdR, kdG, kdB);
+                    mp[currentMaterial].texture = std::make_shared<SolidColor>(kdR, kdG, kdB);
                 }
             } else if (keyword == "Ks") {
                 double ksR, ksG, ksB;
@@ -108,7 +109,8 @@ class colormap {
 
     Vector3 getColor(string& s) {
         if (mp.find(s) != mp.end()) {
-            return Vector3(mp[s].color.r, mp[s].color.g, mp[s].color.b);
+            Color c = mp[s].texture->value(0.0, 0.0, Point3());
+            return Vector3(c.r, c.g, c.b);
         } else {
             Style::logError("Cor " + s + " indefinida no arquivo .mtl");
             return Vector3(0, 0, 0);

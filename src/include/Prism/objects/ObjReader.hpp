@@ -13,6 +13,7 @@
 #include "prism_export.h"
 
 #include "Prism/objects/Colormap.hpp"
+#include "Prism/core/texture.hpp"
 
 #include <algorithm>
 #include <array>
@@ -61,7 +62,8 @@ class ObjReader {
                 iss >> colorname;
                 auto mtlProps = cmap.getMaterial(colorname);
                 curMaterial = std::make_shared<Material>(
-                    Color(mtlProps.color.r, mtlProps.color.g, mtlProps.color.b), mtlProps.ka,
+                    mtlProps.texture->value(0.0, 0.0, Point3()),
+                    mtlProps.ka,
                     mtlProps.ks, mtlProps.ke, mtlProps.ns, mtlProps.ni, mtlProps.d);
             } else if (prefix == "v") {
                 double x, y, z;

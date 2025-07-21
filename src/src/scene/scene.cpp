@@ -145,7 +145,9 @@ Color Scene::trace(const Ray& ray, int depth) const {
 
     auto mat = rec.material;
 
-    Color surface_color = mat->ka * ambient_color_;
+    Color surface_albedo = mat->texture->value(rec.u, rec.v, rec.p);
+
+    Color surface_color = mat->ka * ambient_color_ * surface_albedo;
     Vector3 view_dir = (ray.origin() - rec.p).normalize();
 
     for (const auto& light_ptr : lights_) {
@@ -158,7 +160,7 @@ Color Scene::trace(const Ray& ray, int depth) const {
         Vector3 light_dir = (light_ptr->get_position() - rec.p).normalize();
 
         double diff_factor = std::max(rec.normal.dot(light_dir), 0.0);
-        Color diffuse_color = mat->color * diff_factor;
+        Color diffuse_color = surface_albedo * diff_factor;
 
         Color specular_color;
         if (mat->ks.r > 0 || mat->ks.g > 0 || mat->ks.b > 0) { 

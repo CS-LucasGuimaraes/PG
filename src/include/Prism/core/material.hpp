@@ -14,6 +14,9 @@
 
 #include "Prism/core/color.hpp"
 #include "Prism/core/vector.hpp"
+#include "Prism/core/texture.hpp"
+
+#include <memory> 
 
 namespace Prism {
 
@@ -27,35 +30,24 @@ namespace Prism {
  */
 class PRISM_EXPORT Material {
   public:
-    /**
-     * @brief
-     * Default constructor that initializes the material with default values.
-     * The default values are:
-     * - Color: white (1,1,1)
-     * - Ambient reflectivity (ka): (0.1, 0.1, 0.1)
-     * - Specular reflectivity (ks): (0, 0, 0)
-     * - Emissive color (ke): (0, 0, 0)
-     * - Shininess (ns): 1
-     * - Index of refraction (ni): 1
-     * - Transparency (d): 1
-     */
-    Material(Color color = Color(1, 1, 1), Color ka = Color(0.1, 0.1, 0.1),
-             Color ks = Color(0, 0, 0), Color ke = Color(0, 0, 0), double ns = 1.0, double ni = 1.0,
-             double d = 1.0)
-        : color(color), ka(ka), ks(ks), ke(ke), ns(ns), ni(ni), d(d) {
+    Material() {
+        texture = std::make_shared<SolidColor>(1.0, 1.0, 1.0);
     }
+    explicit Material(Color c, Color ka, Color ks, Color ke, double ns, double ni, double d) :
+        texture(std::make_shared<SolidColor>(c)),
+        ka(ka), ks(ks), ke(ke), ns(ns), ni(ni), d(d) {}
+        
+    explicit Material(std::shared_ptr<Texture> tex, Color ka, Color ks, Color ke, double ns, double ni, double d) :
+        texture(tex), ka(ka), ks(ks), ke(ke), ns(ns), ni(ni), d(d) {}
 
-    Color color; ///< The color of the material, typically used for diffuse reflection.
-    Color ka;    ///< Ambient reflectivity of the material, representing how much ambient light it
-                 ///< reflects.
-    Color ks;    ///< Specular reflectivity of the material, representing how much specular light it
-                 ///< reflects.
-    Color
-        ke; ///< Emissive color of the material, representing light emitted by the material itself.
-    double ns; ///< Shininess factor of the material, affecting the size and intensity of specular
-               ///< highlights.
-    double ni; ///< Index of refraction of the material, used for simulating refraction effects.
-    double d; ///< Transparency of the material, where 0 is fully opaque and 1 is fully transparent.
+    std::shared_ptr<Texture> texture;
+
+    Color ka = Color(0.1, 0.1, 0.1);    ///< Ambient reflectivity
+    Color ks = Color(0, 0, 0);    ///< Specular reflectivity
+    Color ke = Color(0, 0, 0);   ///< Emissive color
+    double ns = 1.0; ///< Shininess factor
+    double ni = 1.0; ///< Index of refraction
+    double d = 1.0; ///< Opacity
 };
 
 } // namespace Prism

@@ -23,6 +23,7 @@
 #include "Prism/objects/sphere.hpp"
 #include "Prism/objects/triangle.hpp"
 #include "Prism/scene/camera.hpp"
+#include "Prism/core/texture.hpp"
 
 #include <cmath>
 #include <fstream>
@@ -66,10 +67,29 @@ Color parseColor(const YAML::Node& node) {
 std::shared_ptr<Material> parseMaterial(const YAML::Node& node) {
     auto mat = std::make_shared<Material>();
 
-    if (node["color"]) {
-        Vector3 v = parseVector(node["color"]);
-        mat->color = Color(v.x, v.y, v.z);
+    if (node["texture"]) {
+        std::string texture_type = node["texture"]["type"].as<std::string>();
+        if (texture_type == "checker") {
+            Color color1 = parseColor(node["texture"]["color1"]);
+            Color color2 = parseColor(node["texture"]["color2"]);
+            double scale = node["texture"]["scale"].as<double>(1.0);
+            mat->texture = std::make_shared<CheckerTexture>(scale, color1, color2);
+        }
+        else {
+            Style::logWarning("Unknown texture type: " + texture_type +
+                              ". Defaulting to solid color.");
+            mat->texture = std::make_shared<SolidColor>(1.0, 1.0, 1.0);
+        }
     }
+    else if (node["color"] && node["color"].IsSequence() && node["color"].size() == 3) {
+        mat->texture = std::make_shared<SolidColor>(
+            parseColor(node["color"]));
+    }
+    else if (node["color"]) {
+        Vector3 v = parseVector(node["color"]);
+        mat->texture = std::make_shared<SolidColor>(v.x, v.y, v.z);
+    }
+
     if (node["ka"])
         mat->ka = parseColor(node["ka"]);
     if (node["ks"])

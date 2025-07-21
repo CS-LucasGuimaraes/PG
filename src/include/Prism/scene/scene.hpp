@@ -14,15 +14,15 @@
 
 #include "Prism/core/color.hpp"
 #include "Prism/objects/objects.hpp"
+#include "Prism/scene/acceleration.hpp"
 #include "Prism/scene/camera.hpp"
 #include "Prism/scene/light.hpp"
-#include "Prism/scene/acceleration.hpp"
 
 #include <filesystem>
 #include <memory>
+#include <mutex>
 #include <ostream>
 #include <vector>
-#include <mutex>
 
 namespace Prism {
 
@@ -35,13 +35,16 @@ PRISM_EXPORT std::filesystem::path generate_filename();
  * the scene from the camera's perspective.
  */
 class PRISM_EXPORT Scene {
-  public:    
+  public:
     /**
      * @brief Constructs a Scene with a specified camera.
      * @param camera The Camera object that defines the viewpoint and projection parameters for
      * rendering the scene.
      */
-    explicit Scene(Camera camera, std::vector<std::unique_ptr<Object>> objects, std::vector<std::unique_ptr<Light>> lights, Color ambient_light = Color(0.1, 0.1, 0.1), ACCELERATION acceleration = ACCELERATION::NONE);
+    explicit Scene(Camera camera, std::vector<std::unique_ptr<Object>> objects,
+                   std::vector<std::unique_ptr<Light>> lights,
+                   Color ambient_light = Color(0.1, 0.1, 0.1),
+                   ACCELERATION acceleration = ACCELERATION::NONE);
 
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;
@@ -65,7 +68,8 @@ class PRISM_EXPORT Scene {
 
     double calculate_shadow_factor(const Light* light, const Point3& p) const;
 
-    void render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done, std::mutex& progress_mutex) const;
+    void render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done,
+                     std::mutex& progress_mutex) const;
 
     int ANTI_ALIASING_SAMPLES = 16;
     int SOFT_SHADOW_SAMPLES = 16;
@@ -75,7 +79,8 @@ class PRISM_EXPORT Scene {
     std::vector<std::unique_ptr<Light>> lights_;   ///< Collection of light sources in the scene
     Color ambient_color_ = Color(0.1, 0.1, 0.1);   ///< Ambient color for the scene
     Camera camera_;                                ///< The camera used to view the scene
-    std::unique_ptr<AccelerationStructure> acceleration_structure_; ///< The acceleration structure used for ray-object intersection
+    std::unique_ptr<AccelerationStructure>
+        acceleration_structure_; ///< The acceleration structure used for ray-object intersection
 };
 } // namespace Prism
 

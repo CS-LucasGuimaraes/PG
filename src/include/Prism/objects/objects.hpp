@@ -35,6 +35,8 @@ struct PRISM_EXPORT HitRecord {
     Point3 p;
     Vector3 normal;
     double t;
+    double u;
+    double v;
     std::shared_ptr<Material> material;
     bool front_face;
 
