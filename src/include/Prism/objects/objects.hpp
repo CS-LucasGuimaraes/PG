@@ -16,6 +16,7 @@
 #include "Prism/core/point.hpp"
 #include "Prism/core/ray.hpp"
 #include "Prism/core/vector.hpp"
+#include "Prism/objects/aabb.hpp"
 
 #include <memory>
 
@@ -64,6 +65,8 @@ class PRISM_EXPORT Object {
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const = 0;
 
+    virtual AABB get_bounding_box() const = 0;
+
     /**
      * @brief Gets the transformation matrix of the object.
      * @param The transformation matrix.
@@ -88,8 +91,7 @@ class PRISM_EXPORT Object {
   protected:
     Matrix transform = Matrix::identity(4);        ///< Transformation matrix for the object
     Matrix inverseTransform = Matrix::identity(4); ///< Inverse of the transformation matrix
-    Matrix inverseTransposeTransform =
-        Matrix::identity(4); ///< Inverse transpose of the transformation matrix
+    Matrix inverseTransposeTransform = Matrix::identity(4); ///< M^-t of the transformation matrix
 };
 
 } // namespace Prism

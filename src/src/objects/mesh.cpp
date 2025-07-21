@@ -68,7 +68,7 @@ bool Mesh::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const
         world_t = (world_p - ray.origin()).dot(ray.direction().normalize());
     }
 
-    if (world_t < t_min || world_t > t_max) {
+    if ((world_t < t_min || world_t > t_max) || world_t == INFINITY) {
         return false;
     }
 
@@ -82,6 +82,30 @@ bool Mesh::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const
 
     return true;
 };
+
+AABB Mesh::get_bounding_box() const {
+    if (points.empty()) {
+        return AABB(Point3(0, 0, 0), Point3(0, 0, 0));
+    }
+
+     const double inf = std::numeric_limits<double>::infinity();
+
+    Point3 min_point(inf, inf, inf);
+    Point3 max_point(-inf, -inf, -inf);
+
+    for (const auto& point : points) {
+        Point3 world_point = transform * (*point);
+        min_point.x = std::min(min_point.x, world_point.x);
+        min_point.y = std::min(min_point.y, world_point.y);
+        min_point.z = std::min(min_point.z, world_point.z);
+
+        max_point.x = std::max(max_point.x, world_point.x);
+        max_point.y = std::max(max_point.y, world_point.y);
+        max_point.z = std::max(max_point.z, world_point.z);
+    }
+
+    return AABB(min_point, max_point);
+}
 
 void Mesh::setMaterial(std::shared_ptr<Material> new_material) {
     material = std::move(new_material);

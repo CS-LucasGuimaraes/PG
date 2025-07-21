@@ -17,6 +17,7 @@
 #include "Prism/core/point.hpp"
 #include "Prism/core/style.hpp"
 #include "Prism/core/vector.hpp"
+#include "Prism/core/utils.hpp"
 #include "Prism/objects/mesh.hpp"
 #include "Prism/objects/plane.hpp"
 #include "Prism/objects/sphere.hpp"
@@ -121,7 +122,7 @@ Matrix parseTransformations(const YAML::Node& node) {
 SceneParser::SceneParser(const std::string& sceneFilePath) : filePath(sceneFilePath) {
 }
 
-Scene SceneParser::parse() {
+Scene SceneParser::parse(ACCELERATION acceleration) const {
     YAML::Node root;
     try {
         root = YAML::LoadFile(filePath);
@@ -149,7 +150,8 @@ Scene SceneParser::parse() {
         Style::logWarning("Ambient light not defined. Using default (0.1, 0.1, 0.1).");
     }
 
-    Scene scene(std::move(camera), ambient_light);
+    std::vector<std::unique_ptr<Object>> objects;
+    std::vector<std::unique_ptr<Light>> lights;
 
     // Parse Material Definitions (for reuse)
     std::map<std::string, std::shared_ptr<Material>> materials;
@@ -165,7 +167,7 @@ Scene SceneParser::parse() {
             Point3 pos = parsePoint(light_node["position"]);
             Vector3 color_vec = parseVector(light_node["color"]);
             Color color(color_vec.x, color_vec.y, color_vec.z);
-            scene.addLight(std::make_unique<Light>(pos, color));
+            lights.push_back(std::make_unique<Light>(pos, color));
         }
     } else {
         Style::logWarning("'lights' node not found or is not a list. No lights will be added.");
@@ -224,11 +226,27 @@ Scene SceneParser::parse() {
 
         if (object) {
             object->setTransform(parseTransformations(obj_node["transform"]));
-            scene.addObject(std::move(object));
+            objects.push_back(std::move(object));
         }
     }
 
-    return scene;
+    Style::logDone("Scene parsing completed successfully.");
+    Style::logInfo("Scene contains: " + Style::CYAN +
+                   std::to_string(objects.size()) + " total objects, " +
+                   std::to_string(lights.size()) + " light sources.");
+    
+    
+    Style::logSection();
+    Style::logInfo("--- Scene Settings ---");
+    Style::logInfo("Resolution: " + Style::CYAN +
+                   std::to_string(cam_node["image_height"].as<int>()) + "x" +
+                   std::to_string(cam_node["image_width"].as<int>()));
+    Style::logInfo("Camera LookFrom: " + Style::CYAN + to_string(camera.pos));
+    Style::logInfo("----------------------");
+    Style::logSection();
+
+
+    return Scene(camera, std::move(objects), std::move(lights), ambient_light, acceleration);
 }
 
 } // namespace Prism

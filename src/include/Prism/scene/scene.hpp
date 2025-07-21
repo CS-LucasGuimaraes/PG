@@ -16,6 +16,7 @@
 #include "Prism/objects/objects.hpp"
 #include "Prism/scene/camera.hpp"
 #include "Prism/scene/light.hpp"
+#include "Prism/scene/acceleration.hpp"
 
 #include <filesystem>
 #include <memory>
@@ -34,34 +35,19 @@ PRISM_EXPORT std::filesystem::path generate_filename();
  * the scene from the camera's perspective.
  */
 class PRISM_EXPORT Scene {
-  public:
+  public:    
     /**
      * @brief Constructs a Scene with a specified camera.
      * @param camera The Camera object that defines the viewpoint and projection parameters for
      * rendering the scene.
      */
-    explicit Scene(Camera camera, Color ambient_light = Color(0.1, 0.1, 0.1));
+    explicit Scene(Camera camera, std::vector<std::unique_ptr<Object>> objects, std::vector<std::unique_ptr<Light>> lights, Color ambient_light = Color(0.1, 0.1, 0.1), ACCELERATION acceleration = ACCELERATION::NONE);
 
     Scene(const Scene&) = delete;
     Scene& operator=(const Scene&) = delete;
 
     Scene(Scene&&) = default;
     Scene& operator=(Scene&&) = default;
-
-    /**
-     * @brief Adds an object to the scene.
-     * @param object A unique pointer to an Object that will be added to the scene.
-     * This method takes ownership of the object and stores it in the scene's collection.
-     */
-    void addObject(std::unique_ptr<Object> object);
-
-    /**
-     * @brief Adds a light source to the scene.
-     * @param light The Light object to be added to the scene.
-     * This method stores the light in the scene's collection, allowing it to be used during
-     * rendering for illumination calculations.
-     */
-    void addLight(std::unique_ptr<Light> light);
 
     /**
      * @brief Renders the scene from the camera's perspective.
@@ -72,19 +58,23 @@ class PRISM_EXPORT Scene {
      */
     void render() const;
 
+    void setAccelerationStructure(ACCELERATION acceleration);
+
   private:
     Color trace(const Ray& ray, int depth) const;
 
-    bool is_in_shadow(const std::unique_ptr<Light>& light, const HitRecord& rec) const;
-
-    bool hit_closest(const Ray& ray, double t_min, double t_max, HitRecord& rec) const;
+    bool is_in_shadow(const std::unique_ptr<Light>& light, Point3 p) const;
 
     void render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done, std::mutex& progress_mutex) const;
+
+    int ANTI_ALIASING_SAMPLES = 16;
+    int MAX_DEPTH = 5;
 
     std::vector<std::unique_ptr<Object>> objects_; ///< Collection of objects in the scene
     std::vector<std::unique_ptr<Light>> lights_;   ///< Collection of light sources in the scene
     Color ambient_color_ = Color(0.1, 0.1, 0.1);   ///< Ambient color for the scene
     Camera camera_;                                ///< The camera used to view the scene
+    std::unique_ptr<AccelerationStructure> acceleration_structure_; ///< The acceleration structure used for ray-object intersection
 };
 } // namespace Prism
 

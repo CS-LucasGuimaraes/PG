@@ -11,6 +11,10 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <string>
+#include <memory>
+#include <cxxabi.h>
+#include <sstream>
 
 namespace Prism {
 
@@ -73,6 +77,31 @@ double schlick(double cos, double ref_idx) {
     auto r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
     r0 = r0 * r0;
     return r0 + (1.0 - r0) * pow((1.0 - cos), 5);
+}
+
+std::string demangle(const char* name) {
+    int status = 0; // Variável para armazenar o status do demangle
+
+    // Usa um ponteiro inteligente para garantir que a memória alocada por __cxa_demangle seja liberada
+    std::unique_ptr<char, void(*)(void*)> res {
+        abi::__cxa_demangle(name, nullptr, nullptr, &status),
+        std::free
+    };
+
+    // Se o status for 0, o demangle foi bem-sucedido
+    return (status == 0) ? res.get() : name;
+}
+
+std::string to_string(const Point3& p) {
+    std::stringstream ss;
+    ss << "[" << p.x << ", " << p.y << ", " << p.z << "]";
+    return ss.str();
+}
+
+std::string to_string(const Vector3& v) {
+    std::stringstream ss;
+    ss << "[" << v.x << ", " << v.y << ", " << v.z << "]";
+    return ss.str();
 }
 
 } // namespace Prism

@@ -12,7 +12,8 @@
 
 int main() {
     try {
-        Prism::SceneParser("./data/input/scene.yml").parse().render();
+        Prism::SceneParser("./data/input/scene.yml").parse(Prism::ACCELERATION::OCTREE).render();
+        // Prism::SceneParser("./data/input/scene.yml").parse(Prism::ACCELERATION::NONE).render();
 
     } catch (const std::exception& e) {
         Prism::Style::logError(e.what());

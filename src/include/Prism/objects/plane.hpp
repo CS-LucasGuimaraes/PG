@@ -46,11 +46,12 @@ class PRISM_EXPORT Plane : public Object {
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
 
+    virtual AABB get_bounding_box() const override;
+
   private:
     Point3 point_on_plane; ///< A point on the plane
     Vector3 normal;        ///< The normal vector of the plane
-    std::shared_ptr<Material>
-        material; ///< Material properties of the plane, defining how it interacts with light
+    std::shared_ptr<Material> material; ///< Material properties of the plane
 };
 
 } // namespace Prism

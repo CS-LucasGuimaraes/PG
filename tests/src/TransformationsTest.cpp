@@ -127,6 +127,11 @@ class TestableObject : public Object {
         return false;
     }
 
+    AABB get_bounding_box() const override {
+        // Retorna uma AABB trivial para testes
+        return AABB(Point3(-1, -1, -1), Point3(1, 1, 1));
+    }
+
     // Funções para acessar as matrizes protegidas da classe base
     const Matrix& getTransform() const {
         return transform;

@@ -78,6 +78,29 @@ bool Triangle::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) c
     return true;
 }
 
+AABB Triangle::get_bounding_box() const {
+    Point3 world_point1 = transform * point1;
+    Point3 world_point2 = transform * point2;
+    Point3 world_point3 = transform * point3;
+
+
+    Point3 min_point(
+        std::min(std::min(world_point1.x, world_point2.x), world_point3.x),
+        std::min(std::min(world_point1.y, world_point2.y), world_point3.y),
+        std::min(std::min(world_point1.z, world_point2.z), world_point3.z)
+    );
+
+    Point3 max_point(
+        std::max(std::max(world_point1.x, world_point2.x), world_point3.x),
+        std::max(std::max(world_point1.y, world_point2.y), world_point3.y),
+        std::max(std::max(world_point1.z, world_point2.z), world_point3.z)
+    );
+    
+    return AABB(min_point, max_point);
+}
+
+
+
 MeshTriangle::MeshTriangle(std::shared_ptr<Point3> p1, std::shared_ptr<Point3> p2,
                            std::shared_ptr<Point3> p3, std::shared_ptr<Vector3> n1,
                            std::shared_ptr<Vector3> n2, std::shared_ptr<Vector3> n3)

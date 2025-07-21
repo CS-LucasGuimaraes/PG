@@ -70,4 +70,11 @@ bool Sphere::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) con
     return true;
 }
 
+AABB Sphere::get_bounding_box() const {
+    Point3 world_center = transform * center;
+
+    return AABB(world_center - Vector3(radius, radius, radius),
+                world_center + Vector3(radius, radius, radius));
+}
+
 } // namespace Prism

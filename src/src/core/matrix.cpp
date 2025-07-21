@@ -110,32 +110,51 @@ Matrix Matrix::operator*(const Matrix& m) const {
 }
 
 Point3 Matrix::operator*(const Point3& p) const {
-    if (!((rows_ == 3 && cols_ == 3) || (rows_ == 4 && cols_ == 4))) {
-        throw std::domain_error("Matrix must be 3x3 or 4x4 to multiply by a Point3.");
+    if (rows_ == 4 && cols_ == 4) {
+        if ((*this)[0][0] == 1.0 && (*this)[0][1] == 0.0 && (*this)[0][2] == 0.0 && (*this)[0][3] == 0.0 &&
+            (*this)[1][0] == 0.0 && (*this)[1][1] == 1.0 && (*this)[1][2] == 0.0 && (*this)[1][3] == 0.0 &&
+            (*this)[2][0] == 0.0 && (*this)[2][1] == 0.0 && (*this)[2][2] == 1.0 && (*this)[2][3] == 0.0 &&
+            (*this)[3][0] == 0.0 && (*this)[3][1] == 0.0 && (*this)[3][2] == 0.0 && (*this)[3][3] == 1.0) {
+            return p;
+        }
+
+        double x = (*this)[0][0] * p.x + (*this)[0][1] * p.y + (*this)[0][2] * p.z + (*this)[0][3];
+        double y = (*this)[1][0] * p.x + (*this)[1][1] * p.y + (*this)[1][2] * p.z + (*this)[1][3];
+        double z = (*this)[2][0] * p.x + (*this)[2][1] * p.y + (*this)[2][2] * p.z + (*this)[2][3];
+        double w = (*this)[3][0] * p.x + (*this)[3][1] * p.y + (*this)[3][2] * p.z + (*this)[3][3];
+
+        if (w != 1.0 && w != 0.0) {
+            return Point3(x / w, y / w, z / w);
+        }
+        return Point3(x, y, z);
+
+    } else if (rows_ == 3 && cols_ == 3) {
+        if ((*this)[0][0] == 1.0 && (*this)[0][1] == 0.0 && (*this)[0][2] == 0.0 &&
+            (*this)[1][0] == 0.0 && (*this)[1][1] == 1.0 && (*this)[1][2] == 0.0 &&
+            (*this)[2][0] == 0.0 && (*this)[2][1] == 0.0 && (*this)[2][2] == 1.0) {
+            return p;
+        }
+
+        double x = (*this)[0][0] * p.x + (*this)[0][1] * p.y + (*this)[0][2] * p.z;
+        double y = (*this)[1][0] * p.x + (*this)[1][1] * p.y + (*this)[1][2] * p.z;
+        double z = (*this)[2][0] * p.x + (*this)[2][1] * p.y + (*this)[2][2] * p.z;
+        return Point3(x, y, z);
     }
 
-    double x = (*this)[0][0] * p.x + (*this)[0][1] * p.y + (*this)[0][2] * p.z;
-    double y = (*this)[1][0] * p.x + (*this)[1][1] * p.y + (*this)[1][2] * p.z;
-    double z = (*this)[2][0] * p.x + (*this)[2][1] * p.y + (*this)[2][2] * p.z;
-    double w = 1.0;
-
-    if (rows_ == 4) { // Adiciona a parte da translação e perspectiva
-        x += (*this)[0][3];
-        y += (*this)[1][3];
-        z += (*this)[2][3];
-        w = (*this)[3][0] * p.x + (*this)[3][1] * p.y + (*this)[3][2] * p.z + (*this)[3][3];
-    }
-
-    if (w != 1.0 && w != 0.0) {
-        return Point3(x / w, y / w, z / w);
-    }
-    return Point3(x, y, z);
+    throw std::domain_error("Matrix must be 3x3 or 4x4 to multiply by a Point3.");
 }
 
 Vector3 Matrix::operator*(const Vector3& v) const {
     if (!((rows_ == 3 && cols_ == 3) || (rows_ == 4 && cols_ == 4))) {
         throw std::domain_error("Matrix must be 3x3 or 4x4 to multiply by a Vector3.");
     }
+
+    if ((*this)[0][0] == 1.0 && (*this)[0][1] == 0.0 && (*this)[0][2] == 0.0 && 
+        (*this)[1][0] == 0.0 && (*this)[1][1] == 1.0 && (*this)[1][2] == 0.0 &&
+        (*this)[2][0] == 0.0 && (*this)[2][1] == 0.0 && (*this)[2][2] == 1.0) {
+        return v;
+    }
+
     // A multiplicação de vetores ignora a translação (quarta coluna/linha)
     double x = (*this)[0][0] * v.x + (*this)[0][1] * v.y + (*this)[0][2] * v.z;
     double y = (*this)[1][0] * v.x + (*this)[1][1] * v.y + (*this)[1][2] * v.z;

@@ -17,6 +17,7 @@
 #include "Prism/core/vector.hpp"
 
 #include <initializer_list>
+#include <string>
 
 namespace Prism {
 
@@ -73,6 +74,32 @@ Vector3 PRISM_EXPORT refract(const Vector3& uv, const Vector3& n, double etai_ov
  * This value is used in ray tracing to determine how much light is reflected versus refracted.
  */
 double PRISM_EXPORT schlick(double cosine, double ref_idx);
+
+/**
+ * @brief Demangles a C++ type name.
+ * This function uses the C++ ABI to demangle a type name, making it more human-readable.
+ * @param name The mangled type name as a C-style string.
+ * @return A std::string containing the demangled type name.
+ * If the demangling fails, it returns the original name.
+ */
+std::string PRISM_EXPORT demangle(const char* name);
+
+/**
+ * @brief Converts a Point3 to a string representation.
+ * This function formats the coordinates of a Point3 into a string for easy display or logging.
+ * @param p The Point3 object to convert.
+ * @return A std::string representing the point in the format "[x, y, z]".
+ */
+std::string PRISM_EXPORT to_string(const Point3& p);
+
+/**
+ * @brief Converts a Vector3 to a string representation.
+ * This function formats the components of a Vector3 into a string for easy display or logging.
+ * @param v The Vector3 object to convert.
+ * @return A std::string representing the vector in the format "[x, y, z]".
+ */
+std::string PRISM_EXPORT to_string(const Vector3& v);
+
 
 } // namespace Prism
 

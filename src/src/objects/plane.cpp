@@ -45,4 +45,38 @@ bool Plane::hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) cons
     return true;
 }
 
+AABB Plane::get_bounding_box() const {
+    const double inf = std::numeric_limits<double>::infinity();
+
+    Vector3 world_normal = (inverseTransposeTransform * normal).normalize();
+    Point3 world_point = transform * point_on_plane;
+
+    const double epsilon = 1e-6;
+
+    // --- Special case: Axis Aligned Plane ---
+
+    // Aligned with the X axis
+    if (std::abs(world_normal.x) == 1.0 && world_normal.y == 0.0 && world_normal.z == 0.0) {
+        return AABB(Point3(world_point.x - epsilon, -inf, -inf),
+                    Point3(world_point.x + epsilon,  inf,  inf));
+    }
+    // Aligned with the Y axis
+    if (world_normal.x == 0.0 && std::abs(world_normal.y) == 1.0 && world_normal.z == 0.0) {
+        return AABB(Point3(-inf, world_point.y - epsilon, -inf),
+                    Point3( inf, world_point.y + epsilon,  inf));
+    }
+    // Aligned with the Z axis
+    if (world_normal.x == 0.0 && world_normal.y == 0.0 && std::abs(world_normal.z) == 1.0) {
+        return AABB(Point3(-inf, -inf, world_point.z - epsilon),
+                    Point3( inf,  inf, world_point.z + epsilon));
+    }
+
+    // --- General Case: Rotated Planes ---
+    // If the plane is not perfectly aligned, any AABB that contains it
+    // needs to be infinite in all three directions. Trying to calculate a
+    // "tight" bound is impossible.
+    return AABB(Point3(-inf, -inf, -inf),
+                Point3( inf,  inf,  inf));
+}
+
 } // namespace Prism

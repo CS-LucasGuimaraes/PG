@@ -13,6 +13,7 @@
 #include "Prism/core/material.hpp"
 #include "Prism/core/style.hpp"
 #include "Prism/core/utils.hpp"
+#include "Prism/scene/octree.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -37,24 +38,18 @@ PRISM_EXPORT std::ostream& operator<<(std::ostream& os, const Color& color) {
     return os;
 }
 
-Scene::Scene(Camera camera, Color ambient_light)
-    : camera_(std::move(camera)), ambient_color_(ambient_light) {
-}
-
-void Scene::addObject(std::unique_ptr<Object> object) {
-    objects_.push_back(std::move(object));
-}
-
-void Scene::addLight(std::unique_ptr<Light> light) {
-    lights_.push_back(std::move(light));
+Scene::Scene(Camera camera, std::vector<std::unique_ptr<Object>> objects, std::vector<std::unique_ptr<Light>> lights, Color ambient_light, ACCELERATION acceleration)
+    : camera_(std::move(camera)), ambient_color_(ambient_light), objects_(std::move(objects)), lights_(std::move(lights)) {
+        setAccelerationStructure(acceleration);
+    
 }
 
 bool get_local_time(std::tm* tm_out, const std::time_t* time_in) {
 #if defined(_WIN32) || defined(_MSC_VER)
-    // Usa a versão segura do Windows (MSVC)
+    // Uses Windows secure version
     return localtime_s(tm_out, time_in) == 0;
 #else
-    // Usa a versão reentrante/segura do Linux e macOS (GCC/Clang)
+    // Uses Linux and macOS (GCC/Clang) secure version
     return localtime_r(time_in, tm_out) != nullptr;
 #endif
 }
@@ -76,36 +71,15 @@ std::filesystem::path generate_filename() {
     return "render_fallback.ppm";
 }
 
-bool Scene::is_in_shadow(const std::unique_ptr<Light>& light, const HitRecord& rec) const {
-    double light_distance = (light->position - rec.p).magnitude();
-    Vector3 light_dir = (light->position - rec.p).normalize();
-    Ray shadow_ray(rec.p, light_dir);
-    bool in_shadow = false;
-    for (const auto& obj_ptr : objects_) {
-        HitRecord shadow_rec;
-        if (obj_ptr->hit(shadow_ray, 1e-4, light_distance, shadow_rec)) {
-            in_shadow = true;
-            break;
-        }
-    }
-    return in_shadow;
+bool Scene::is_in_shadow(const std::unique_ptr<Light>& light, Point3 p) const {
+    double light_distance = (light->position - p).magnitude();
+    Vector3 light_dir = (light->position - p).normalize();
+    Ray shadow_ray(p, light_dir);
+
+    HitRecord rec;
+    return acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec);
 }
 
-bool Scene::hit_closest(const Ray& ray, double t_min, double t_max, HitRecord& rec) const {
-    bool hit_anything = false;
-    double closest_t = INFINITY;
-
-    for (const auto& object_ptr : objects_) {
-        HitRecord temp_rec;
-        if (object_ptr->hit(ray, 1e-4, closest_t, temp_rec)) {
-            hit_anything = true;
-            closest_t = temp_rec.t;
-            rec = temp_rec;
-        }
-    }
-
-    return hit_anything;
-}
 
 Color Scene::trace(const Ray& ray, int depth) const {
     if (depth <= 0) {
@@ -113,7 +87,7 @@ Color Scene::trace(const Ray& ray, int depth) const {
     }
 
     HitRecord rec;
-    if (!hit_closest(ray, 1e-4, INFINITY, rec)) {
+    if (!acceleration_structure_->hit_closest(ray, 1e-4, INFINITY, rec)) {
         return ambient_color_; // Return ambient color if no hit
     }
 
@@ -123,7 +97,7 @@ Color Scene::trace(const Ray& ray, int depth) const {
     Vector3 view_dir = (ray.origin() - rec.p).normalize();
 
     for (const auto& light_ptr : lights_) {
-        if (!is_in_shadow(light_ptr, rec)) {
+        if (!is_in_shadow(light_ptr, rec.p)) {
 
             // Diffuse contribution
             Vector3 light_dir = (light_ptr->position - rec.p).normalize();
@@ -184,8 +158,6 @@ Color Scene::trace(const Ray& ray, int depth) const {
 }
 
 void Scene::render_tile(std::vector<Color>& buffer, int start_y, int end_y, int& pixels_done, std::mutex& progress_mutex) const {
-    const int ANTI_ALIASING_SAMPLES = 16;
-    const int MAX_DEPTH = 5;
     const int total_pixels_global = camera_.pixel_height * camera_.pixel_width;
     int last_progress_percent = -1;
 
@@ -235,12 +207,19 @@ void Scene::render() const {
     auto clean_path = std::filesystem::weakly_canonical(output_dir);
 
     Style::logInfo("Output directory: " + Prism::Style::CYAN + clean_path.string());
-    Style::logInfo("Starting render...\n");
-
-    auto start_time = std::chrono::steady_clock::now();
+    Style::logInfo("Starting render...");
 
     const int num_threads = std::thread::hardware_concurrency();
-    Style::logInfo("Using " + std::to_string(num_threads) + " threads.");
+
+    Style::logSection();
+    Style::logInfo("--- Render Settings ---");
+    Style::logInfo("Threads: " + Prism::Style::CYAN + std::to_string(std::thread::hardware_concurrency()));
+    Style::logInfo("Samples per Pixel: " + Prism::Style::CYAN + std::to_string(ANTI_ALIASING_SAMPLES));
+    Style::logInfo("Max Ray-tracing Depth: " + Prism::Style::CYAN + std::to_string(MAX_DEPTH));
+    Style::logInfo("-----------------------");
+    Style::logSection();
+
+    auto start_time = std::chrono::steady_clock::now();
 
     std::vector<std::thread> threads;
     std::vector<Color> image_buffer(camera_.pixel_width * camera_.pixel_height);
@@ -282,6 +261,43 @@ void Scene::render() const {
     Style::logDone("Total render time: " + Prism::Style::CYAN +
                    std::to_string(elapsed_seconds.count()) + "s");
     Style::logDone("Image saved as: " + Prism::Style::CYAN + full_path.string());
+}
+
+void Scene::setAccelerationStructure(ACCELERATION acceleration) {
+    
+    auto start_time = std::chrono::steady_clock::now();
+    
+    std::vector<Object*> raw_objects;
+    raw_objects.reserve(objects_.size());
+    
+    for (const auto& obj_ptr : objects_) {
+        raw_objects.push_back(obj_ptr.get()); //
+    }
+    
+    switch (acceleration)
+    {
+        case ACCELERATION::NONE:
+        acceleration_structure_ = std::make_unique<NoAcceleration>(raw_objects);
+        break;
+        case ACCELERATION::OCTREE:
+        acceleration_structure_ = std::make_unique<Octree>(raw_objects);
+        break;
+        default:
+        Style::logError("Unsupported acceleration structure type.");
+        Style::logError("Falling back to NoAcceleration.");
+        acceleration_structure_ = std::make_unique<NoAcceleration>(raw_objects);
+        Style::logWarning("This may result in slower rendering performance.");
+    }
+
+    Style::logInfo("Acceleration structure set to: " + Prism::Style::CYAN + demangle(typeid(*acceleration_structure_).name()));
+
+    Style::logInfo("Building acceleration structure...");
+
+    auto end_time = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end_time - start_time;
+
+    Style::logDone("Acceleration structure updated successfully.");
+    Style::logDone("Total build time: " + Prism::Style::CYAN + std::to_string(elapsed_seconds.count()) + "s");
 }
 
 } // namespace Prism

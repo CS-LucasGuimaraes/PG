@@ -78,13 +78,14 @@ class PRISM_EXPORT Triangle : public Object {
      * intersection point, normal, and material properties.
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
+ 
+    virtual AABB get_bounding_box() const override;
 
   private:
     Point3 point1; ///< The first vertex of the triangle
     Point3 point2; ///< The second vertex of the triangle
     Point3 point3; ///< The third vertex of the triangle
-    std::shared_ptr<Material>
-        material; ///< Material properties of the triangle, defining how it interacts with light
+    std::shared_ptr<Material> material; ///< Material properties of the triangle
 };
 
 /**

@@ -50,11 +50,12 @@ class PRISM_EXPORT Sphere : public Object {
      */
     virtual bool hit(const Ray& ray, double t_min, double t_max, HitRecord& rec) const override;
 
+    virtual AABB get_bounding_box() const override;
+
   private:
     Point3 center; ///< The center point of the sphere
     double radius; ///< The radius of the sphere
-    std::shared_ptr<Material>
-        material; ///< Material properties of the sphere, defining how it interacts with light
+    std::shared_ptr<Material> material; ///< Material properties of the sphere
 };
 
 } // namespace Prism

@@ -40,6 +40,10 @@ const std::string BOLD_GREEN = "\033[1;32m";
 const std::string BOLD_RED = "\033[1;31m";
 const std::string BOLD_YELLOW = "\033[1;33m";
 
+inline void logSection() {
+    std::clog << std::endl;
+}
+
 /**
  * @brief Logs a formatted informational message to std::clog.
  * @param message The message to display.
@@ -97,7 +101,7 @@ inline void logStatusBar(double progress, int width = 25) {
     std::clog << GREEN << "] " << percentage << "%" << RESET << std::flush;
 
     if (progress >= 1.0) {
-        std::clog << '\n' << std::endl;
+        std::clog << std::endl;
     }
 }
 

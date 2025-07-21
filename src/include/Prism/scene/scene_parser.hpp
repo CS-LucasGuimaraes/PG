@@ -15,6 +15,7 @@
 #include "prism_export.h"
 
 #include "Prism/scene/scene.hpp"
+#include "Prism/scene/acceleration.hpp"
 
 #include <string>
 
@@ -39,7 +40,7 @@ class PRISM_EXPORT SceneParser {
      * @return A Scene object containing the parsed camera, materials, and objects.
      * @throws std::runtime_error if there is an error reading or parsing the YAML file.
      */
-    Scene parse();
+    Scene parse(ACCELERATION acceleration = ACCELERATION::NONE) const;
 
   private:
     std::string filePath; ///< The path to the YAML file containing the scene description
