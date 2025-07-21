@@ -14,6 +14,10 @@
 #include <string>
 #include <vector>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // Define M_PI if not already defined
+#endif
+
 namespace Prism {
 
 class PRISM_EXPORT Texture {
@@ -59,6 +63,100 @@ class PRISM_EXPORT CheckerTexture : public Texture {
 
   private:
     double inv_scale;
+    std::shared_ptr<Texture> even;
+    std::shared_ptr<Texture> odd;
+};
+
+class PRISM_EXPORT StripesTexture : public Texture {
+  public:
+    StripesTexture(double scale, std::shared_ptr<Texture> even, std::shared_ptr<Texture> odd)
+        : inv_scale(1.0 / scale), even(even), odd(odd) {
+    }
+
+    StripesTexture(double scale, Color c1, Color c2)
+        : inv_scale(1.0 / scale), even(std::make_shared<SolidColor>(c1)),
+          odd(std::make_shared<SolidColor>(c2)) {
+    }
+
+    virtual Color value(double u, double v, const Point3& p) const override {
+        auto uInteger = static_cast<int>(std::floor(inv_scale * u));
+        auto vInteger = static_cast<int>(std::floor(inv_scale * v));
+
+        bool isEven = (uInteger) % 2 == 0;
+
+        return isEven ? even->value(u, v, p) : odd->value(u, v, p);
+    }
+
+  private:
+    double inv_scale;
+    std::shared_ptr<Texture> even;
+    std::shared_ptr<Texture> odd;
+};
+
+class PRISM_EXPORT SineWaveTexture : public Texture {
+  public:
+    SineWaveTexture(double scale, std::shared_ptr<Texture> even, std::shared_ptr<Texture> odd)
+        : inv_scale(1.0 / scale), even(even), odd(odd) {
+    }
+
+    SineWaveTexture(double scale, Color c1, Color c2)
+        : inv_scale(1.0 / scale), even(std::make_shared<SolidColor>(c1)),
+          odd(std::make_shared<SolidColor>(c2)) {
+    }
+
+    virtual Color value(double u, double v, const Point3& p) const override {
+        double frequency = 2.0 * M_PI * inv_scale;
+        double phase = 0.0;
+
+        double wave = sin(frequency * u + phase);
+
+        return even->value(u, v, p) * (1.0 + wave) + odd->value(u, v, p) * (1.0 - wave);
+    }
+
+  private:
+    double inv_scale;
+    std::shared_ptr<Texture> even;
+    std::shared_ptr<Texture> odd;
+};
+
+class PRISM_EXPORT WavyStripesTexture : public Texture {
+  public:
+    WavyStripesTexture(double stripe_density, double wave_frequency, double wave_amplitude,
+                       std::shared_ptr<Texture> even, std::shared_ptr<Texture> odd)
+        : stripe_density_(stripe_density), wave_frequency_(wave_frequency),
+          wave_amplitude_(wave_amplitude), even(even), odd(odd) {
+    }
+
+    WavyStripesTexture(double stripe_density, double wave_frequency, double wave_amplitude,
+                       Color c1, Color c2)
+        : stripe_density_(stripe_density), wave_frequency_(wave_frequency),
+          wave_amplitude_(wave_amplitude), even(std::make_shared<SolidColor>(c1)),
+          odd(std::make_shared<SolidColor>(c2)) {
+    }
+
+    virtual Color value(double u, double v, const Point3& p) const override {
+        double main_coord = u + v;
+        double perpendicular_coord = u - v;
+
+        // double wave = sin(wave_frequency_ * main_coord) * wave_amplitude_;
+        // double stripe = fmod(perpendicular_coord * stripe_density_, 2.0);
+        // bool isEven = (static_cast<int>(stripe) % 2 == 0);
+        // return isEven ? even->value(u, v, p) : odd->value(u, v, p) * (1.0 + wave);
+
+        double distorted = main_coord + wave_amplitude_ * std::sin(wave_frequency_ * perpendicular_coord);
+        double band_value = std::fmod(distorted * stripe_density_, 1.0);
+
+        if (band_value < 0.0) {
+            band_value += 1.0;
+        }
+
+        return (band_value < 0.5) ? even->value(u, v, p) : odd->value(u, v, p);
+    }
+
+  private:
+    double stripe_density_;
+    double wave_frequency_;
+    double wave_amplitude_;
     std::shared_ptr<Texture> even;
     std::shared_ptr<Texture> odd;
 };

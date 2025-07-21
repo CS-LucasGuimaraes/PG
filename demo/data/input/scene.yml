@@ -62,6 +62,27 @@ definitions:
       ka: [1.0, 1.0, 1.0]
       ks: [0.0, 0.0, 0.0]
 
+    listras_azul: &listras_azul
+      texture:
+        type: stripes
+        scale: 50
+        color1: [0.1, 0.1, 0.45]
+        color2: [0.9, 0.9, 0.9]
+      ka: [1.0, 1.0, 1.0]
+      ks: [0.0, 0.0, 0.0]
+      ke: [0.3, 0.3, 0.45]
+
+    listras_curvas: &listras_curvas
+      texture:
+        type: wavy_stripes
+        stripe_density: 1
+        wave_frequency: 0.00001
+        wave_amplitude: 1
+        color1: [0.1, 0.45, 0.1]
+        color2: [0.9, 0.9, 0.9]
+      ka: [1.0, 1.0, 1.0]
+      ks: [0.0, 0.0, 0.0]
+
     parede_tijolo: &tijolo
       texture:
         type: image
@@ -112,21 +133,29 @@ objects:
     point_on_plane: [0, 0, 0]
     normal: [0, 1, 0]
     material: *chao_xadrez
+
   - name: Teto
     type: plane
     point_on_plane: [0, 555, 0]
     normal: [0, -1, 0]
-    material: *branco
+    material: *listras_azul
+    transform:
+      - type: rotation
+        angle: 90
+        axis: [0, 1, 0]
+
   - name: Parede do Fundo
     type: plane
     point_on_plane: [0, 0, 555]
     normal: [0, 0, -1]
     material: *tijolo
+
   - name: Parede Direita (Verde)
     type: plane
     point_on_plane: [555, 0, 0]
     normal: [-1, 0, 0]
-    material: *verde
+    material: *listras_curvas
+
   - name: Parede Esquerda (Vermelha)
     type: plane
     point_on_plane: [0, 0, 0]

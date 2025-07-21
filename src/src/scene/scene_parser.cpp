@@ -70,12 +70,37 @@ std::shared_ptr<Material> parseMaterial(const YAML::Node& node,
 
     if (node["texture"]) {
         std::string texture_type = node["texture"]["type"].as<std::string>();
-        if (texture_type == "checker") {
+        if (texture_type == "solid") {
+            Color color = parseColor(node["texture"]["color"]);
+            mat->texture = std::make_shared<SolidColor>(color);
+        }
+        else if (texture_type == "checker") {
             Color color1 = parseColor(node["texture"]["color1"]);
             Color color2 = parseColor(node["texture"]["color2"]);
             double scale = node["texture"]["scale"].as<double>(1.0);
             mat->texture = std::make_shared<CheckerTexture>(scale, color1, color2);
-        } else if (texture_type == "image" || texture_type == "img") {
+        } 
+        else if(texture_type == "stripes") {
+            Color color1 = parseColor(node["texture"]["color1"]);
+            Color color2 = parseColor(node["texture"]["color2"]);
+            double scale = node["texture"]["scale"].as<double>(1.0);
+            mat->texture = std::make_shared<StripesTexture>(scale, color1, color2);
+        } 
+        else if (texture_type == "sinewave") {
+            Color color1 = parseColor(node["texture"]["color1"]);
+            Color color2 = parseColor(node["texture"]["color2"]);
+            double scale = node["texture"]["scale"].as<double>(1.0);
+            mat->texture = std::make_shared<SineWaveTexture>(scale, color1, color2);
+        }
+        else if (texture_type == "wavy_stripes") {
+            Color color1 = parseColor(node["texture"]["color1"]);
+            Color color2 = parseColor(node["texture"]["color2"]);
+            double stripe_density = node["texture"]["stripe_density"].as<double>(1.0);
+            double wave_frequency = node["texture"]["wave_frequency"].as<double>(1.0);
+            double wave_amplitude = node["texture"]["wave_amplitude"].as<double>(0.5);
+            mat->texture = std::make_shared<WavyStripesTexture>(stripe_density, wave_frequency, wave_amplitude, color1, color2);
+        }
+        else if (texture_type == "image" || texture_type == "img") {
             std::string path_str = node["texture"]["path"].as<std::string>();
             double scale = node["texture"]["scale"].as<double>(1.0);
             std::filesystem::path full_path = scene_dir / path_str;
