@@ -72,62 +72,63 @@ std::filesystem::path generate_filename() {
 }
 
 double Scene::calculate_shadow_factor(const Light* light, const Point3& p) const {
-    if (const auto* area_light = dynamic_cast<const AreaLight*>(light)) {
-        // --- Logic for Soft Shadows (AreaLights) ---
-        int unblocked_rays = 0;
+    if (SOFT_SHADOW_SAMPLES > 1)
+        if(const auto* area_light = dynamic_cast<const AreaLight*>(light)) {
+            // --- Logic for Soft Shadows (AreaLights) ---
+            int unblocked_rays = 0;
 
-        const int TOTAL_SAMPLES = SOFT_SHADOW_SAMPLES;
-        const int PROBE_SAMPLES = std::min(std::max(SOFT_SHADOW_SAMPLES/4, 2), SOFT_SHADOW_SAMPLES);
+            const int TOTAL_SAMPLES = SOFT_SHADOW_SAMPLES;
+            const int PROBE_SAMPLES = std::min(std::max(SOFT_SHADOW_SAMPLES/4, 2), SOFT_SHADOW_SAMPLES);
 
-        for (int i = 0; i < PROBE_SAMPLES; ++i) {
-            Point3 random_point_on_light = area_light->get_random_point_on_surface();
+            for (int i = 0; i < PROBE_SAMPLES; ++i) {
+                Point3 random_point_on_light = area_light->get_random_point_on_surface();
 
-            double light_distance = (random_point_on_light - p).magnitude();
-            Vector3 light_dir = (random_point_on_light - p).normalize();
-            Ray shadow_ray(p, light_dir);
+                double light_distance = (random_point_on_light - p).magnitude();
+                Vector3 light_dir = (random_point_on_light - p).normalize();
+                Ray shadow_ray(p, light_dir);
 
-            HitRecord rec;
-            if (!acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec)) {
-                unblocked_rays++;
+                HitRecord rec;
+                if (!acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec)) {
+                    unblocked_rays++;
+                }
             }
-        }
 
-        if (unblocked_rays == 0) {
-            return 0.0; // Fully shadowed
-        }
-        if (unblocked_rays == PROBE_SAMPLES) {
-            return 1.0; // Fully lit
-        }
-
-        for (int i = PROBE_SAMPLES; i < TOTAL_SAMPLES; ++i) {
-            Point3 random_point_on_light = area_light->get_random_point_on_surface();
-
-            double light_distance = (random_point_on_light - p).magnitude();
-            Vector3 light_dir = (random_point_on_light - p).normalize();
-            Ray shadow_ray(p, light_dir);
-
-            HitRecord rec;
-            if (!acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec)) {
-                unblocked_rays++;
+            if (unblocked_rays == 0) {
+                return 0.0; // Fully shadowed
             }
+            if (unblocked_rays == PROBE_SAMPLES) {
+                return 1.0; // Fully lit
+            }
+
+            for (int i = PROBE_SAMPLES; i < TOTAL_SAMPLES; ++i) {
+                Point3 random_point_on_light = area_light->get_random_point_on_surface();
+
+                double light_distance = (random_point_on_light - p).magnitude();
+                Vector3 light_dir = (random_point_on_light - p).normalize();
+                Ray shadow_ray(p, light_dir);
+
+                HitRecord rec;
+                if (!acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec)) {
+                    unblocked_rays++;
+                }
+            }
+
+            return static_cast<double>(unblocked_rays) / SOFT_SHADOW_SAMPLES;
+
         }
+        
+    // --- Logic for Hard Shadows (PointLights) ---
+    Point3 light_pos = light->get_position();
+    double light_distance = (light_pos - p).magnitude();
+    Vector3 light_dir = (light_pos - p).normalize();
+    Ray shadow_ray(p, light_dir);
 
-        return static_cast<double>(unblocked_rays) / SOFT_SHADOW_SAMPLES;
-
+    HitRecord rec;
+    // If the ray is NOT blocked, it is fully lit (1.0). Otherwise, fully shadowed (0.0).
+    if (!acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec)) {
+        return 1.0;
     } else {
-        // --- Logic for Hard Shadows (PointLights) ---
-        Point3 light_pos = light->get_position();
-        double light_distance = (light_pos - p).magnitude();
-        Vector3 light_dir = (light_pos - p).normalize();
-        Ray shadow_ray(p, light_dir);
-
-        HitRecord rec;
-        // If the ray is NOT blocked, it is fully lit (1.0). Otherwise, fully shadowed (0.0).
-        if (!acceleration_structure_->hit_any(shadow_ray, 1e-4, light_distance, rec)) {
-            return 1.0;
-        } else {
-            return 0.0;
-        }
+        return 0.0;
     }
 }
 
@@ -222,24 +223,36 @@ void Scene::render_tile(std::vector<Color>& buffer, int start_y, int end_y, int&
     for (int y = start_y; y < end_y; ++y) {
         for (int x = 0; x < camera_.pixel_width; ++x) {
             Color pixel_color(0, 0, 0);
-            for (int s = 0; s < ANTI_ALIASING_SAMPLES; ++s) {
-                double random_dx = distribution(generator) - 0.5;
-                double random_dy = distribution(generator) - 0.5;
 
-                // Corrigi a chamada de `pixel_00_loc` para ser um acesso de membro.
+            if (ANTI_ALIASING_SAMPLES > 1) {
+                for (int s = 0; s < ANTI_ALIASING_SAMPLES; ++s) {
+                    double random_dx = distribution(generator) - 0.5;
+                    double random_dy = distribution(generator) - 0.5;
+
+                    // Corrigi a chamada de `pixel_00_loc` para ser um acesso de membro.
+                    Point3 pixel_center = camera_.pixel_00_loc() +
+                                        (camera_.pixel_delta_u() * x) -
+                                        (camera_.pixel_delta_v() * y);
+
+                    Point3 sample_target = pixel_center +
+                                        (camera_.pixel_delta_u() * random_dx) +
+                                        (camera_.pixel_delta_v() * random_dy);
+
+                    Ray sample_ray(camera_.pos, sample_target);
+                    pixel_color += trace(sample_ray, MAX_DEPTH);
+                }
+                pixel_color = pixel_color/static_cast<double>(ANTI_ALIASING_SAMPLES);
+            } 
+            else {
                 Point3 pixel_center = camera_.pixel_00_loc() +
                                       (camera_.pixel_delta_u() * x) -
                                       (camera_.pixel_delta_v() * y);
 
-                Point3 sample_target = pixel_center +
-                                       (camera_.pixel_delta_u() * random_dx) +
-                                       (camera_.pixel_delta_v() * random_dy);
-
-                Ray sample_ray(camera_.pos, sample_target);
-                pixel_color += trace(sample_ray, MAX_DEPTH);
+                Ray sample_ray(camera_.pos, pixel_center);
+                pixel_color = trace(sample_ray, MAX_DEPTH);
             }
 
-            buffer[y * camera_.pixel_width + x] = pixel_color / static_cast<double>(ANTI_ALIASING_SAMPLES);
+            buffer[y * camera_.pixel_width + x] = pixel_color;
 
             {
                 std::lock_guard<std::mutex> lock(progress_mutex); // Trava o mutex
