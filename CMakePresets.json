@@ -22,7 +22,7 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "BUILD_TESTING": "OFF",
-                "PRISM_BUILD_DEMO": "OFF"
+                "PRISM_BUILD_DEMO": "ON"
             }
         }
     ],

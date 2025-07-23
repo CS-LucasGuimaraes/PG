@@ -177,7 +177,7 @@ Color Scene::trace(const Ray& ray, int depth) const {
     } else if (mat->ks.r > 0 || mat->ks.g > 0 || mat->ks.b > 0) {
         Vector3 reflect_dir = ray.direction() - rec.normal * 2 * ray.direction().dot(rec.normal);
         Ray reflection_ray(rec.p + rec.normal * 1e-4, reflect_dir);
-        final_color = final_color * (1.0 - mat->ks.r) + mat->ks * trace(reflection_ray, depth - 1);
+        final_color = final_color * Color(1.0 - mat->ks.r, 1.0 - mat->ks.g, 1.0 - mat->ks.b) + mat->ks * trace(reflection_ray, depth - 1);
     }
 
     return final_color.clamp();

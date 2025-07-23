@@ -102,34 +102,6 @@ objects:
     normal: [1, 0, 0]
     material: *vermelho
 
-  # Blocos com tamanho e posição originais
-  - name: Bloco Alto (Laranja)
-    type: mesh
-    path: "cubo.obj"
-    material: *laranja
-    transform:
-      - type: scaling
-        factors: [82.5, 165, 82.5] 
-      - type: rotation
-        angle: 18
-        axis: [0, 1, 0]
-      - type: translation
-        vector: [180, 165, 250] 
-
-  - name: Bloco Baixo (Azul)
-    type: mesh
-    path: "cubo.obj"
-    material: *azul
-    transform:
-      - type: scaling
-        factors: [82.5, 82.5, 82.5]
-      - type: rotation
-        angle: -20
-        axis: [0, 1, 0]
-      - type: translation
-        vector: [370, 82.5, 150]
-
-  # ESFERAS COM POSIÇÃO AJUSTADA (AINDA MAIS PERTO)
   - name: Esfera de Vidro
     type: sphere
     center: [380, 90, -140]  # Z foi de 120 para 80

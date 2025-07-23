@@ -1,0 +1,421 @@
+#version 450
+
+// ========= STRUCTS (mirroring c++ structs) =========
+struct Camera {
+    vec3 position;
+    vec3 pixel_delta_u;
+    vec3 pixel_delta_v;
+    vec3 pixel_00_loc;
+    vec3 ambient_color;
+
+    uint image_width;
+    uint image_height;
+};
+
+struct Material {
+    // Aligned to 16 bytes
+    vec3 color;
+    float refraction_index;
+
+    // Aligned to 16 bytes
+    vec3 ambient;
+    float transparency;
+
+    // Aligned to 16 bytes
+    vec3 specular;
+    float shininess;
+
+    vec3 emission;
+};
+
+struct SceneObject {
+    int type;
+    int material_index;
+    vec2 padding; // Padding for alignment
+
+    // Sphere data
+    vec3 center;
+    float radius;
+
+    // Plane data
+    vec3 point_on_plane;
+    vec3 normal;
+
+    mat4 transform;
+    mat4 inverse_transform; 
+    mat4 inverse_transpose_transform; 
+};
+
+struct Light {
+    vec3 position;
+    vec3 color;
+};
+
+struct HitRecord {
+    float t;
+    vec3 p;
+    vec3 normal;
+    bool front_face;
+    int material_index;
+};
+
+struct Ray {
+    vec3 origin;
+    vec3 direction;
+};
+
+void set_face_normal(inout HitRecord rec, in Ray r, in vec3 outward_normal) {
+    rec.front_face = dot(r.direction, outward_normal) < 0.0;
+    rec.normal = rec.front_face ? outward_normal : -outward_normal;
+}
+
+// ========= BUFFERS (Bindings) =========
+layout(set = 0, binding = 0) buffer OutputBuffer { vec4 imageData[]; } outBuffer;
+layout(set = 0, binding = 1) uniform UBO { Camera camera; } ubo;
+layout(set = 0, binding = 2) readonly buffer ObjectBuffer { SceneObject objects[]; } objectBuffer;
+layout(set = 0, binding = 3) readonly buffer MaterialBuffer { Material materials[]; } materialBuffer;
+layout(set = 0, binding = 4) readonly buffer LightBuffer { Light lights[]; } lightBuffer;
+
+// ========= PSEUDO-RANDOM NUMBER GENERATION =========
+
+vec2 rand2(vec2 p) {
+    return fract(
+        sin(
+            vec2(
+                dot(p, vec2(12.9898, 78.233)),
+                dot(p, vec2(39.346, 49.125))
+            )
+        ) * 43758.5453
+    );
+}
+
+float random(inout uint state) {
+    // PCG (Permuted Congruential Generator) hash
+    uint x = state;
+    uint count = x >> 18u;
+    x = x * 747796405u + 2891336453u;
+    x = (x >> ((x >> 28u) + 4u)) ^ x;
+    x = x * 277803737u;
+    x = (x >> 22u) ^ x;
+    state = x;
+    return float(state) / 4294967295.0; // Divide pelo valor máximo de um uint
+}
+
+// =========
+
+Ray transform_ray(Ray ray, mat4 transform) {
+    vec4 transformed_origin = transform * vec4(ray.origin, 1.0);
+    vec4 transformed_direction = transform * vec4(ray.direction, 0.0);
+    return Ray(transformed_origin.xyz, normalize(transformed_direction).xyz);
+}
+
+float schlick(float cosine, float refraction_index) {
+    float r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
+    r0 = r0 * r0;
+    return r0 + (1.0 - r0) * pow(1.0 - cosine, 5.0);
+}
+
+// ========= INTERSECTION FUNCTIONS =========
+
+bool hit_sphere(in int object_index, in Ray ray, in float t_min, in float t_max, inout HitRecord rec) {
+    SceneObject s = objectBuffer.objects[object_index];
+    Ray transformed_ray = transform_ray(ray, s.inverse_transform);
+
+    vec3 oc = transformed_ray.origin - s.center;
+    float a = dot(transformed_ray.direction, transformed_ray.direction);
+    float half_b = dot(oc, transformed_ray.direction);
+    float c = dot(oc, oc) - s.radius * s.radius;
+    float discriminant = half_b * half_b - a * c;
+
+    if (discriminant < 0.0) {
+        return false;
+    }
+
+    float sqrt_discriminant = sqrt(discriminant);
+
+    float root = (-half_b - sqrt_discriminant) / a;
+
+    vec3 local_hit_point = transformed_ray.origin + root * transformed_ray.direction;
+    vec3 world_hit_point = vec3(s.transform * vec4(local_hit_point, 1.0));
+    float t_world = dot(world_hit_point - ray.origin, ray.direction);
+
+    if (t_world < t_min || t_world > t_max) {
+        root = (-half_b + sqrt_discriminant) / a;
+        local_hit_point = transformed_ray.origin + root * transformed_ray.direction;
+        world_hit_point = vec3(s.transform * vec4(local_hit_point, 1.0));
+        t_world = dot(world_hit_point - ray.origin, ray.direction);
+
+        if (t_world < t_min || t_world > t_max) {
+            return false;
+        }
+    }
+    
+    rec.t = t_world;
+    rec.p = world_hit_point;
+    
+    vec3 outward_normal_local = (local_hit_point - s.center) / s.radius;
+    vec3 outward_normal_world = normalize(vec3(s.inverse_transpose_transform * vec4(outward_normal_local, 0.0)));
+    
+    set_face_normal(rec, ray, outward_normal_world);
+    rec.material_index = s.material_index;
+
+    return true;
+}
+
+bool hit_plane(in int object_index, in Ray ray, in float t_min, in float t_max, inout HitRecord rec) {
+    SceneObject s = objectBuffer.objects[object_index];
+    Ray transformed_ray = transform_ray(ray, s.inverse_transform);
+
+    float denom = dot(transformed_ray.direction, s.normal);
+    if (abs(denom) < 1e-6) {
+        return false; // Ray is parallel to the plane
+    }
+    float t_local = dot(s.point_on_plane - transformed_ray.origin, s.normal) / denom;
+
+    if (t_local < 0.0) {
+        return false;
+    }
+
+    vec3 local_hit_point = transformed_ray.origin + t_local * transformed_ray.direction;
+    vec3 world_hit_point = vec3(s.transform * vec4(local_hit_point, 1.0));
+    float t_world = dot(world_hit_point - ray.origin, ray.direction);
+
+    if (t_world < t_min || t_world > t_max) {
+        return false;
+    }
+
+    rec.t = t_world;
+    rec.p = world_hit_point;
+    
+    vec3 outward_normal_world = normalize(vec3(s.inverse_transpose_transform * vec4(s.normal, 0.0)));
+    set_face_normal(rec, ray, outward_normal_world);
+    rec.material_index = s.material_index;
+
+    return true;
+}
+
+// ========= RAY TRACING FUNCTION =========
+
+bool hit_closest(Ray ray, inout HitRecord rec) {
+    bool hit = false;
+    float closest_t = 1.0 / 0.0; // Initialize to infinity
+
+    for (int i = 0; i < objectBuffer.objects.length(); i++) {
+        HitRecord temp_rec;
+        SceneObject obj = objectBuffer.objects[i];
+        if (obj.type == 0) { // Sphere
+            if (hit_sphere(i, ray, 1e-4, closest_t, temp_rec)) {
+                hit = true;
+                closest_t = temp_rec.t;
+                rec = temp_rec;
+            }
+        }
+        
+        else if (obj.type == 1) { // Plane
+            if (hit_plane(i, ray, 1e-4, closest_t, temp_rec)) {
+                hit = true;
+                closest_t = temp_rec.t;
+                rec = temp_rec;
+            }
+        }
+    }
+
+    return hit;
+}
+
+bool is_in_shadow(int light_index, inout HitRecord rec) {
+    Light light = lightBuffer.lights[light_index];
+    float light_distance = length(light.position - rec.p);
+    vec3 light_direction = normalize(light.position - rec.p);
+
+    vec3 outward_normal = rec.front_face ? rec.normal : -rec.normal;
+    Ray shadow_ray = Ray(rec.p + outward_normal * 1e-4, light_direction);
+    HitRecord shadow_rec;
+    for (int i = 0; i < objectBuffer.objects.length(); i++) {
+        SceneObject obj = objectBuffer.objects[i];
+        if (obj.type == 0) { // Sphere
+            if (hit_sphere(i, shadow_ray, 1e-4, light_distance, shadow_rec)) {
+                return true; // In shadow
+            }
+        }
+        
+        else if (obj.type == 1) { // Plane
+            if (hit_plane(i, shadow_ray, 1e-4, light_distance, shadow_rec)) {
+                return true; // In shadow
+            }
+        }
+    }
+
+    return false; // Not in shadow
+}
+
+// =====================================================================
+// FUNÇÃO AUXILIAR PARA AMOSTRAGEM DE HEMISFÉRIO COM COSSENO PONDERADO
+// =====================================================================
+// Gera uma direção aleatória em um hemisfério alinhado com a normal (0,0,1)
+// e a transforma para o hemisfério da normal da superfície atual.
+// Isso é crucial para bounces difusos eficientes.
+vec3 cosine_weighted_hemisphere_sample(vec3 normal, inout uint random_state) {
+    float r1 = random(random_state);
+    float r2 = random(random_state);
+
+    float phi = 2.0 * 3.1415926535 * r1;
+    float cos_theta = sqrt(1.0 - r2);
+    float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+
+    vec3 sample_dir = vec3(cos(phi) * sin_theta, sin(phi) * sin_theta, cos_theta);
+
+    // Cria uma base ortonormal a partir da normal da superfície
+    vec3 up = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+    vec3 tangent = normalize(cross(up, normal));
+    vec3 bitangent = cross(normal, tangent);
+
+    // Transforma a direção da amostra para o espaço da normal
+    return normalize(tangent * sample_dir.x + bitangent * sample_dir.y + normal * sample_dir.z);
+}
+
+// =====================================================================
+// FUNÇÃO DE PATH TRACING PRINCIPAL (VERSÃO CORRIGIDA)
+// =====================================================================
+vec3 trace(Ray ray, int max_depth, inout uint random_state) {
+    vec3 final_color = vec3(0.0);
+    vec3 throughput = vec3(1.0);
+    Ray current_ray = ray;
+    
+    for (int d = 0; d < max_depth; d++) {
+        HitRecord rec;
+        if (!hit_closest(current_ray, rec)) {
+            final_color += throughput * ubo.camera.ambient_color;
+            break;
+        }
+
+        Material mat = materialBuffer.materials[rec.material_index];
+        
+        // CORREÇÃO 1: Adicionar a emissão do material em todos os bounces.
+        // É uma abordagem mais simples e robusta que a anterior.
+        final_color += throughput * mat.emission;
+        
+        bool is_dielectric = (mat.transparency < 1.0);
+        
+        if (is_dielectric) {
+            // [LÓGICA PARA MATERIAIS DIELÉTRICOS (Vidro, etc.)] - Sem alterações aqui
+            float reflectance;
+            float refraction_ratio = rec.front_face ? (1.0 / mat.refraction_index) : mat.refraction_index;
+            vec3 unit_direction = normalize(current_ray.direction);
+            float cos_theta = min(dot(-unit_direction, rec.normal), 1.0);
+
+            float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+            if (refraction_ratio * sin_theta > 1.0) {
+                reflectance = 1.0;
+            } else {
+                reflectance = schlick(cos_theta, refraction_ratio);
+            }
+
+            vec3 offset_normal;
+            vec3 albedo;
+            vec3 next_direction;
+            if (random(random_state) < reflectance) {
+                next_direction = reflect(unit_direction, rec.normal);
+                albedo = mat.specular;
+                offset_normal = rec.normal;
+            } else {
+                next_direction = refract(unit_direction, rec.normal, refraction_ratio);
+                albedo = rec.front_face ? vec3(1.0) : mat.color;
+                offset_normal = -rec.normal;
+            }
+            
+            throughput *= albedo;
+            current_ray = Ray(rec.p + offset_normal * 1e-4, normalize(next_direction));
+
+        } else {
+            // [LÓGICA PARA MATERIAIS OPACOS (Difuso/Especular)]
+
+            // --- Next Event Estimation (Iluminação Direta) ---
+            vec3 direct_lighting = vec3(0.0);
+            for (int i = 0; i < lightBuffer.lights.length(); i++) {
+                if (!is_in_shadow(i, rec)) {
+                    Light light = lightBuffer.lights[i];
+                    vec3 light_dir = normalize(light.position - rec.p);
+                    float cos_theta_light = max(dot(rec.normal, light_dir), 0.0);
+                    
+                    vec3 brdf = mat.color / 3.1415926535; // BRDF Lambertiano
+                    
+                    // CORREÇÃO 2: Removida a atenuação por distância ao quadrado.
+                    // Isso trata as luzes como direcionais, o que deve funcionar com sua cena.
+                    direct_lighting += brdf * light.color * cos_theta_light;
+                }
+            }
+            final_color += throughput * direct_lighting;
+
+            // --- Amostragem de BSDF (Iluminação Indireta / Continuação do Caminho) ---
+            float specular_probability = (mat.specular.r + mat.specular.g + mat.specular.b) / 3.0;
+            vec3 albedo;
+            vec3 next_direction;
+
+            if (random(random_state) < specular_probability) {
+                // Bounce Especular
+                next_direction = reflect(current_ray.direction, rec.normal);
+                albedo = mat.specular;
+            } else {
+                // Bounce Difuso
+                next_direction = cosine_weighted_hemisphere_sample(rec.normal, random_state);
+                albedo = mat.color;
+            }
+
+            throughput *= albedo;
+            current_ray = Ray(rec.p + rec.normal * 1e-4, next_direction);
+        }
+
+        // --- Roleta Russa para terminar o caminho ---
+        if (d > 2) {
+            float p = max(throughput.r, max(throughput.g, throughput.b));
+            if (random(random_state) > p) {
+                break;
+            }
+            throughput /= p;
+        }
+    }
+
+    return final_color * 2;
+}
+
+// ========= MAIN PROGRAM =========
+layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+
+void main() {
+    const int ANTI_ALIASING_SAMPLES = 1024;
+    const int MAX_DEPTH = 5;
+
+    uvec2 pixelCoords = gl_GlobalInvocationID.xy;
+    if (pixelCoords.x >= ubo.camera.image_width || pixelCoords.y >= ubo.camera.image_height) {
+        return;
+    }
+    uint index = pixelCoords.y * ubo.camera.image_width + pixelCoords.x;
+
+    vec3 pixel_color = vec3(0.0);
+    for (int i = 0; i < ANTI_ALIASING_SAMPLES; ++i) {
+        uint random_state = gl_GlobalInvocationID.x * 196613u 
+                          + gl_GlobalInvocationID.y * 262147u 
+                          + uint(i) * 479001599u;
+                          
+        vec2 random_offset = rand2(pixelCoords + vec2(float(i), float(ANTI_ALIASING_SAMPLES-i))) - 0.5;
+
+        vec3 pixel_center = ubo.camera.pixel_00_loc + 
+                            (ubo.camera.pixel_delta_u * pixelCoords.x) - 
+                            (ubo.camera.pixel_delta_v * pixelCoords.y);
+
+        vec3 sample_target = pixel_center + 
+                            (ubo.camera.pixel_delta_u * random_offset.x) -
+                            (ubo.camera.pixel_delta_v * random_offset.y);
+
+        vec3 ray_origin = ubo.camera.position;
+        vec3 ray_direction = normalize(sample_target - ray_origin);
+        Ray sample_ray = Ray(ray_origin, ray_direction);
+
+        pixel_color += trace(sample_ray, MAX_DEPTH, random_state);
+    }
+    
+    pixel_color /= float(ANTI_ALIASING_SAMPLES);
+
+    outBuffer.imageData[index] = vec4(pixel_color, 1.0);
+}

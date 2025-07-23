@@ -9,12 +9,12 @@ namespace Prism {
 #define TYPE_SPHERE 0
 #define TYPE_PLANE 1
 
-VulkanRenderer::VulkanRenderer(VulkanContext& context, const SceneDataGPU& sceneData, uint32_t imageWidth, uint32_t imageHeight)
+VulkanRenderer::VulkanRenderer(VulkanContext& context, const SceneDataGPU& sceneData, uint32_t imageWidth, uint32_t imageHeight, std::string shaderPath)
     : m_context(context), m_imageWidth(imageWidth), m_imageHeight(imageHeight) {
     try {
         createBuffers(sceneData.getCamera(), sceneData.getObjects(), sceneData.getMaterials(), sceneData.getLights());
         createDescriptorSet();
-        createComputePipeline();
+        createComputePipeline(shaderPath);
         createCommandObjects();
         Style::logInfo("VulkanRenderer initialized.");
     } catch (const vk::Error& e) {
@@ -254,9 +254,9 @@ void VulkanRenderer::createDescriptorSet() {
     Style::logInfo("Descriptor Set created for all buffers.");
 }
 
-void VulkanRenderer::createComputePipeline() {
+void VulkanRenderer::createComputePipeline(std::string shaderPath) {
     // Carrega o shader compilado (SPIR-V)
-    std::ifstream file("./shaders/raytracer.spv", std::ios::ate | std::ios::binary);
+    std::ifstream file(shaderPath, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
         throw std::runtime_error("Falha ao abrir o arquivo do shader!");
     }
